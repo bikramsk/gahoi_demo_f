@@ -61,19 +61,18 @@ const Header = () => {
           </Link>
 
           <div className="flex items-center space-x-3">
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors z-50"
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
+            {/* Hamburger icon */}
+            {!isMenuOpen && (
+              <button 
+                onClick={() => setIsMenuOpen(true)}
+                className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors z-50"
+                aria-label="Open menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Desktop Menu */}
@@ -104,6 +103,16 @@ const Header = () => {
               ref={dropdownRef}
               className="md:hidden fixed inset-0 top-[88px] bg-red-800/95 backdrop-blur-sm z-40"
             >
+              {/* Close button */}
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-lg transition-colors z-50"
+                aria-label="Close menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
               <div className="container mx-auto px-4 py-4">
                 <div className="flex flex-col space-y-4">
                   {menuItems.map((item) => (
