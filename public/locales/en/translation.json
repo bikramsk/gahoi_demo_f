@@ -1,0 +1,894 @@
+{
+  "common": {
+    "readMore": "Read More",
+    "search": "Search",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "tagline": "Empowering our community through unity, tradition, and mutual support."
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About Us",
+    "contact": "Contact Us",
+    "login": "Login",
+    "gauseva": "Gau Seva",
+    "gotraankna": "Gotra & Aankna",
+    "allassembly": "All Assembly",
+    "registration": "Registration",
+    "familylogin": "Family Login",
+    "hostelry": "Hostelry",
+    "privacyPolicy": "Privacy Policy",
+    "socialFlagSong": "Social Flag Song",
+    "rite": "Rite",
+    "video": "Video",
+    "latestNews": "Latest News",
+    "funds": "Community Fund",
+    "overview": "Overview",
+    "successStories": "Success Stories",
+    "ongoingSupport": "Ongoing Support",
+    "contributors": "Contributors",
+    "requests": "Fund Requests"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email",
+    "somethingWentWrong": "Something went wrong",
+    "pageNotFound": "Page Not Found",
+    "goBack": "Go Back to Home"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "goHome": "Go to Home",
+    "goBack": "Go Back"
+  },
+  "login": {
+    "title": "Login to Your Account",
+    "pageTitle": "Login - Gahoi Samaj",
+    "meta": {
+      "title": "Login - Gahoi Samaj",
+      "description": "Login to access Gahoi Samaj community features and services"
+    },
+    "backToHome": "Back to Home",
+    "welcomeMessage": "Welcome to Gahoi Jan Kalyan Samiti",
+    "subtitle": "Login to your account",
+    "mobileNumber": "Mobile Number",
+    "enterOtp": "Enter OTP",
+    "sendOtp": "Send OTP",
+    "verifyOtp": "Verify OTP",
+    "resendOtp": "Resend OTP",
+    "waitMessage": "Please wait {{seconds}} seconds before requesting new OTP",
+    "errors": {
+      "mobileRequired": "Mobile number is required",
+      "mobileLength": "Mobile number must be 10 digits",
+      "invalidOtp": "Invalid OTP",
+      "otpRequired": "OTP is required",
+      "invalidMobile": "Please enter a valid mobile number",
+      "tooManyAttempts": "Too many attempts. Please try again later",
+      "serverError": "Server error. Please try again"
+    },
+    "success": {
+      "otpSent": "OTP sent successfully",
+      "verified": "Mobile number verified successfully"
+    },
+    "progress": {
+      "step1": "Enter Mobile",
+      "step2": "Verify OTP",
+      "step3": "Complete"
+    },
+    "help": {
+      "title": "Need Help?",
+      "contact": "Contact Support",
+      "forgotNumber": "Forgot Registered Number?"
+    },
+    "steps": {
+      "login": "Login",
+      "otpVerification": "OTP Verification",
+      "registration": "Registration",
+      "completion": "Completion"
+    },
+    "otpAuth": "OTP Authentication",
+    "otpAuthDescription": "Please enter the OTP sent to your mobile number",
+    "otpAuthResendMessage": "Didn't receive OTP?",
+    "otpAuthResendButton": "Resend OTP",
+    "otpAuthValidating": "Validating OTP...",
+    "otpAuthEnterDigits": "Enter 6 digits code",
+    "otpAuthRemainingTime": "Resend available in {{seconds}} seconds",
+    "mobilePlaceholder": "Enter your 10 digit mobile number",
+    "otpSentMessage": "OTP has been sent to your mobile number",
+    "otpPlaceholder": "Enter 6 digit OTP",
+    "welcomeTitle": "Welcome to Gahoi Jan Kalyan Samiti",
+    "communityConnect": "Connect with your community",
+    "termsAgreement": "By logging in, you agree to our Terms of Service and Privacy Policy",
+    "termsLinks": {
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy"
+    },
+    "sending": "Sending...",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "slogan": "Empowering your community connection."
+  },
+  "latestNews": {
+    "meta": {
+      "title": "Latest News - Gahoi Samaj",
+      "description": "Stay updated with the latest news and updates from Gahoi Samaj"
+    },
+    "hero": {
+      "title": "Latest News & Updates",
+      "subtitle": "Stay informed about our community's activities and achievements",
+      "backgroundAlt": "Latest news hero background"
+    },
+    "title": "Latest News",
+    "subtitle": "Stay updated with our community news",
+    "error": {
+      "title": "Error Loading News",
+      "description": "Unable to load news at this time"
+    },
+    "empty": {
+      "title": "No News Available",
+      "description": "Check back later for updates"
+    },
+    "moreImages": "more images",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "socialFlagSong": {
+    "meta": {
+      "title": "Social Flag Song - Gahoi Samaj",
+      "description": "The official flag song of Gahoi Samaj representing our values and unity"
+    },
+    "title": "Social Flag Song",
+    "subtitle": "Our Community's Anthem",
+    "hero": {
+      "title": "Gahoi Samaj Flag Song",
+      "subtitle": "A Symbol of Unity and Pride"
+    },
+    "sections": {
+      "introduction": {
+        "title": "About Our Flag Song",
+        "description": "The flag song represents our community's values, traditions, and aspirations"
+      },
+      "lyrics": {
+        "hindi": {
+          "title": "Hindi Lyrics",
+          "note": "Original lyrics in Hindi",
+          "content": "Our community's flag song in Hindi"
+        },
+        "english": {
+          "title": "English Translation",
+          "note": "Translated version for wider understanding",
+          "content": "English translation of our flag song"
+        }
+      },
+      "meaning": {
+        "title": "Song Significance",
+        "description": "Understanding the deeper meaning and symbolism in our flag song",
+        "items": {
+          "1": "Represents our unity and strength",
+          "2": "Celebrates our cultural heritage",
+          "3": "Inspires future generations",
+          "4": "Promotes community values"
+        }
+      }
+    },
+    "download": {
+      "title": "Download Options",
+      "audio": "Download Audio",
+      "lyrics": "Download Lyrics"
+    },
+    "footer": {
+      "text": "This flag song represents the values, aspirations, and unity of the Gahoi community. It serves as a reminder of our rich heritage and commitment to community welfare."
+    }
+  },
+  "footer": {
+    "followUs": "Follow Us",
+    "quickLinks": "Quick Links",
+    "contactUs": "Contact Us",
+    "allRightsReserved": "All rights reserved",
+    "address": "12, Tarun Vihar Colony, Thatipur, Gwalior-474011 (M.P.)",
+    "email": "Email: gahloishakti@gmail.com",
+    "phone": "Phone: +91 9303872220",
+    "copyright": "© Gahoi Shakti Jan Kalyan Samiti India 2025"
+  },
+  "cowSeva": {
+    "title": "Cow Seva",
+    "description": "Cow protection and service is not just a religious duty but a scientific and ecological necessity. Our Gaushalas provide shelter, care, and love to hundreds of cows, ensuring they live a dignified life. Through your support, we can continue this noble mission of protecting and serving these divine beings.",
+    "donateButton": "Donate Now",
+    "methods": {
+      "cowDonation": {
+        "title": "Cow Donation",
+        "description": "Support our Gaushala by donating for cow care. Your contribution helps us provide food, shelter, and medical care to our cows."
+      },
+      "fodderDonation": {
+        "title": "Fodder Donation",
+        "description": "Contribute towards the daily feed requirements of our cows. Quality fodder ensures their health and well-being."
+      },
+      "volunteer": {
+        "title": "Volunteer Service",
+        "description": "Join us in serving the cows directly. Your time and effort make a significant difference in their lives."
+      },
+      "buyProducts": {
+        "title": "Buy Cow Products",
+        "description": "Support our cause by purchasing pure and natural cow products. The proceeds help us maintain our Gaushala."
+      }
+    },
+    "hero": {
+      "subtitle": "Serving Cows, Serving Humanity"
+    },
+    "donate": {
+      "title": "Donate for Cows Today",
+      "description": "Serving mother cow is our religious and social duty. Become a part of this virtuous cause by contributing today.",
+      "button": "Donate Now"
+    }
+  },
+  "cowSevaCollection": {
+    "title": "Cow Seva Collection",
+    "description": "Collection of works done in our gaushala",
+    "summaryCards": {
+      "totalDonations": {
+        "title": "Total Donations",
+        "period": "Last 30 days"
+      },
+      "totalExpenses": {
+        "title": "Total Expenses",
+        "period": "Year to date"
+      },
+      "cowsSheltered": {
+        "title": "Cows Sheltered",
+        "period": "cross all centers"
+      },
+      "sevaCenters": {
+        "title": "Seva Centers",
+        "period": "Active locations"
+      }
+    },
+    "tabs": {
+      "donations": "Donations",
+      "expenses": "Expenses",
+      "places": "Seva Places"
+    },
+    "donations": {
+      "title": "Donation Records",
+      "searchPlaceholder": "Search donations...",
+      "export": "Export",
+      "exportReport": "Export Report",
+      "columns": {
+        "name": "Donor Name",
+        "amount": "Amount",
+        "date": "Date",
+        "place": "Place",
+        "purpose": "Purpose"
+      }
+    },
+    "expenses": {
+      "title": "Monthly Expenses",
+      "export": "Export",
+      "exportReport": "Export Report",
+      "columns": {
+        "month": "Month",
+        "feed": "Feed",
+        "medical": "Medical",
+        "maintenance": "Maintenance",
+        "staff": "Staff",
+        "total": "Total"
+      }
+    },
+    "sevaPlaces": {
+      "title": "Our Cow Seva Centers",
+      "description": "We maintain several gaushalas (cow shelters).",
+      "details": {
+        "inCharge": "In Charge",
+        "contact": "Contact",
+        "visitButton": "Visit Center"
+      }
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "{{start}}-{{end}} of {{total}}"
+    },
+    "loading": "Loading data",
+    "error": "Error loading data: {{message}}"
+  },
+  "aboutUs": {
+    "title": "About Us",
+    "meta": {
+      "title": "About Us",
+      "description": "The purpose of forming the organization is to work for the welfare of the community and to assist people in need."
+    },
+    "hero": {
+      "title": "About Us",
+      "subtitle": "An organization dedicated to community development",
+      "imageAlt": "Community gathering representing our values and traditions"
+    },
+    "purpose": {
+      "title": "Our Purpose",
+      "description": "The objective of establishing the organization is to work for the welfare of society and to provide assistance to people facing difficulties. In 2025, the organization's operational area is Gwalior and nearby cities, with the aim of expanding to major cities of Madhya Pradesh within the next year. Subsequently, the scope of work will be further extended to cover the entire state of Madhya Pradesh, and eventually, the entire country, to organize and unite the Gahoi community."
+    },
+    "values": {
+      "title": "Our Values",
+      "truth": {
+        "title": "Truth",
+        "description": "We walk the path of truth and treat everyone with honesty."
+      },
+      "dharma": {
+        "title": "Dharma",
+        "description": "We cherish and promote the values of Dharma."
+      },
+      "service": {
+        "title": "Service",
+        "description": "We consider it our duty to serve society and help everyone."
+      }
+    },
+    "programs": {
+      "title": "Organization's Potential Annual Programs:",
+      "list": [
+        "Career Counseling / Talent Recognition Ceremony - May/June",
+        "Rainy Season Meet - July/August",
+        "Matrimonial Meet - September/October",
+        "Business Meet - November/December",
+        "New Year Fun Fair Party - January/February",
+        "Matrimonial Meet - March/April"
+      ]
+    },
+    "benefits": {
+      "title": "Perks of Being a Member",
+      "list": [
+        "Coupons for 2 programs held in the year will be provided, which will include meal arrangements.",
+        "Free entry/guidance will be available for other programs/activities/seminars.",
+        "Members will receive discount offers on various products/services.",
+        "By participating in the organization's activities, there will be an opportunity to become a member of the committee/executive board based on performance in the following year.",
+        "Joining the organization provides a chance to establish yourself and grow your business."
+      ]
+    },
+    "responsibilities": {
+      "title": "Main Responsibilities Defined for 2025",
+      "list": [
+        "Providing information about government schemes for the education of economically weaker children in society and providing financial assistance.",
+        "Organizing introduction meetings for the marriage of unmarried children in society.",
+        "Helping needy children get jobs through the industrialists of society. Additionally, any other responsibilities agreed upon by the executive."
+      ]
+    },
+    "cta": {
+      "title": "Join Us Today",
+      "description": "Contribute to the development of society and work with us to build a better tomorrow.",
+      "memberButton": "Become a Member",
+      "contactButton": "Contact Us"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Connect with us and let's develop the society together",
+    "meta": {
+      "title": "Contact Us - Gahoi Samaj",
+      "description": "Contact Gahoi Samaj. We are ready to help you."
+    },
+    "location": {
+      "title": "Our Location"
+    },
+    "form": {
+      "title": "Send us a Message",
+      "name": {
+        "label": "Your Name",
+        "placeholder": "Enter your name",
+        "error": "Please enter your name"
+      },
+      "mobile": {
+        "label": "Mobile Number",
+        "placeholder": "Enter your mobile number",
+        "error": "Please enter your mobile number",
+        "invalidError": "Please enter a valid mobile number"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "Enter your email address",
+        "error": "Please enter your email",
+        "invalidError": "Please enter a valid email address"
+      },
+      "subject": {
+        "label": "Subject",
+        "placeholder": "Enter subject",
+        "error": "Please enter the subject"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Enter your message",
+        "error": "Please enter your message"
+      },
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "success": "Message sent successfully!",
+      "error": "Error sending message. Please try again."
+    },
+    "addresses": {
+      "primary": {
+        "name": "Shri Pradeep Paharia",
+        "address1": "12, Tarun Vihar Colony, Thatipur",
+        "address2": "Gwalior – 474011 (Madhya Pradesh)"
+      },
+      "secondary": {
+        "name": "Shri Sudhir Rawat",
+        "address1": "12, Tarun Vihar Colony, Thatipur",
+        "address2": "Gwalior – 474011 (Madhya Pradesh)"
+      }
+    }
+  },
+  "gotraAankna": {
+    "meta": {
+      "title": "Gotra & Aankna - Gahoi Samaj",
+      "description": "Information about Gotras and Aankna of Gahoi Samaj"
+    },
+    "title": "Gotra & Aankna",
+    "subtitle": "An important part of our tradition and heritage",
+    "gotraLabel": "Gotra :",
+    "rishiLabel": "Rishi :",
+    "kulDeviLabel": "Kul Devi :",
+    "aanknaListLabel": "Aankna List",
+    "viewAanknaList": "View Aankna List",
+    "hideAanknaList": "Hide Aankna List",
+    "noAankna": "No Aankna currently exists for this Gotra",
+    "gotraImportanceTitle": "Importance of Gotra",
+    "gotraImportanceDescription": "Gotra is an ancient tradition that represents lineage. It is an important part of our identity.",
+    "guidanceMatrimonialRelations": "Guidance in matrimonial relations",
+    "identificationLineage": "Identification of lineage",
+    "socialOrganization": "Social organization",
+    "useReligiousRituals": "Use in religious rituals",
+    "aanknaImportanceTitle": "Importance of Aankna",
+    "aanknaImportanceDescription": "Aankna is a unique identifier of our family identity. It strengthens our social structure.",
+    "familyIdentity": "Family identity",
+    "determinationSocialRelations": "Determination of social relations",
+    "preservationTraditions": "Preservation of traditions",
+    "knowledgeGenealogy": "Knowledge of genealogy"
+  },
+  "allAssembly": {
+    "meta": {
+      "title": "All Assemblies - Gahoi Samaj",
+      "description": "Details of all assemblies and executive committees of Gahoi Samaj."
+    },
+    "title": "Gahoi Vaishya Mahasabha",
+    "subtitle": "Details of All Assemblies",
+    "tabs": {
+      "2015": "2015 Assembly",
+      "2019": "2019 Assembly",
+      "central": "Central Assembly"
+    },
+    "executiveList": {
+      "title": "Elected Office Bearers of the All India Gahoi Vaishya Mahasabha"
+    },
+    "nominatedOfficials": {
+      "2015": "Nominated Officials 2015",
+      "2019": "Nominated Officials 2019",
+      "central": "List of Nominated Officials and Executive Members"
+    },
+    "positions": {
+      "nationalPresident": "National President",
+      "seniorVicePresident": "Senior Vice President",
+      "vicePresident": "Vice President",
+      "generalSecretary": "General Secretary",
+      "minister": "Minister",
+      "coordinator": "Coordinator",
+      "publicityMinister": "Publicity Minister",
+      "propertyDevelopmentCoordinator": "Property Development Coordinator",
+      "manager": "Manager",
+      "executiveChairman": "Executive Chairman",
+      "centralMinister": "Central Minister",
+      "jointMinister": "Joint Minister",
+      "developmentMinister": "Development Minister",
+      "organisationMinister": "Organisation Minister",
+      "assistantMinister": "Assistant Minister",
+      "treasurer": "Treasurer",
+      "auditor": "Auditor",
+      "executivePresident": "Executive President",
+      "chairmanTribunal": "Chairman Tribunal",
+      "ministerTribunal": "Minister Tribunal",
+      "chairmanAkshayNidhi": "Chairman Akshay Nidhi",
+      "chairmanGahoiGlobalCheCom": "Chairman Gahoi Global Che-Com",
+      "ministerGahoiGlobalCheCom": "Minister Gahoi Global Che-Com",
+      "chairmanShasEmployee": "Chairman Shas Employee",
+      "ministerShasEmployee": "Minister Shas Employee",
+      "chairmanPolitician": "Chairman Politician",
+      "ministerPolitician": "Minister Politician",
+      "gahoiWelfareFund": "Gahoi Welfare Fund",
+      "presidentAllIndiaGahoiVaishyaWomen": "President All India Gahoi Vaishya Women",
+      "ministerMinisterAllIndiaGahoiVaishyaWomen": "Minister All India Gahoi Vaishya Women",
+      "presidentAllIndiaGahoiVaishya": "President All India Gahoi Vaishya",
+      "ministerMinisterAllIndiaGahoiVaishyaYouthCouncil": "Minister All India Gahoi Vaishya Youth Council",
+      "presidentAllIndiaGahoiVaishyaSeniorAssociation": "President All India Gahoi Vaishya Senior Association",
+      "ministerMinisterAllIndiaGahoiVaishyaSeniorAssociation": "Minister All India Gahoi Vaishya Senior Association",
+      "chiefElectionCommissioner": "Chief Election Commissioner",
+      "coordinatorCensus": "Census Coordinator",
+      "managerRajabeti": "Manager Rajabeti",
+      "managerGahoiBhawanChitrakoot": "Manager Gahoi Bhawan Chitrakoot"
+    },
+    "contact": {
+      "mobile": "Mobile:"
+    }
+  },
+  "home": {
+    "about": {
+      "title": "About Our Community",
+      "description": "Gahoi Samaj India emphasizes religious studies and spirituality for creating a refined and progressive society. We believe in contributing towards building a peaceful and enlightened society.",
+      "images": {
+        "communityGathering": "Community gathering at a cultural event",
+        "culturalEvent": "Traditional cultural celebration"
+      }
+    },
+    "heritage": {
+      "title": "Our Cultural Heritage",
+      "subtitle": "Rich traditions and cultural heritage of the Gahoi Community",
+      "items": {
+        "traditions": {
+          "title": "Rich Traditions",
+          "description": "Ancient customs and rituals that define our cultural identity"
+        },
+        "legacy": {
+          "title": "Historical Legacy",
+          "description": "Our community's journey through centuries of achievements"
+        },
+        "values": {
+          "title": "Cultural Values",
+          "description": "Core principles that guide our community"
+        },
+        "achievements": {
+          "title": "Notable Achievements",
+          "description": "Celebrating our community's accomplishments"
+        }
+      },
+      "story": {
+        "title": "Our Cultural Journey",
+        "description": "A legacy of traditions, values, and achievements passed down through generations"
+      },
+      "highlights": {
+        "values": {
+          "title": "Cultural Values",
+          "description": "Our values are rooted in tradition, respect, and community service"
+        },
+        "education": {
+          "title": "Education & Growth",
+          "description": "Empowering our community through knowledge and skill development"
+        }
+      }
+    },
+    "events": {
+      "community": {
+        "title": "Community Events",
+        "description": "Join us in celebrating our traditions and strengthening community bonds"
+      },
+      "gauSeva": {
+        "title": "Gau Seva",
+        "description": "Supporting our sacred cow protection and care initiatives"
+      },
+      "cultural": {
+        "title": "Cultural Programs",
+        "description": "Preserving and promoting our rich cultural heritage"
+      }
+    },
+    "news": {
+      "title": "Latest News & Updates",
+      "subtitle": "Stay informed about our community's activities and achievements",
+      "readMore": "Read More",
+      "viewAll": "View All News",
+      "items": {
+        "0": {
+          "title": "Community Gathering Success",
+          "excerpt": "Recent community gathering brings together families from across the region"
+        },
+        "1": {
+          "title": "Educational Initiative Launch",
+          "excerpt": "New program to support education for underprivileged children"
+        },
+        "2": {
+          "title": "Cultural Festival Announcement",
+          "excerpt": "Annual cultural festival dates announced with exciting new programs"
+        }
+      }
+    },
+    "newsSubmission": {
+      "title": "Share Your News",
+      "subtitle": "Help us keep the community informed and connected",
+      "imageAlt": "News submission illustration",
+      "submitButton": "Submit Your News",
+      "features": {
+        "shareNews": {
+          "title": "Share News",
+          "description": "Share important updates and achievements with the community"
+        },
+        "awareness": {
+          "title": "Raise Awareness",
+          "description": "Help spread awareness about community initiatives and events"
+        },
+        "connect": {
+          "title": "Stay Connected",
+          "description": "Connect with community members and stay updated"
+        },
+        "partnerships": {
+          "title": "Build Partnerships",
+          "description": "Create opportunities for collaboration within the community"
+        }
+      }
+    },
+    "cowSeva": {
+      "title": "Cow Seva Initiatives",
+      "subtitle": "Join us in our mission to protect and serve our sacred cows",
+      "activities": {
+        "dailyCare": {
+          "title": "Daily Care",
+          "description": "Providing food, water, and essential care to our cows"
+        },
+        "shelter": {
+          "title": "Shelter",
+          "description": "Maintaining comfortable and safe shelters for our cows"
+        },
+        "medical": {
+          "title": "Medical Care",
+          "description": "Regular health checkups and medical treatment"
+        },
+        "products": {
+          "title": "Natural Products",
+          "description": "Creating sustainable products from cow by-products"
+        }
+      },
+      "donate": {
+        "title": "Support Our Cause",
+        "description": "Your contribution helps us provide better care for our cows",
+        "button": "Donate Now"
+      }
+    },
+    "successStories": {
+      "title": "Success Stories",
+      "subtitle": "Inspiring achievements of our community members",
+      "stories": {
+        "story1": {
+          "coupleNames": "Rahul and Priya Gahoi",
+          "story": "A beautiful couple formed through our community platform. Both families found perfect compatibility in values and aspirations."
+        },
+        "story2": {
+          "coupleNames": "Aditya and Sneha Gahoi",
+          "story": "Met through our matrimonial meet and instantly connected on community values and modern outlook."
+        },
+        "story3": {
+          "coupleNames": "Vivek and Neha Gahoi",
+          "story": "Found each other through family references in our community. Their shared interest in social service brought them closer."
+        },
+        "story4": {
+          "coupleNames": "Mohit & Ritu Gahoi",
+          "story": "Connected through our community's digital platform. Their journey from first meeting to marriage is truly inspiring."
+        }
+      },
+      "cta": {
+        "title": "Share Your Story",
+        "description": "Inspire others by sharing your success story",
+        "button": "Submit Your Story"
+      },
+      "marriageStories": {
+        "story1": {
+          "date": "Married on Dec 15, 2023",
+          "location": "Gwalior, MP",
+          "imageAlt": "Wedding couple from Gwalior"
+        },
+        "story2": {
+          "date": "Married on Nov 20, 2023",
+          "location": "Indore, MP",
+          "imageAlt": "Wedding couple from Indore"
+        },
+        "story3": {
+          "date": "Married on Oct 5, 2023",
+          "location": "Bhopal, MP",
+          "imageAlt": "Wedding couple from Bhopal"
+        },
+        "story4": {
+          "date": "Married on Sept 12, 2023",
+          "location": "Jabalpur, MP",
+          "imageAlt": "Wedding couple from Jabalpur"
+        }
+      }
+    },
+    "stayConnected": {
+      "heading": "STAY CONNECTED WITH",
+      "title": "Gahoi Shakti Jan Kalyan Samiti",
+      "description": "Gahoi Shakti Jan Kalyan Samiti, religious studies and spirituality for creating a refined society for everyone. We believe in contributing most towards building a peaceful and enlightened society.",
+      "moreInfo": "For More Information",
+      "playStoreAlt": "Get it on Google Play",
+      "viewMoreApps": "Click here to view more about Apps",
+      "appImageAlt": "Gahoi Samaj App"
+    }
+  },
+  "privacyPolicy": {
+    "title": "Privacy Policy",
+    "meta": {
+      "title": "Privacy Policy - Gahoi Samaj",
+      "description": "Privacy Policy and data protection guidelines for Gahoi Samaj website users"
+    },
+    "intro": "This Privacy Policy outlines how we collect, use, and protect your personal information when you use our website.",
+    "sections": {
+      "infoCollection": {
+        "title": "Information We Collect",
+        "items": {
+          "1": "Personal information (name, email, phone number)",
+          "2": "Family and matrimonial details",
+          "3": "Educational and professional information",
+          "4": "Community participation details",
+          "5": "Website usage data and preferences"
+        }
+      },
+      "dataUsage": {
+        "title": "How We Use Your Information",
+        "items": {
+          "1": "To provide community services and support",
+          "2": "To facilitate matrimonial matches",
+          "3": "To organize community events and activities",
+          "4": "To send important updates and notifications",
+          "5": "To improve our website and services"
+        }
+      },
+      "dataSecurity": {
+        "title": "Data Security",
+        "description": "We implement strict security measures to protect your personal information from unauthorized access or disclosure."
+      },
+      "userRights": {
+        "title": "Your Rights",
+        "items": {
+          "1": "Access your personal information",
+          "2": "Update or correct your details",
+          "3": "Request data deletion",
+          "4": "Opt-out of communications"
+        }
+      },
+      "smsPermission": {
+        "title": "SMS and Communication Permissions",
+        "intro": "We use SMS and other communication methods to keep you informed about important updates and services.",
+        "items": {
+          "1": "Event notifications and community updates",
+          "2": "Security alerts and account verification",
+          "3": "Important announcements and reminders"
+        }
+      },
+      "infoUsage": {
+        "title": "How We Use Your Information",
+        "intro": "We use your information responsibly to provide and improve our community services.",
+        "items": {
+          "1": "To maintain and update your community membership profile",
+          "2": "To send you important notifications about events and activities",
+          "3": "To process and manage your participation in community programs",
+          "4": "To improve our services and develop new features",
+          "5": "To ensure the security and integrity of our platform"
+        }
+      },
+      "infoSharing": {
+        "title": "Information Sharing",
+        "intro": "We are committed to protecting your privacy and only share information in specific circumstances.",
+        "serviceProviders": {
+          "title": "Service Providers",
+          "content": "We may share information with trusted service providers who assist us in operating our website, conducting our business, or serving our users, as long as they agree to keep this information confidential."
+        },
+        "legal": {
+          "title": "Legal Requirements",
+          "content": "We may disclose information when required by law or to protect our rights, privacy, safety, or property."
+        }
+      },
+      "policyUpdates": {
+        "title": "Policy Updates",
+        "content": "We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the effective date."
+      }
+    }
+  },
+  "flagSong": {
+    "hero": {
+      "title": "Gahoi Samaj Flag Song",
+      "subtitle": "A Symbol of Unity and Pride"
+    },
+    "lyrics": {
+      "left": {
+        "1": {
+          "line1": "जागो गहोई समाज हमारे",
+          "line2": "ध्वज को ऊंचा लहराएं"
+        },
+        "2": {
+          "line1": "एक लक्ष्य और भावना में एकजुट",
+          "line2": "साथ मिलकर आगे बढ़ें"
+        },
+        "3": {
+          "line1": "धर्म कर्म की राह पर चलकर",
+          "line2": "सत्य न्याय को अपनाएं"
+        },
+        "4": {
+          "line1": "विद्या व्यापार में हो आगे",
+          "line2": "नई ऊंचाई को छू लें"
+        },
+        "5": {
+          "line1": "गौ सेवा हमारा धर्म है",
+          "line2": "इसको शीश नवाएं"
+        }
+      },
+      "right": {
+        "1": {
+          "line1": "विरासत हमारी राह दिखाए",
+          "line2": "मूल्य हमारे प्रकाश जगाएं"
+        },
+        "2": {
+          "line1": "समाज सेवा में समर्पित हैं",
+          "line2": "दिन-प्रतिदिन हम मजबूत बनें"
+        },
+        "3": {
+          "line1": "संस्कृति हमारी अनमोल है",
+          "line2": "इसको सदा बचाएं"
+        },
+        "4": {
+          "line1": "युवा शक्ति को जगाएंगे",
+          "line2": "नई दिशा दिखलाएं"
+        },
+        "5": {
+          "line1": "एकता का संदेश फैलाएं",
+          "line2": "सबको साथ चलाएं"
+        },
+        "6": {
+          "line1": "जय जय गहोई समाज हमारा",
+          "line2": "गौरव से सिर उठाएं"
+        }
+      }
+    },
+    "footer": {
+      "text": "This flag song represents the values, aspirations, and unity of the Gahoi community. It serves as a reminder of our rich heritage and commitment to community welfare."
+    }
+  },
+  "videoPage": {
+    "meta": {
+      "title": "Video Gallery - Gahoi Samaj",
+      "description": "Video Gallery of Gahoi Vaishya Mahasabha - A collection of our activities and events"
+    },
+    "hero": {
+      "title": "Video Gallery",
+      "subtitle": "Visual Archive of Gahoi Vaishya Mahasabha Activities",
+      "backgroundAlt": "Video Gallery Background"
+    }
+  },
+  "funds": {
+    "meta": {
+      "title": "Community Funds - Gahoi Samaj",
+      "description": "Support and track community contributions. Together we can make a difference in our society through regular contributions and transparent fund management."
+    },
+    "title": "Community Funds",
+    "subtitle": "Together we can make a difference",
+    "stats": {
+      "totalContributors": "Total Contributors",
+      "totalContributions": "Total Contributions",
+      "successRate": "Success Rate",
+      "studentsSupported": "Students Supported",
+      "totalSupport": "Total Support"
+    },
+    "regularContributors": {
+      "sectionTitle": "Regular Contributors",
+      "sectionDescription": "View our dedicated community members who contribute regularly to support community.",
+      "donationRecord": "Donation Record",
+      "search": "Search contributors...",
+      "export": "Export Data",
+      "contributorName": "Contributor Name",
+      "monthlyContribution": "Monthly Contribution",
+      "totalContribution": "Total Contribution",
+      "date": "Date",
+      "place": "Place",
+      "purpose": "Purpose",
+      "educationSupport": "Education Support",
+      "showing": "Showing",
+      "of": "of",
+      "total": "total entries"
+    },
+    "supportedStudentsTitle": "Supported Students",
+    "supportedStudentsDescription": "Meet our bright students who are achieving their dreams with community support",
+    "supportedBy": "Supported by",
+    "joinUs": {
+      "title": "Join Our Mission",
+      "description": "Be a part of our community's growth. Your regular contribution can help shape the future of deserving students.",
+      "button": "Contribute Now"
+    }
+  }
+} 

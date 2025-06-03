@@ -1,0 +1,41 @@
+# Set default character set
+AddDefaultCharset UTF-8
+
+# Force UTF-8 for certain file types
+AddCharset UTF-8 .html .css .js .xml .json .txt
+
+# Set proper MIME types
+AddType application/font-woff .woff
+AddType application/font-woff2 .woff2
+
+# Set proper headers
+<FilesMatch "\.(htm|html|css|js|json|xml|txt)$">
+    Header set Content-Type "text/html; charset=UTF-8"
+</FilesMatch>
+
+<FilesMatch "\.(woff|woff2)$">
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Enable CORS for fonts
+<IfModule mod_headers.c>
+    <FilesMatch "\.(woff|woff2)$">
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET"
+        Header set Access-Control-Allow-Headers "Content-Type"
+    </FilesMatch>
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Handle Single Page Application routing
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^index\.html$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-l
+    RewriteRule . /index.html [L]
+</IfModule> 
