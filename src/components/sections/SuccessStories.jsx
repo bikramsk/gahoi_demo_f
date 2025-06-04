@@ -4,7 +4,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+const API_URL = "https://api.gahoishakti.in/";
 
 const SupportedStudentsSection = () => {
   const { t } = useTranslation();
