@@ -17,7 +17,7 @@ const LanguageSwitcher = () => {
     >
       <span 
         className={`text-xs font-semibold w-5 text-center font-english ${
-          !isHindi ? "text-[#FD7D01] font-bold" : "text-red-800"
+          !isHindi ? "text-[#FD7D01] font-bold" : "text-white"
         }`}
       >
         EN
@@ -25,7 +25,7 @@ const LanguageSwitcher = () => {
       <div 
         className="relative inline-flex h-5 w-8 mx-1.5 items-center rounded-full transition-colors"
         style={{
-          backgroundColor: isHindi ? '#dc2626' : '#991b1b'
+          backgroundColor: isHindi ? '#dc2626' : '#dc2626'
         }}
       >
         <span className="sr-only">Toggle language</span>
@@ -37,7 +37,7 @@ const LanguageSwitcher = () => {
       </div>
       <span 
         className={`text-xs font-semibold w-5 text-center font-hindi ${
-          isHindi ? "text-[#FD7D01] font-bold" : "text-red-800"
+          isHindi ? "text-[#FD7D01] font-bold" : "text-white"
         }`}
       >
         हिं

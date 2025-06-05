@@ -49,7 +49,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50">
+    <header className="absolute top-0 left-0 right-0 z-50 bg-[#800000]">
       <nav className="container mx-auto px-4 py-2">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-3 z-50">
