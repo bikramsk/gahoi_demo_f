@@ -34,7 +34,7 @@ const CommunityFunds = () => {
             headers: {
               'Content-Type': 'application/json',
               ...(import.meta.env.VITE_API_TOKEN && {
-                'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
+                // 'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
               })
             }
           }
