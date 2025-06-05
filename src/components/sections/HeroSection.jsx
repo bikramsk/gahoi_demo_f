@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API_URL = "https://api.gahoishakti.in";
+const API_URL = "https://demo.gahoishakti.in";
 
 const HeroSection = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
