@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-<<<<<<< HEAD
+
 const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
-=======
-const API_URL = "https://demo.gahoishakti.in";
->>>>>>> 5402d5b6d82b77c77b992a410b9f6010b88845da
+
+
 
 const HeroSection = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
