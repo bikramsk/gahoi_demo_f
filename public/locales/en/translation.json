@@ -695,11 +695,18 @@
     "stayConnected": {
       "heading": "STAY CONNECTED WITH",
       "title": "Gahoi Shakti Jan Kalyan Samiti",
-      "description": "Gahoi Shakti Jan Kalyan Samiti, religious studies and spirituality for creating a refined society for everyone. We believe in contributing most towards building a peaceful and enlightened society.",
+      "description": "Gahoi Shakti Jan Kalyan Samiti emphasizes religious studies and spirituality for creating a refined society for everyone. We believe in contributing towards building a peaceful and enlightened society.",
       "moreInfo": "For More Information",
-      "playStoreAlt": "Get it on Google Play",
+      "getItOn": "GET IT ON",
+      "googlePlay": "Google Play",
       "viewMoreApps": "Click here to view more about Apps",
-      "appImageAlt": "Gahoi Samaj App"
+      "appTitle": "GAHOI SHAKTI",
+      "appSubtitle": "JAN KALYAN SAMITI",
+      "appDeveloper": "Gahoi Samaj India",
+      "appSize": "1.2 MB",
+      "appRating": "Rated 4+",
+      "installButton": "Install",
+      "aboutApp": "About this app"
     }
   },
   "privacyPolicy": {
