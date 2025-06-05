@@ -180,7 +180,7 @@ export const STATE_TO_DISTRICTS = {
     "South Goa"
   ],
   "Gujarat": [
-    "Ahmadabad",
+    "Ahmedabad",
     "Amreli",
     "Anand",
     "Banas Kantha",
@@ -390,7 +390,7 @@ export const STATE_TO_DISTRICTS = {
     "Singrauli",
     "Tikamgarh",
     "Ujjain",
-    "Umaria",
+    "Umariya",
     "Vidisha"
   ],
   "Maharashtra": [
@@ -1604,8 +1604,8 @@ export const DISTRICT_TO_CITIES = {
     ]
   },
   "Gujarat": {
-    "Ahmadabad": [
-      "Ahmadabad",
+    "Ahmedabad": [
+      "Ahmedabad",
       "Bareja",
       "Barwala",
       "Bavla",
@@ -2876,7 +2876,7 @@ export const DISTRICT_TO_CITIES = {
       "Chachaura-Binaganj",
       "Guna",
       "Kumbhraj",
-      "Raghogarh"
+      "Raghavgarh"
     ],
     "Gwalior": [
       "Antari",
@@ -3189,11 +3189,11 @@ export const DISTRICT_TO_CITIES = {
       "Ujjain",
       "Unhel"
     ],
-    "Umaria": [
+    "Umariya": [
       "Chandia",
       "Nowrozabad",
       "Pali",
-      "Umaria"
+      "Umariya"
     ],
     "Vidisha": [
       "Basoda",

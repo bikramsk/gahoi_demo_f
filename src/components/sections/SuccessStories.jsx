@@ -4,7 +4,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-const API_URL = "https://api.gahoishakti.in/";
+const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
 
 const SupportedStudentsSection = () => {
   const { t } = useTranslation();
@@ -22,7 +22,7 @@ const SupportedStudentsSection = () => {
             headers: {
               'Content-Type': 'application/json',
               ...(import.meta.env.VITE_API_TOKEN && {
-                // 'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
+                'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
               })
             }
           }

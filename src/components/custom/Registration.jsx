@@ -57,7 +57,21 @@ const SUB_LOCAL_PANCHAYATS = {
   Dhuliya: ["Dhuliya"],
   Morena: ["Morena", "Ambah", "Porsa"],
   Bhind: ["Bhind", "Ater", "Lahar"],
-  Gwalior: ["Gwalior", "Dabra", "Bhitarwar"],
+  Gwalior: ["Gwalior", "Dabra","Madhavganj",
+        "Khasgi Bazaar",
+        "Daulatganj",
+        "Kampoo",
+        "Lohia Bazaar",
+        "Phalka Bazaar",
+        "Lohamandi",
+        "Bahodapur",
+        "Naka Chandravadni",
+        "Harishankarpuram",
+        "Thatipur",
+        "Morar",
+        "Dabra",
+        "Pichhore Dabra",
+        "Behat"],
   Patna: ["Patna"],
   Durg: ["Durg"],
   Rajnandgaon: ["Rajnandgaon"],
@@ -84,7 +98,9 @@ const SUB_LOCAL_PANCHAYATS = {
   Ujjain: ["Ujjain"],
   Bhopal: ["Bhopal", "Berasia"],
   Vidisha: ["Vidisha"],
-  Raisen: ["Begamganj"]
+  Raisen: ["Begamganj"],
+  Sultanpur: ["Visani"],
+  Ahmedabad: ["Gandhinagar"],
 };
 
 const CHAURASI_LOCAL_PANCHAYAT_MAPPING = {
@@ -106,7 +122,7 @@ const CHAURASI_SUB_LOCAL_PANCHAYAT_MAPPING = {
     ],
     "Ashok Nagar": ["Ashok Nagar", "Bamore Kala"],
     Guna: ["Guna"],
-    Ahmedabad: ["Gandhi Nagar"],
+    Ahmedabad: ["Gandhinagar"],
   },
   "Shri Gahoi Vaishya Sabha": {
     Shivpuri: ["Karera", "Bhonti"],
@@ -3160,14 +3176,24 @@ const RegistrationForm = () => {
       }
     }
 
+    //for Gujarat
+    if (formData.state === "Gujarat") {
+      if (formData.district === "Ahmedabad") {
+        return ["Chaurasi Regional Assembly"];
+      }
+    }
+
     // For Madhya Pradesh, filter assemblies based on district
     if (formData.state === "Madhya Pradesh") {
       // Mahakaushal Regional Assembly districts
-      if (["Jabalpur", "Katni", "Rewa", "Narsinghpur", "Umaria", "Sagar", "Seoni", "Katni", "Chhindwara", "Panna", "Hoshangabad", "Mandla", "Damoh", "Shahdol", "Dindori",
+      if (["Jabalpur", "Katni", "Rewa", "Narsinghpur", "Umariya", "Sagar", "Seoni", "Katni", "Chhindwara", "Panna", "Hoshangabad", "Mandla", "Damoh", "Shahdol", "Dindori",
         "Guna"
       ].includes(formData.district)) {
         if (formData.district === "Panna") {
           return ["Mahakaushal Regional Assembly", "Vindhya Regional Assembly"];
+        }
+        if (formData.district === "Guna") {
+          return ["Mahakaushal Regional Assembly", "Chaurasi Regional Assembly"];
         }
         return ["Mahakaushal Regional Assembly"];
       }
@@ -3184,6 +3210,11 @@ const RegistrationForm = () => {
       if (["Shivpuri", "Rewa", "Satna", "Ashoknagar", "Guna"].includes(formData.district)) {
         return ["Chaurasi Regional Assembly"];
       }
+
+     
+   
+     
+
 
       // Chambal Regional Assembly districts
       if (["Gwalior", "Bhind", "Datia", "Morena"].includes(formData.district)) {
@@ -3261,6 +3292,13 @@ const RegistrationForm = () => {
         }
         if (formData.district === "Ashoknagar") {
           return ["Gahoi Vaishya Panchayat", "Gahoi Vaishya Samaj"];
+        }
+      }
+
+      //for Gujarat
+      if (formData.regionalAssembly === "Chaurasi Regional Assembly") {
+        if (formData.state === "Gujarat") {
+          return ["Gahoi Vaishya Panchayat"];
         }
       }
     }
@@ -3360,7 +3398,7 @@ const RegistrationForm = () => {
 
     // Mahakaushal Regional Assembly case
     if (formData.regionalAssembly === "Mahakaushal Regional Assembly") {
-      if (formData.state === "Uttar Pradesh" && formData.district === "Sultanpur") {
+      if (formData.state === "Uttar Pradesh" && formData.city === "Sultanpur") {
         return ["Gahoi Vaishya Panchayat"];
       }
       if (formData.state === "Madhya Pradesh" && formData.city === "Gotegaon" ) {
@@ -3402,7 +3440,7 @@ const RegistrationForm = () => {
         return ["Gahoi Vaishya Panchayat"];
       }
 
-       if (formData.state === "Madhya Pradesh" && formData.city === "Umaria" ) {
+       if (formData.state === "Madhya Pradesh" && formData.city === "Umariya" ) {
         return ["Shri Gahoi Vaishya Panchayat"];
       }
 
@@ -3442,7 +3480,7 @@ const RegistrationForm = () => {
         return ["Gahoi Vaishya Panchayat"];
       }
 // Guna
-      if (formData.state === "Madhya Pradesh" && formData.city === "Raghogarh") {
+      if (formData.state === "Madhya Pradesh" && formData.city === "Raghavgarh") {
         return ["Gahoi Vaishya Panchayat"];
       }
 
@@ -3592,7 +3630,13 @@ if (formData.state === "Madhya Pradesh" && (formData.city === "Lakhnadon" || for
     // Chaurasi Regional Assembly cases
     if (formData.regionalAssembly === "Chaurasi Regional Assembly" && formData.state === "Madhya Pradesh") {
       return [formData.district];
+
     }
+    if (formData.regionalAssembly === "Chaurasi Regional Assembly" && formData.state === "Gujarat") {
+      return [formData.district];
+
+    }
+
 
     // Chambal Regional Assembly cases
     if (formData.regionalAssembly === "Chambal Regional Assembly") {
@@ -3669,65 +3713,65 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
     }
 
 
-
-    // Mahakaushal Regional Assembly case
-    if (formData.regionalAssembly === "Mahakaushal Regional Assembly") {
-      if (formData.state === "Uttar Pradesh" && formData.district === "Sultanpur") {
-        return ["Gahoi Vaishya Panchayat"];
-      }
-      if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
-        if (formData.district === "Narsinghpur" && formData.localPanchayatName === "Gahoi Vaishya Panchayat") return ["Narsinghpur"];       
-      }
-        if (formData.localPanchayatName === "Gahoi Vaishya Samaj Panchayat") {
-        if (formData.localPanchayatName === "Gahoi Vaishya Samaj Panchayat") return ["Narsinghpur"];       
-      }
-
-       if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
-        if (formData.city === "Sihora" && formData.localPanchayatName === "Gahoi Vaishya Panchayat") return ["Jabalpur"];       
-      }
-
-         if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
-        if (formData.city === "Jabalpur" && formData.localPanchayatName === "Gahoi Vaishya Panchayat") return ["Jabalpur"];       
-      }
-      
-       if (formData.localPanchayatName === "Shri Gahoi Vaishya Samaj") {
-        if (formData.city === "Jabalpur" && formData.localPanchayatName === "Shri Gahoi Vaishya Samaj") return ["Jabalpur"];       
-      }
-
-      if (formData.localPanchayatName === "Shri Gahoi Vaishya Panchayat") {
-        if (formData.city === "Umaria" && formData.localPanchayatName === "Shri Gahoi Vaishya Panchayat") return ["Umaria"];       
-      }
-
-      //Sagar
-
-      if (
-              (formData.localPanchayatName === "Gahoi Vaishya Panchayat" && 
-              (formData.city === "Rehli" || formData.city === "Sagar")) ||
-              (formData.localPanchayatName === "Shri Gahoi Vaishya Panchayat" && 
-              (formData.city === "Garhakota" || formData.city === "Deori")) ||
-              (formData.localPanchayatName === "Gahoi Vaishya Samaj" && 
-              formData.city === "Shahgarh")
-            ) {
-              return ["Sagar"];
+        // Mahakaushal Regional Assembly case
+        if (formData.regionalAssembly === "Mahakaushal Regional Assembly") {
+          if (formData.state === "Uttar Pradesh" && formData.district === "Sultanpur" && formData.city === "Sultanpur" && formData.localPanchayatName === "Gahoi Vaishya Panchayat" ) {
+            return ["Sultanpur"];
+            
+          }
+          if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
+            if (formData.district === "Narsinghpur" && formData.localPanchayatName === "Gahoi Vaishya Panchayat") return ["Narsinghpur"];       
+          }
+            if (formData.localPanchayatName === "Gahoi Vaishya Samaj Panchayat") {
+            if (formData.localPanchayatName === "Gahoi Vaishya Samaj Panchayat") return ["Narsinghpur"];       
+          }
+    
+           if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
+            if (formData.city === "Sihora" && formData.localPanchayatName === "Gahoi Vaishya Panchayat") return ["Jabalpur"];       
+          }
+    
+             if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
+            if (formData.city === "Jabalpur" && formData.localPanchayatName === "Gahoi Vaishya Panchayat") return ["Jabalpur"];       
+          }
+          
+           if (formData.localPanchayatName === "Shri Gahoi Vaishya Samaj") {
+            if (formData.city === "Jabalpur" && formData.localPanchayatName === "Shri Gahoi Vaishya Samaj") return ["Jabalpur"];       
+          }
+    
+          if (formData.localPanchayatName === "Shri Gahoi Vaishya Panchayat") {
+            if (formData.city === "Umariya" && formData.localPanchayatName === "Shri Gahoi Vaishya Panchayat") return ["Umariya"];       
+          }
+    
+          //Sagar
+    
+          if (
+                  (formData.localPanchayatName === "Gahoi Vaishya Panchayat" && 
+                  (formData.city === "Rehli" || formData.city === "Sagar")) ||
+                  (formData.localPanchayatName === "Shri Gahoi Vaishya Panchayat" && 
+                  (formData.city === "Garhakota" || formData.city === "Deori")) ||
+                  (formData.localPanchayatName === "Gahoi Vaishya Samaj" && 
+                  formData.city === "Shahgarh")
+                ) {
+                  return ["Sagar"];
+                }
+    
+            if (formData.localPanchayatName === "Gahoi Vaishya Panchayat" && 
+              (formData.city === "Seoni" || formData.city === "Lakhnadon")) {
+            return ["Seoni"];
+          }
+    
+    
+          //Katni
+          if (formData.state === "Madhya Pradesh" && formData.city === "Katni Nagar") {
+            if (formData.localPanchayatName === "Gahoi Vaishya Samaj") {
+              return ["Katni"];
             }
-
-        if (formData.localPanchayatName === "Gahoi Vaishya Panchayat" && 
-          (formData.city === "Seoni" || formData.city === "Lakhnadon")) {
-        return ["Seoni"];
-      }
-
-
-      //Katni
-      if (formData.state === "Madhya Pradesh" && formData.city === "Katni Nagar") {
-        if (formData.localPanchayatName === "Gahoi Vaishya Samaj") {
-          return ["Katni"];
+            if (formData.localPanchayatName === "Gahoi Vaishya Panchayat Parishad") {
+              return ["Katni"];
+            }
+          }
+          
         }
-        if (formData.localPanchayatName === "Gahoi Vaishya Panchayat Parishad") {
-          return ["Katni"];
-        }
-      }
-      
-    }
 
     //Chindwara
 
@@ -3778,7 +3822,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
       }
     }
 // Guna
-    if (formData.state === "Madhya Pradesh" && formData.city === "Raghogarh") {
+    if (formData.state === "Madhya Pradesh" && formData.city === "Raghavgarh") {
       if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
         return ["Guna"];
       }
@@ -3800,22 +3844,22 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
     if (formData.regionalAssembly === "Ganga Jamuna Regional Assembly") {
       if (formData.state === "Uttar Pradesh") {
         if (formData.district === "Jalaun") {
-          return ["Gahoi Vaishya Samaj Panchayat", "Gahoi Vaishya Panchayat Samiti"];
+          return ["Jalaun"];
         }
         if (formData.district === "Lucknow") {
-          return ["Gahoi Vaishya Panchayat"];
+          return ["Lucknow"];
         }
         if (formData.district === "Kanpur Nagar") {
-          return ["Gahoi Vaishya Kalyan Samiti"];
+          return ["Kanpur"];
         }
         if (formData.district === "Chitrakoot") {
-          return ["Gahoi Vaishya Samaj"];
+          return ["Chitrakoot"];
         }
         if (formData.district === "Banda") {
-            return ["Gahoi Vaishya Samaj Panchayat"];
+            return ["Banda"];
           }
         if (formData.district === "Auraiya") {
-          return ["Gahoi Vaishya Yuva Samiti"];
+          return ["Auraiya"];
         }
       }
     }
@@ -3939,7 +3983,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
       // Guna district cases
       if (formData.district === "Guna") {
         if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
-          if (formData.localPanchayat === "Guna") return ["Raghogarh"];
+          if (formData.localPanchayat === "Guna") return ["Raghavgarh"];
         }
       }
 
@@ -3980,10 +4024,10 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           if (formData.localPanchayat === "Sagar") return ["Shahgarh"];
         }
 
-      // Umaria district cases
-      if (formData.district === "Umaria") {
+      // Umariya district cases
+      if (formData.district === "Umariya") {
         if (formData.localPanchayatName === "Shri Gahoi Vaishya Panchayat") {
-          if (formData.localPanchayat === "Umaria") return ["Silaudi", "Masur Pani", "Dhuldhuli", "Devri"];
+          if (formData.localPanchayat === "Umariya") return ["Silaudi", "Masur Pani", "Dhuldhuli", "Deori"];
         }
       }
 
@@ -3991,6 +4035,13 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
       if (formData.district === "Seoni") {
         if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
           if (formData.localPanchayat === "Seoni") return ["Seoni", "Ganesh Ganji"];
+        }
+      }
+
+      // Ahmedabad city cases
+      if (formData.city === "Ahmedabad") {
+        if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
+          if (formData.localPanchayat === "Ahmedabad") return ["Gandhinagar"];
         }
       }
 
@@ -4095,7 +4146,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           break;
         case "Ashoknagar":
           if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
-            return ["Ashoknagar", "Bamore Kalan"];
+            return ["Ashoknagar", "Bamore Kala"];
           }
           if (formData.localPanchayatName === "Gahoi Vaishya Samaj") {
             return ["Dinara", "Guna"];
@@ -4110,6 +4161,15 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           return [];
       }
     }
+
+
+    // Ahmedabad city cases
+    if (formData.city === "Ahmedabad") {
+      if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {
+        if (formData.localPanchayat === "Ahmedabad") return ["Gandhinagar"];
+      }
+     } 
+
 
     // Ganga Jamuna Regional Assembly cases
     if (formData.regionalAssembly === "Ganga Jamuna Regional Assembly") {

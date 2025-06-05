@@ -74,7 +74,7 @@ const CowSevaCollection = () => {
         const API_TOKEN = import.meta.env.VITE_API_TOKEN;
         const response = await fetch('https://api.gahoishakti.in/api/cowsevas?populate[donations][populate]=*&populate[monthlyExpenses][populate]=*&populate[sevaPlaces][populate]=*', {
           headers: {
-            // 'Authorization': `Bearer ${API_TOKEN}`,
+            'Authorization': `Bearer ${API_TOKEN}`,
             'Content-Type': 'application/json',
           }
         });
@@ -133,9 +133,9 @@ const CowSevaCollection = () => {
                   address: p.address,
                   contact: p.contact,
                   inCharge: p.inCharge,
-                  imageUrl: imageData?.url ? `https://api.gahoishakti.in${imageData.url}` : null,
+                  imageUrl: imageData?.url ? `http://localhost:1337${imageData.url}` : null,
                   thumbnailUrl: imageData?.formats?.thumbnail?.url 
-                    ? `https://api.gahoishakti.in${imageData.formats.thumbnail.url}` 
+                    ? `http://localhost:1337${imageData.formats.thumbnail.url}` 
                     : null,
                   url: p.url || '#'
                 };

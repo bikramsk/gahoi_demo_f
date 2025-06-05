@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { FaCalendar, FaMapMarkerAlt, FaImages, FaChevronLeft, FaChevronRight, FaTimes } from 'react-icons/fa';
 
-const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL || "http://localhost:1337";
+const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
 
 const LatestNews = () => {
   const { t, i18n } = useTranslation();
