@@ -21,8 +21,9 @@ export default defineConfig({
         changeOrigin: true,
         secure: true,
         rewrite: (path) => {
-          console.log('Rewriting path:', path);
-          return path;
+          const newPath = path.replace(/^\/api/, '');
+          console.log('Rewriting path:', { original: path, new: newPath });
+          return newPath;
         },
         headers: {
           'Accept': 'application/json',
@@ -41,8 +42,8 @@ export default defineConfig({
           proxy.on('proxyReq', (proxyReq, req) => {
             console.log('Sending Request:', {
               method: req.method,
-              url: req.url,
-              path: proxyReq.path,
+              originalUrl: req.url,
+              proxyPath: proxyReq.path,
               headers: proxyReq.getHeaders()
             });
           });
@@ -50,7 +51,6 @@ export default defineConfig({
             console.log('Received Response:', {
               status: proxyRes.statusCode,
               url: req.url,
-              path: req.path,
               contentType: proxyRes.headers['content-type']
             });
 
@@ -60,9 +60,9 @@ export default defineConfig({
             });
             proxyRes.on('end', () => {
               try {
-                JSON.parse(body);
-                res.end(body);
-              } catch (parseError) {
+                const jsonData = JSON.parse(body);
+                res.end(JSON.stringify(jsonData));
+              } catch {
                 if (body.includes('<!DOCTYPE html>')) {
                   res.writeHead(500, {
                     'Content-Type': 'application/json',
@@ -79,15 +79,37 @@ export default defineConfig({
           });
         }
       },
-      '^/wpsenders/.*': {
+      '/wpsenders': {
         target: 'https://www.wpsenders.in',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/wpsenders/, ''),
+        rewrite: (path) => {
+          const newPath = path.replace(/^\/wpsenders/, '/api');
+          console.log('Rewriting WP Senders path:', { original: path, new: newPath });
+          return newPath;
+        },
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Access-Control-Allow-Origin': '*'
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        configure: (proxy) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('WP Senders Proxy Error:', err);
+            if (!res.headersSent) {
+              res.writeHead(500, {
+                'Content-Type': 'application/json',
+              });
+              res.end(JSON.stringify({ error: 'WP Senders Proxy Error', message: err.message }));
+            }
+          });
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('Sending WP Senders Request:', {
+              method: req.method,
+              originalUrl: req.url,
+              proxyPath: proxyReq.path,
+              headers: proxyReq.getHeaders()
+            });
+          });
         }
       }
     },

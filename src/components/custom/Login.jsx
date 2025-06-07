@@ -13,14 +13,22 @@ const sendWhatsAppOTP = async (mobileNumber) => {
   try {
     console.log('Attempting to send WhatsApp OTP for:', mobileNumber);
     
-    const sendOtpResponse = await fetch('/api/user-mpins/send-whatsapp-otp', {
+    // Generate a 4-digit OTP
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    
+    // Send OTP via WhatsApp using WP Senders API
+    const sendOtpResponse = await fetch('/wpsenders/sendMessage', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify({
-        mobileNumber
+      body: new URLSearchParams({
+        api_key: 'HVW5LEKQ8IBPR3SJU6F7TCMYZ',
+        number: mobileNumber,
+        template_name: 'gahoi_shakti_otp',
+        var1: otp.toString(),
+        route: '1' // Using route 1 for transactional message
       })
     });
 
@@ -32,11 +40,28 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const responseData = await sendOtpResponse.json();
     console.log('WhatsApp OTP Response:', responseData);
 
-    if (import.meta.env.DEV && responseData.otp) {
-      console.log('Development OTP:', responseData.otp);
+    // Store OTP in backend for verification
+    const storeOtpResponse = await fetch('/api/user-mpins/store-otp', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        mobileNumber,
+        otp: otp.toString()
+      })
+    });
+
+    if (!storeOtpResponse.ok) {
+      throw new Error('Failed to store OTP');
     }
 
-    return responseData;
+    if (import.meta.env.DEV) {
+      console.log('Development OTP:', otp);
+    }
+
+    return { success: true };
   } catch (error) {
     console.error('Error in sendWhatsAppOTP:', error);
     throw error;
