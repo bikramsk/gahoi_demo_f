@@ -10,6 +10,7 @@
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import process from 'process'
 
 export default defineConfig({
   plugins: [react()],
@@ -29,7 +30,8 @@ export default defineConfig({
         },
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.VITE_API_TOKEN}`
         },
         configure: (proxy) => {
           proxy.on('error', (err, req, res) => {
@@ -42,6 +44,13 @@ export default defineConfig({
             }
           });
           proxy.on('proxyReq', (proxyReq, req) => {
+            // Ensure proper headers
+            proxyReq.setHeader('Accept', 'application/json');
+            proxyReq.setHeader('Content-Type', 'application/json');
+            if (process.env.VITE_API_TOKEN) {
+              proxyReq.setHeader('Authorization', `Bearer ${process.env.VITE_API_TOKEN}`);
+            }
+
             console.log('Sending Request:', {
               method: req.method,
               originalUrl: req.url,
@@ -56,26 +65,40 @@ export default defineConfig({
               contentType: proxyRes.headers['content-type']
             });
 
+            // Force JSON content type
+            res.setHeader('Content-Type', 'application/json');
+
             let body = '';
             proxyRes.on('data', (chunk) => {
               body += chunk;
             });
             proxyRes.on('end', () => {
+              // If we got an error status code, return it as JSON
+              if (proxyRes.statusCode >= 400) {
+                res.writeHead(proxyRes.statusCode, {
+                  'Content-Type': 'application/json',
+                });
+                res.end(JSON.stringify({
+                  error: 'API Error',
+                  status: proxyRes.statusCode,
+                  message: body
+                }));
+                return;
+              }
+
               try {
                 const jsonData = JSON.parse(body);
                 res.end(JSON.stringify(jsonData));
-              } catch {
-                if (body.includes('<!DOCTYPE html>')) {
-                  res.writeHead(500, {
-                    'Content-Type': 'application/json',
-                  });
-                  res.end(JSON.stringify({
-                    error: 'Invalid Response',
-                    message: 'Received HTML when expecting JSON'
-                  }));
-                } else {
-                  res.end(body);
-                }
+              } catch (error) {
+                // If response is HTML or invalid JSON, return error
+                res.writeHead(500, {
+                  'Content-Type': 'application/json',
+                });
+                res.end(JSON.stringify({
+                  error: 'Invalid Response',
+                  message: 'Server returned invalid JSON response',
+                  details: error.message
+                }));
               }
             });
           });
@@ -127,7 +150,8 @@ export default defineConfig({
               try {
                 const jsonData = JSON.parse(body);
                 res.end(JSON.stringify(jsonData));
-              } catch (parseError) {
+              } catch {
+                // For WP Senders, return raw response if not JSON
                 res.end(body);
               }
             });
