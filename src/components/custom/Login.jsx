@@ -27,7 +27,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
         'api_key': 'HVWSLEKQ81BPR3SJU8F7TCMYZ',
         'message': message,
         'number': mobileNumber,
-        'route': 'whatsapp',
+        'route': '1',
         'country_code': '91'
       })
     });
