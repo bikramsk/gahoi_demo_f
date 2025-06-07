@@ -11,79 +11,39 @@ const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-  
-    console.log('Attempting to generate OTP for:', mobileNumber);
+    console.log('Attempting to send WhatsApp OTP for:', mobileNumber);
     
-    const generateOtpResponse = await fetch('/api/auth/otp/generate', {  
+    const sendOtpResponse = await fetch('/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${API_TOKEN}`
       },
       body: JSON.stringify({
-        mobile_number: mobileNumber, 
-        type: 'whatsapp',
-        length: 4
+        mobileNumber  // Using mobileNumber directly as the backend expects
       })
     });
 
-   
-    const responseText = await generateOtpResponse.text();
-    console.log('OTP Generation Response:', {
-      status: generateOtpResponse.status,
-      statusText: generateOtpResponse.statusText,
-      headers: Object.fromEntries(generateOtpResponse.headers.entries()),
-      body: responseText
-    });
-
-    if (!generateOtpResponse.ok) {
-      throw new Error(`Failed to generate OTP: ${generateOtpResponse.status} ${generateOtpResponse.statusText}`);
-    }
-
-    const otpData = JSON.parse(responseText);
-
-  
-    console.log('Attempting to send OTP via WhatsApp');
-    
-    const sendOtpResponse = await fetch('/api/auth/whatsapp/send-otp', {  
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
-      },
-      body: JSON.stringify({
-        mobile_number: mobileNumber,  
-        otp: otpData.otp,
-        template_name: 'gahoi_shakti_otp',  
-        language_code: 'en', 
-        components: [
-          {
-            type: 'body',
-            parameters: [
-              {
-                type: 'text',
-                text: otpData.otp
-              }
-            ]
-          }
-        ]
-      })
-    });
-
-    
-    const sendResponseText = await sendOtpResponse.text();
-    console.log('WhatsApp Send Response:', {
+    const responseText = await sendOtpResponse.text();
+    console.log('WhatsApp OTP Response:', {
       status: sendOtpResponse.status,
       statusText: sendOtpResponse.statusText,
       headers: Object.fromEntries(sendOtpResponse.headers.entries()),
-      body: sendResponseText
+      body: responseText
     });
 
     if (!sendOtpResponse.ok) {
       throw new Error(`Failed to send WhatsApp OTP: ${sendOtpResponse.status} ${sendOtpResponse.statusText}`);
     }
 
-    return JSON.parse(sendResponseText);
+    const response = JSON.parse(responseText);
+    
+    // In development, show OTP in console
+    if (response.otp) {
+      console.log('Development OTP:', response.otp);
+    }
+
+    return response;
   } catch (error) {
     console.error('Error in sendWhatsAppOTP:', error);
     throw error;
@@ -92,54 +52,59 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
 const checkUserAndMPIN = async (mobileNumber) => {
   try {
- 
-    const userResponse = await fetch(`${API_URL}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`, {
+    const userResponse = await fetch(`/api/check-user-mpin/${mobileNumber}`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_TOKEN}`
       }
     });
 
     if (!userResponse.ok) {
-      throw new Error('Failed to check user existence');
+      const errorText = await userResponse.text();
+      throw new Error(`Failed to check user: ${userResponse.status} ${errorText}`);
     }
 
-    const userData = await userResponse.json();
-    const exists = userData.data && userData.data.length > 0;
-
-    if (!exists) {
-      return { exists: false, hasMPIN: false };
-    }
-
-    // Check if user has MPIN
-    const mpinResponse = await fetch(`${API_URL}/api/user-mpins?filters[mobile_number][$eq]=${mobileNumber}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!mpinResponse.ok) {
-      throw new Error('Failed to check MPIN status');
-    }
-
-    const mpinData = await mpinResponse.json();
-    return {
-      exists: true,
-      hasMPIN: mpinData.data && mpinData.data.length > 0
-    };
+    return await userResponse.json();
   } catch (error) {
     console.error('Error checking user and MPIN:', error);
     throw error;
   }
 };
 
-const verifyMPIN = async (mobileNumber, mpin) => {
+const verifyOTP = async (mobileNumber, otp) => {
   try {
-    const response = await fetch(`${API_URL}/api/auth/verify-mpin`, {
+    const response = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_TOKEN}`
+      },
+      body: JSON.stringify({
+        mobileNumber,
+        otp
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OTP verification failed: ${response.status} ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    throw error;
+  }
+};
+
+const verifyMPIN = async (mobileNumber, mpin) => {
+  try {
+    const response = await fetch('/api/verify-mpin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_TOKEN}`
       },
       body: JSON.stringify({
         mobileNumber,
@@ -148,7 +113,8 @@ const verifyMPIN = async (mobileNumber, mpin) => {
     });
 
     if (!response.ok) {
-      throw new Error('Invalid MPIN');
+      const errorText = await response.text();
+      throw new Error(`MPIN verification failed: ${response.status} ${errorText}`);
     }
 
     return await response.json();
@@ -378,25 +344,10 @@ const Login = () => {
         setLoading(true);
         try {
           // Verify OTP
-          const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              mobileNumber: formData.mobileNumber,
-              otp: formData.otp
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error('OTP verification failed');
-          }
-
-          const data = await response.json();
+          const response = await verifyOTP(formData.mobileNumber, formData.otp);
           
-          if (data.jwt) {
-            localStorage.setItem('token', data.jwt);
+          if (response.jwt) {
+            localStorage.setItem('token', response.jwt);
             localStorage.setItem('verifiedMobile', formData.mobileNumber);
             
             // Update steps progress
