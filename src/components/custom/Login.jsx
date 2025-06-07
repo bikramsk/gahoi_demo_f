@@ -11,13 +11,12 @@ const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    console.log('Attempting to send OTP via SMS for:', mobileNumber);
+    console.log('Attempting to send WhatsApp OTP for:', mobileNumber);
     
     const otp = Math.floor(1000 + Math.random() * 9000);
-    
     const formattedNumber = mobileNumber;
     
-    // Send OTP via SMS using WP Senders API
+    // Send OTP via WhatsApp 
     const sendOtpResponse = await fetch('/wpsenders/sendMessage', {
       method: 'POST',
       headers: {
@@ -25,15 +24,11 @@ const sendWhatsAppOTP = async (mobileNumber) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: new URLSearchParams({
-        api_key: 'HVW5LEKQ81BPR3SJU6F7TCMYZ',
+        api_key: 'HVW5LEKQ8IBPR3SJU6F7TCMYZ',
         number: formattedNumber,
-        sender: 'GAHOIS', // SMS sender ID
-        message: `Your OTP for Gahoi Shakti login is ${otp}. Valid for 5 minutes.`, // Direct message for SMS
-        route: '1', // Transactional route
-        country_code: '91',
-        flash: '0',
-        unicode: '0',
-        schedule: '0'
+        message: `Your OTP for Gahoi Shakti login is: ${otp}. Valid for 10 minutes.`,
+        route: 1,
+        country_code: 91
       })
     });
 
@@ -50,15 +45,15 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       console.log('Parsed WP Senders response:', responseData);
       
       if (!responseData.status) {
-        throw new Error(responseData.message || 'Failed to send SMS OTP');
+        throw new Error(responseData.message || 'Failed to schedule WhatsApp message');
       }
     } catch (parseError) {
       console.error('Failed to parse WP Senders response as JSON:', parseError);
       throw new Error(`Invalid response format from WP Senders: ${parseError.message}`);
     }
 
-    // If we got here, the message was sent successfully
-    console.log('SMS OTP sent successfully');
+    // If we got here, the message was scheduled successfully
+    console.log('WhatsApp message scheduled successfully');
 
     // Store OTP in backend for verification
     const storeOtpResponse = await fetch('/api/user-mpins/store-otp', {
@@ -84,10 +79,10 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
     return { 
       success: true,
-      message: 'OTP has been sent to your mobile number via SMS. Please check your messages.'
+      message: 'OTP has been sent to your WhatsApp. Please wait a moment to receive it.'
     };
   } catch (error) {
-    console.error('Error in sending OTP:', error);
+    console.error('Error in sendWhatsAppOTP:', error);
     throw error;
   }
 };
@@ -326,12 +321,12 @@ const Login = () => {
         const { exists, hasMPIN } = await checkUserAndMPIN(formData.mobileNumber);
         
         if (!exists) {
-          // New user - proceed with OTP via SMS
+          // New user - proceed with WhatsApp OTP
           try {
             await sendWhatsAppOTP(formData.mobileNumber);
             setCurrentStep(2); // Move to OTP step
           } catch (error) {
-            console.error('Error sending OTP via SMS:', error);
+            console.error('Error sending WhatsApp OTP:', error);
             setErrors({ 
               mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
             });
@@ -345,7 +340,7 @@ const Login = () => {
               await sendWhatsAppOTP(formData.mobileNumber);
               setCurrentStep(2); // Move to OTP step
             } catch (error) {
-              console.error('Error sending OTP via SMS:', error);
+              console.error('Error sending WhatsApp OTP:', error);
               setErrors({ 
                 mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
               });

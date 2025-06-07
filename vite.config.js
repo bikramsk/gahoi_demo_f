@@ -15,6 +15,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    host: true,
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'https://api.gahoishakti.in',
@@ -108,6 +110,26 @@ export default defineConfig({
               originalUrl: req.url,
               proxyPath: proxyReq.path,
               headers: proxyReq.getHeaders()
+            });
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Received WP Senders Response:', {
+              status: proxyRes.statusCode,
+              url: req.url,
+              contentType: proxyRes.headers['content-type']
+            });
+
+            let body = '';
+            proxyRes.on('data', (chunk) => {
+              body += chunk;
+            });
+            proxyRes.on('end', () => {
+              try {
+                const jsonData = JSON.parse(body);
+                res.end(JSON.stringify(jsonData));
+              } catch (parseError) {
+                res.end(body);
+              }
             });
           });
         }
