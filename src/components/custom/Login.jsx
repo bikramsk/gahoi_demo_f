@@ -13,52 +13,30 @@ const sendWhatsAppOTP = async (mobileNumber) => {
   try {
     console.log('Attempting to send WhatsApp OTP for:', mobileNumber);
     
-    // Generate a 4-digit OTP
-    const otp = Math.floor(1000 + Math.random() * 9000);
-    const message = `Your OTP for Gahoi Shakti login is: ${otp}. Please do not share this OTP with anyone.`;
-    
-    const sendOtpResponse = await fetch('/wpsenders/api/sendMessage', {
+    const sendOtpResponse = await fetch('/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       },
-      body: new URLSearchParams({
-        'api_key': 'HVWSLEKQ81BPR3SJU8F7TCMYZ',
-        'message': message,
-        'number': mobileNumber,
-        'route': '1',
-        'country_code': '91'
+      body: JSON.stringify({
+        mobileNumber
       })
     });
 
-    const responseText = await sendOtpResponse.text();
-    console.log('WhatsApp API Response:', {
-      status: sendOtpResponse.status,
-      statusText: sendOtpResponse.statusText,
-      headers: Object.fromEntries(sendOtpResponse.headers.entries()),
-      body: responseText
-    });
-
     if (!sendOtpResponse.ok) {
-      throw new Error(`Failed to send WhatsApp OTP: ${sendOtpResponse.status} ${responseText}`);
+      const errorText = await sendOtpResponse.text();
+      throw new Error(errorText || 'Failed to send WhatsApp OTP');
     }
 
-    try {
-      const responseData = JSON.parse(responseText);
-      // Validate the response
-      if (!responseData.status) {
-        throw new Error('WhatsApp API error: ' + responseData.message || 'Unknown error');
-      }
-      // Store OTP in development for testing
-      if (import.meta.env.DEV) {
-        console.log('Development OTP:', otp);
-      }
-      return { success: true, otp };
-    } catch (e) {
-      console.error('Failed to parse JSON response:', e);
-      throw new Error('Invalid response format from server');
+    const responseData = await sendOtpResponse.json();
+    console.log('WhatsApp OTP Response:', responseData);
+
+    if (import.meta.env.DEV && responseData.otp) {
+      console.log('Development OTP:', responseData.otp);
     }
+
+    return responseData;
   } catch (error) {
     console.error('Error in sendWhatsAppOTP:', error);
     throw error;
@@ -72,29 +50,25 @@ const checkUserAndMPIN = async (mobileNumber) => {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
+        'Content-Type': 'application/json'
       }
     });
 
-    const responseText = await userResponse.text();
     console.log('User check response:', {
       status: userResponse.status,
       statusText: userResponse.statusText,
-      headers: Object.fromEntries(userResponse.headers.entries()),
-      body: responseText
+      headers: Object.fromEntries(userResponse.headers.entries())
     });
 
     if (!userResponse.ok) {
-      throw new Error(`Failed to check user: ${userResponse.status} ${responseText}`);
+      const errorText = await userResponse.text();
+      console.error('Error response:', errorText);
+      throw new Error(errorText || 'Failed to check user status');
     }
 
-    try {
-      return JSON.parse(responseText);
-    } catch (e) {
-      console.error('Failed to parse JSON response:', e);
-      throw new Error('Invalid response format from server');
-    }
+    const data = await userResponse.json();
+    console.log('Parsed response:', data);
+    return data;
   } catch (error) {
     console.error('Error checking user and MPIN:', error);
     throw error;
@@ -106,8 +80,8 @@ const verifyOTP = async (mobileNumber, otp) => {
     const response = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         mobileNumber,
@@ -117,7 +91,7 @@ const verifyOTP = async (mobileNumber, otp) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`OTP verification failed: ${response.status} ${errorText}`);
+      throw new Error(errorText || 'OTP verification failed');
     }
 
     return await response.json();
@@ -132,8 +106,8 @@ const verifyMPIN = async (mobileNumber, mpin) => {
     const response = await fetch('/api/verify-mpin', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         mobileNumber,
@@ -143,7 +117,7 @@ const verifyMPIN = async (mobileNumber, mpin) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`MPIN verification failed: ${response.status} ${errorText}`);
+      throw new Error(errorText || 'MPIN verification failed');
     }
 
     return await response.json();
