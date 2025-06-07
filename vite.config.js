@@ -47,6 +47,17 @@ export default defineConfig({
           });
         }
       },
+      '^/wpsenders/.*': {
+        target: 'https://www.wpsenders.in',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/wpsenders/, ''),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
     },
   },
   assetsInclude: ['**/*.woff', '**/*.woff2'],

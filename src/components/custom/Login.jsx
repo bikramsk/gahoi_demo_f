@@ -13,20 +13,27 @@ const sendWhatsAppOTP = async (mobileNumber) => {
   try {
     console.log('Attempting to send WhatsApp OTP for:', mobileNumber);
     
-    const sendOtpResponse = await fetch('/api/send-whatsapp-otp', {
+    // Generate a 4-digit OTP
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    const message = `Your OTP for Gahoi Shakti login is: ${otp}. Please do not share this OTP with anyone.`;
+    
+    const sendOtpResponse = await fetch('/wpsenders/api/sendMessage', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify({
-        mobileNumber
+      body: new URLSearchParams({
+        'api_key': 'HVWSLEKQ81BPR3SJU8F7TCMYZ',
+        'message': message,
+        'number': mobileNumber,
+        'route': 'whatsapp',
+        'country_code': '91'
       })
     });
 
     const responseText = await sendOtpResponse.text();
-    console.log('WhatsApp OTP Response:', {
+    console.log('WhatsApp API Response:', {
       status: sendOtpResponse.status,
       statusText: sendOtpResponse.statusText,
       headers: Object.fromEntries(sendOtpResponse.headers.entries()),
@@ -38,11 +45,16 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     }
 
     try {
-      const response = JSON.parse(responseText);
-      if (process.env.NODE_ENV === 'development' && response.otp) {
-        console.log('Development OTP:', response.otp);
+      const responseData = JSON.parse(responseText);
+      // Validate the response
+      if (!responseData.status) {
+        throw new Error('WhatsApp API error: ' + responseData.message || 'Unknown error');
       }
-      return response;
+      // Store OTP in development for testing
+      if (import.meta.env.DEV) {
+        console.log('Development OTP:', otp);
+      }
+      return { success: true, otp };
     } catch (e) {
       console.error('Failed to parse JSON response:', e);
       throw new Error('Invalid response format from server');
@@ -170,7 +182,6 @@ const Login = () => {
     { name: t('login.steps.completion'), completed: false }
   ]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [hasMPIN, setHasMPIN] = useState(false);
   const [showMpinInput, setShowMpinInput] = useState(false);
   const [verifyingMPIN, setVerifyingMPIN] = useState(false);
 
@@ -229,8 +240,8 @@ const Login = () => {
   const handleOtpChange = (e) => {
     const { value } = e.target;
     
-    // Only allow 6 digit numbers
-    if (!/^\d*$/.test(value) || value.length > 6) {
+    // Only allow 4 digit numbers
+    if (!/^\d*$/.test(value) || value.length > 4) {
       return;
     }
     
@@ -258,7 +269,7 @@ const Login = () => {
 
     if (showOtpInput && !formData.otp) {
       newErrors.otp = t('login.errors.otpRequired');
-    } else if (showOtpInput && formData.otp.length !== 6) {
+    } else if (showOtpInput && formData.otp.length !== 4) {
       newErrors.otp = t('login.errors.otpLength');
     }
 
@@ -288,7 +299,6 @@ const Login = () => {
           }
         } else {
           setUserExists(true);
-          setHasMPIN(hasMPIN);
           if (hasMPIN) {
             setShowMpinInput(true);
           } else {
@@ -593,7 +603,7 @@ const Login = () => {
                       }`}
                       pattern="[0-9]*"
                       inputMode="numeric"
-                      maxLength={6}
+                      maxLength={4}
                       placeholder={t('login.otpPlaceholder')}
                       disabled={loading}
                     />
