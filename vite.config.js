@@ -17,8 +17,28 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:1337',
+        target: 'https://api.gahoishakti.in',
         changeOrigin: true,
+        secure: true,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        },
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.log('Proxy Error:', err);
+          });
+          proxy.on('proxyReq', (_, req) => {
+            console.log('Sending Request:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log('Received Response:', proxyRes.statusCode, req.url);
+            if (proxyRes.statusCode === 405) {
+              console.log('Method Not Allowed - Check if the API endpoint supports this method');
+            }
+          });
+        }
       },
     },
   },
