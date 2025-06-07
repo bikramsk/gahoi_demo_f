@@ -11,41 +11,51 @@ const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    // Step 1: Generate the 4-digit OTP
-    const generateOtpResponse = await fetch('/api/otp/generate', {
+  
+    console.log('Attempting to generate OTP for:', mobileNumber);
+    
+    const generateOtpResponse = await fetch('/api/auth/otp/generate', {  
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${API_TOKEN}`
       },
       body: JSON.stringify({
-        mobileNumber,
+        mobile_number: mobileNumber, 
         type: 'whatsapp',
         length: 4
-      }),
-      credentials: 'include'
+      })
+    });
+
+   
+    const responseText = await generateOtpResponse.text();
+    console.log('OTP Generation Response:', {
+      status: generateOtpResponse.status,
+      statusText: generateOtpResponse.statusText,
+      headers: Object.fromEntries(generateOtpResponse.headers.entries()),
+      body: responseText
     });
 
     if (!generateOtpResponse.ok) {
-      const errorText = await generateOtpResponse.text();
-      console.error('OTP Generation Error:', errorText);
-      throw new Error('Failed to generate OTP');
+      throw new Error(`Failed to generate OTP: ${generateOtpResponse.status} ${generateOtpResponse.statusText}`);
     }
 
-    const otpData = await generateOtpResponse.json();
+    const otpData = JSON.parse(responseText);
 
-    // Step 2: Send the OTP via WhatsApp
-    const sendOtpResponse = await fetch('/api/whatsapp/send-otp', {
+  
+    console.log('Attempting to send OTP via WhatsApp');
+    
+    const sendOtpResponse = await fetch('/api/auth/whatsapp/send-otp', {  
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${API_TOKEN}`
       },
       body: JSON.stringify({
-        mobileNumber,
+        mobile_number: mobileNumber,  
         otp: otpData.otp,
-        template: 'gahoi_shakti_otp',
-        language: 'en',
+        template_name: 'gahoi_shakti_otp',  
+        language_code: 'en', 
         components: [
           {
             type: 'body',
@@ -57,26 +67,32 @@ const sendWhatsAppOTP = async (mobileNumber) => {
             ]
           }
         ]
-      }),
-      credentials: 'include'
+      })
+    });
+
+    
+    const sendResponseText = await sendOtpResponse.text();
+    console.log('WhatsApp Send Response:', {
+      status: sendOtpResponse.status,
+      statusText: sendOtpResponse.statusText,
+      headers: Object.fromEntries(sendOtpResponse.headers.entries()),
+      body: sendResponseText
     });
 
     if (!sendOtpResponse.ok) {
-      const errorText = await sendOtpResponse.text();
-      console.error('WhatsApp Send Error:', errorText);
-      throw new Error('Failed to send WhatsApp OTP');
+      throw new Error(`Failed to send WhatsApp OTP: ${sendOtpResponse.status} ${sendOtpResponse.statusText}`);
     }
 
-    return await sendOtpResponse.json();
+    return JSON.parse(sendResponseText);
   } catch (error) {
-    console.error('Error sending WhatsApp OTP:', error);
+    console.error('Error in sendWhatsAppOTP:', error);
     throw error;
   }
 };
 
 const checkUserAndMPIN = async (mobileNumber) => {
   try {
-    // Check if user exists
+ 
     const userResponse = await fetch(`${API_URL}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`, {
       method: 'GET',
       headers: {
