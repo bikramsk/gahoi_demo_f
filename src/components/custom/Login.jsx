@@ -16,11 +16,12 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const sendOtpResponse = await fetch('/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${API_TOKEN}`
       },
       body: JSON.stringify({
-        mobileNumber  // Using mobileNumber directly as the backend expects
+        mobileNumber
       })
     });
 
@@ -33,17 +34,19 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     });
 
     if (!sendOtpResponse.ok) {
-      throw new Error(`Failed to send WhatsApp OTP: ${sendOtpResponse.status} ${sendOtpResponse.statusText}`);
+      throw new Error(`Failed to send WhatsApp OTP: ${sendOtpResponse.status} ${responseText}`);
     }
 
-    const response = JSON.parse(responseText);
-    
-    // In development, show OTP in console
-    if (response.otp) {
-      console.log('Development OTP:', response.otp);
+    try {
+      const response = JSON.parse(responseText);
+      if (process.env.NODE_ENV === 'development' && response.otp) {
+        console.log('Development OTP:', response.otp);
+      }
+      return response;
+    } catch (e) {
+      console.error('Failed to parse JSON response:', e);
+      throw new Error('Invalid response format from server');
     }
-
-    return response;
   } catch (error) {
     console.error('Error in sendWhatsAppOTP:', error);
     throw error;
@@ -52,20 +55,34 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
 const checkUserAndMPIN = async (mobileNumber) => {
   try {
+    console.log('Checking user and MPIN for:', mobileNumber);
     const userResponse = await fetch(`/api/check-user-mpin/${mobileNumber}`, {
       method: 'GET',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${API_TOKEN}`
       }
     });
 
+    const responseText = await userResponse.text();
+    console.log('User check response:', {
+      status: userResponse.status,
+      statusText: userResponse.statusText,
+      headers: Object.fromEntries(userResponse.headers.entries()),
+      body: responseText
+    });
+
     if (!userResponse.ok) {
-      const errorText = await userResponse.text();
-      throw new Error(`Failed to check user: ${userResponse.status} ${errorText}`);
+      throw new Error(`Failed to check user: ${userResponse.status} ${responseText}`);
     }
 
-    return await userResponse.json();
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse JSON response:', e);
+      throw new Error('Invalid response format from server');
+    }
   } catch (error) {
     console.error('Error checking user and MPIN:', error);
     throw error;

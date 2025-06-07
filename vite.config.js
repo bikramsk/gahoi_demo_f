@@ -20,22 +20,29 @@ export default defineConfig({
         target: 'https://api.gahoishakti.in',
         changeOrigin: true,
         secure: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
         headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept'
         },
         configure: (proxy) => {
           proxy.on('error', (err) => {
             console.log('Proxy Error:', err);
           });
-          proxy.on('proxyReq', (_, req) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
             console.log('Sending Request:', req.method, req.url);
+            // Ensure proper headers
+            proxyReq.setHeader('Accept', 'application/json');
+            proxyReq.setHeader('Content-Type', 'application/json');
           });
           proxy.on('proxyRes', (proxyRes, req) => {
-            console.log('Received Response:', proxyRes.statusCode, req.url);
-            if (proxyRes.statusCode === 405) {
-              console.log('Method Not Allowed - Check if the API endpoint supports this method');
+            console.log('Received Response:', proxyRes.statusCode, req.url, proxyRes.headers);
+            // Force JSON content type if the response is JSON
+            if (proxyRes.headers['content-type']?.includes('application/json')) {
+              proxyRes.headers['content-type'] = 'application/json';
             }
           });
         }
