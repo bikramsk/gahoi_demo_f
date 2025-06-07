@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Helmet } from "react-helmet-async";
@@ -8,29 +8,131 @@ import { getLoginPageData } from "../../data/loader";
 
 const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
 
-// Function to check if user exists in Strapi backend
-const checkUserExists = async (mobileNumber) => {
-  try {
-    const url = `${API_URL}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`;
 
-    const response = await fetch(url, {
+const sendWhatsAppOTP = async (mobileNumber) => {
+  try {
+    // Step 1: Generate the 4-digit OTP that will replace {{1}}
+    const generateOtpResponse = await fetch(`${API_URL}/api/otp/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        mobileNumber,
+        type: 'whatsapp',
+        length: 4  // This generates a 4-digit OTP like "1234"
+      })
+    });
+
+    if (!generateOtpResponse.ok) {
+      throw new Error('Failed to generate OTP');
+    }
+
+    const otpData = await generateOtpResponse.json();
+
+ 
+    const sendOtpResponse = await fetch(`${API_URL}/api/whatsapp/send-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        mobileNumber,
+        otp: otpData.otp,  
+        template: 'gahoi_shakti_otp',
+        language: 'en',
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              {
+                type: 'text',
+                text: otpData.otp  
+              }
+            ]
+          }
+        ]
+      })
+    });
+
+    if (!sendOtpResponse.ok) {
+      throw new Error('Failed to send WhatsApp OTP');
+    }
+
+    return await sendOtpResponse.json();
+  } catch (error) {
+    console.error('Error sending WhatsApp OTP:', error);
+    throw error;
+  }
+};
+
+
+const checkUserAndMPIN = async (mobileNumber) => {
+  try {
+    // Check if user exists
+    const userResponse = await fetch(`${API_URL}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     });
 
-    if (!response.ok) {
-      console.error('API Response not ok:', response.status, response.statusText);
+    if (!userResponse.ok) {
       throw new Error('Failed to check user existence');
     }
 
-    const data = await response.json();
-    return data.data && data.data.length > 0;
+    const userData = await userResponse.json();
+    const exists = userData.data && userData.data.length > 0;
 
+    if (!exists) {
+      return { exists: false, hasMPIN: false };
+    }
+
+    // Check if user has MPIN
+    const mpinResponse = await fetch(`${API_URL}/api/user-mpins?filters[mobile_number][$eq]=${mobileNumber}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!mpinResponse.ok) {
+      throw new Error('Failed to check MPIN status');
+    }
+
+    const mpinData = await mpinResponse.json();
+    return {
+      exists: true,
+      hasMPIN: mpinData.data && mpinData.data.length > 0
+    };
   } catch (error) {
-    console.error('Error checking user existence:', error);
-    return false;
+    console.error('Error checking user and MPIN:', error);
+    throw error;
+  }
+};
+
+
+const verifyMPIN = async (mobileNumber, mpin) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/verify-mpin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        mobileNumber,
+        mpin
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Invalid MPIN');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error verifying MPIN:', error);
+    throw error;
   }
 };
 
@@ -44,7 +146,8 @@ const Login = () => {
   });
   const [formData, setFormData] = useState({
     mobileNumber: '',
-    otp: ''
+    otp: '',
+    mpin: ''
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -61,6 +164,10 @@ const Login = () => {
     { name: t('login.steps.registration'), completed: false },
     { name: t('login.steps.completion'), completed: false }
   ]);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [hasMPIN, setHasMPIN] = useState(false);
+  const [showMpinInput, setShowMpinInput] = useState(false);
+  const [verifyingMPIN, setVerifyingMPIN] = useState(false);
 
   // Load page data
   React.useEffect(() => {
@@ -106,7 +213,7 @@ const Login = () => {
       }));
     }
 
-    // Reset user existence check when mobile number changes
+    // Reset user existence when mobile number changes
     if (name === 'mobileNumber') {
       setUserExists(false);
       setShowOtpInput(false);
@@ -155,51 +262,73 @@ const Login = () => {
   };
 
   // Function to check user existence before sending OTP
-  const handleCheckUserAndSendOtp = async () => {
+  const handleCheckUserAndProceed = async () => {
     if (formData.mobileNumber.length === 10 && recaptchaVerified) {
       setCheckingUser(true);
       setErrors({});
       
       try {
-        const exists = await checkUserExists(formData.mobileNumber);
+        const { exists, hasMPIN } = await checkUserAndMPIN(formData.mobileNumber);
         
-        if (exists) {
+        if (!exists) {
+          // New user - proceed with WhatsApp OTP
+          try {
+            await sendWhatsAppOTP(formData.mobileNumber);
+            setCurrentStep(2); // Move to OTP step
+          } catch (error) {
+            console.error('Error sending WhatsApp OTP:', error);
+            setErrors({ 
+              mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
+            });
+          }
+        } else {
           setUserExists(true);
+          setHasMPIN(hasMPIN);
+          if (hasMPIN) {
+            setShowMpinInput(true);
+          } else {
+            try {
+              await sendWhatsAppOTP(formData.mobileNumber);
+              setCurrentStep(2); // Move to OTP step
+            } catch (error) {
+              console.error('Error sending WhatsApp OTP:', error);
           setErrors({ 
-            mobileNumber: 'This mobile number is already registered. Please use a different number.' 
-          });
-          setCheckingUser(false);
-          return;
+                mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
+              });
+            }
+          }
         }
-
-        // If user doesn't exist, proceed with OTP sending
-        setLoading(true);
-        setCheckingUser(false);
-        
-        // Simulate OTP send API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setOtpSent(true);
-        setShowOtpInput(true);
-        setErrors({});
-        setUserExists(false);
-        
-        // Update steps progress
-        const updatedSteps = [...processSteps];
-        updatedSteps[0].completed = true;
-        setProcessSteps(updatedSteps);
-        
       } catch (error) {
-        console.error('Error in user check or OTP send:', error);
+        console.error('Error in user check:', error);
         setErrors({ 
-          mobileNumber: 'Unable to verify mobile number. Please try again later.' 
+          mobileNumber: t('login.errors.serverError') || 'Server error. Please try again.'
         });
-        setUserExists(false);
-        setOtpSent(false);
-        setShowOtpInput(false);
       } finally {
-        setLoading(false);
         setCheckingUser(false);
+      }
+    }
+  };
+
+  const handleMPINSubmit = async () => {
+    if (formData.mpin.length === 4) {
+      setVerifyingMPIN(true);
+      setErrors({});
+      try {
+        const result = await verifyMPIN(formData.mobileNumber, formData.mpin);
+        if (result.token) {
+          // Store token and redirect
+          localStorage.setItem('token', result.token);
+          navigate('/dashboard');
+        } else {
+          throw new Error('No token received');
+        }
+      } catch (error) {
+        console.error('MPIN verification error:', error);
+        setErrors({
+          mpin: t('login.errors.invalidMPIN') || 'Invalid MPIN. Please try again.'
+        });
+      } finally {
+        setVerifyingMPIN(false);
       }
     }
   };
@@ -207,6 +336,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
+    setErrors({});
     
     if (validateForm()) {
       if (!showOtpInput) {
@@ -214,22 +344,37 @@ const Login = () => {
           setErrors({ mobileNumber: t('login.errors.recaptcha') });
           return;
         }
-        await handleCheckUserAndSendOtp();
+        try {
+          await handleCheckUserAndProceed();
+        } catch (error) {
+          console.error('Error in form submission:', error);
+          setErrors({ 
+            mobileNumber: t('login.errors.serverError') || 'Server error. Please try again.'
+          });
+        }
       } else {
         setLoading(true);
         try {
-          // Simulate OTP verification - accept any 6-digit OTP
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Simulate successful verification
-          const response = { jwt: 'dummy-token-123456' };
-          
-          // Store the JWT token
-          if (response.jwt) {
-            localStorage.setItem('token', response.jwt);
+          // Verify OTP
+          const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              mobileNumber: formData.mobileNumber,
+              otp: formData.otp
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('OTP verification failed');
           }
+
+          const data = await response.json();
           
-          // Store mobile number in localStorage for registration page
+          if (data.jwt) {
+            localStorage.setItem('token', data.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           
           // Update steps progress
@@ -237,8 +382,6 @@ const Login = () => {
           updatedSteps[1].completed = true;
           setProcessSteps(updatedSteps);
           
-          // Redirect to registration
-          setTimeout(() => {
             navigate('/registration', { 
               state: { 
                 mobileNumber: formData.mobileNumber,
@@ -246,19 +389,15 @@ const Login = () => {
                 processSteps: updatedSteps
               } 
             });
-          }, 500);
-          
+          } else {
+            throw new Error('No token received');
+          }
         } catch (error) {
           console.error('Error verifying OTP:', error);
-          let errorMessage = t('login.errors.invalidOtp');
-          
-          if (error.error?.message) {
-            errorMessage = error.error.message;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-          
-          setErrors({ otp: errorMessage });
+          setErrors({ 
+            otp: t('login.errors.invalidOtp') || 'Invalid OTP. Please try again.'
+          });
+        } finally {
           setLoading(false);
         }
       }
@@ -272,6 +411,20 @@ const Login = () => {
   const hasError = (fieldName) => {
     return submitted && errors[fieldName];
   };
+
+  // Add event handler for MPIN input button
+  const handleMpinButtonClick = () => {
+    handleMPINSubmit();
+  };
+
+  // Update processSteps when currentStep changes
+  useEffect(() => {
+    const updatedSteps = processSteps.map((step, index) => ({
+      ...step,
+      completed: index + 1 < currentStep
+    }));
+    setProcessSteps(updatedSteps);
+  }, [currentStep]);
 
   return (
     <div 
@@ -432,7 +585,7 @@ const Login = () => {
                         <div className="flex space-x-2">
                           <button
                             type="button"
-                            onClick={handleCheckUserAndSendOtp}
+                            onClick={handleCheckUserAndProceed}
                             className="text-[10px] sm:text-xs text-red-700 hover:text-red-800"
                           >
                             {t('login.resendOtp')}
@@ -462,6 +615,27 @@ const Login = () => {
                         {t('login.otpSentMessage')}
                       </p>
                     )}
+                  </div>
+                )}
+
+                {/* MPIN Input - Only show if user exists and MPIN input is not shown */}
+                {showMpinInput && (
+                  <div className="mt-4">
+                    <input
+                      type="password"
+                      maxLength={4}
+                      value={formData.mpin}
+                      onChange={(e) => setFormData({ ...formData, mpin: e.target.value })}
+                      placeholder={t('login.mpinPlaceholder')}
+                      className="w-full p-2 border rounded"
+                    />
+                    <button
+                      onClick={handleMpinButtonClick}
+                      disabled={formData.mpin.length !== 4 || verifyingMPIN}
+                      className="mt-2 w-full bg-red-600 text-white p-2 rounded disabled:bg-gray-400"
+                    >
+                      {verifyingMPIN ? t('login.verifying') : t('login.verifyMPIN')}
+                    </button>
                   </div>
                 )}
 
@@ -514,3 +688,8 @@ const Login = () => {
 };
 
 export default Login;
+
+
+
+
+
