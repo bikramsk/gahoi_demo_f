@@ -13,7 +13,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
   try {
     console.log('Attempting to send WhatsApp OTP for:', mobileNumber);
     
-    const sendOtpResponse = await fetch('/api/send-whatsapp-otp', {
+    const sendOtpResponse = await fetch('/api/user-mpins/send-whatsapp-otp', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -46,7 +46,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 const checkUserAndMPIN = async (mobileNumber) => {
   try {
     console.log('Checking user and MPIN for:', mobileNumber);
-    const userResponse = await fetch(`/api/check-user-mpin/${mobileNumber}`, {
+    const userResponse = await fetch(`/api/user-mpins/check-user-mpin/${mobileNumber}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -54,21 +54,28 @@ const checkUserAndMPIN = async (mobileNumber) => {
       }
     });
 
+    // Log full response details
     console.log('User check response:', {
       status: userResponse.status,
       statusText: userResponse.statusText,
       headers: Object.fromEntries(userResponse.headers.entries())
     });
 
+    const responseText = await userResponse.text();
+    console.log('Response body:', responseText);
+
     if (!userResponse.ok) {
-      const errorText = await userResponse.text();
-      console.error('Error response:', errorText);
-      throw new Error(errorText || 'Failed to check user status');
+      throw new Error(responseText || 'Failed to check user status');
     }
 
-    const data = await userResponse.json();
-    console.log('Parsed response:', data);
-    return data;
+    try {
+      const data = JSON.parse(responseText);
+      console.log('Parsed response:', data);
+      return data;
+    } catch (parseError) {
+      console.error('Failed to parse response as JSON:', parseError);
+      throw new Error('Invalid response format from server');
+    }
   } catch (error) {
     console.error('Error checking user and MPIN:', error);
     throw error;
@@ -77,7 +84,7 @@ const checkUserAndMPIN = async (mobileNumber) => {
 
 const verifyOTP = async (mobileNumber, otp) => {
   try {
-    const response = await fetch('/api/verify-otp', {
+    const response = await fetch('/api/user-mpins/verify-otp', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -103,7 +110,7 @@ const verifyOTP = async (mobileNumber, otp) => {
 
 const verifyMPIN = async (mobileNumber, mpin) => {
   try {
-    const response = await fetch('/api/verify-mpin', {
+    const response = await fetch('/api/user-mpins/verify-mpin', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
