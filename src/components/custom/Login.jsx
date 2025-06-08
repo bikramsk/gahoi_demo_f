@@ -6,28 +6,23 @@ import { useTranslation } from "react-i18next";
 
 import { getLoginPageData } from "../../data/loader";
 
-// Debug log
+
 console.log('Environment Variables:', {
-  API_URL: import.meta.env.VITE_API_URL,
-  WPSENDERS_URL: import.meta.env.VITE_WPSENDERS_URL,
   MODE: import.meta.env.MODE
 });
 
-// In production, we want to use the full URLs
-const API_URL = import.meta.env.MODE === 'production' 
+// Use direct URLs in production, proxy in development
+const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
-  : (import.meta.env.VITE_API_URL || '');
+  : '/api';
 
-const WPSENDERS_URL = import.meta.env.MODE === 'production'
+const WPSENDERS_BASE = import.meta.env.MODE === 'production'
   ? 'https://www.wpsenders.in/api'
-  : (import.meta.env.VITE_WPSENDERS_URL || '');
+  : '/wpsenders';
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
-// Remove trailing slash if present
-const baseApiUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
-
-console.log('Using API URL:', baseApiUrl);
+console.log('Using API BASE:', API_BASE);
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
@@ -37,7 +32,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const formattedNumber = mobileNumber;
     
     // Send OTP via WhatsApp
-    const sendOtpResponse = await fetch(`${WPSENDERS_URL}/sendMessage`, {
+    const sendOtpResponse = await fetch(`${WPSENDERS_BASE}/sendMessage`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -76,7 +71,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     console.log('WhatsApp message scheduled successfully');
 
     // Store OTP in backend for verification
-    const storeOtpResponse = await fetch(`${baseApiUrl}/user-mpins/store-otp`, {
+    const storeOtpResponse = await fetch(`${API_BASE}/user-mpins/store-otp`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -110,7 +105,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
 const checkUserAndMPIN = async (mobileNumber) => {
   try {
-    const url = `${baseApiUrl}/user-mpins/check-user-mpin/${mobileNumber}`;
+    const url = `${API_BASE}/user-mpins/check-user-mpin/${mobileNumber}`;
     console.log('Making API request to:', url);
     
     const userResponse = await fetch(url, {
@@ -158,7 +153,7 @@ const checkUserAndMPIN = async (mobileNumber) => {
 
 const verifyOTP = async (mobileNumber, otp) => {
   try {
-    const response = await fetch(`${baseApiUrl}/user-mpins/verify-otp`, {
+    const response = await fetch(`${API_BASE}/user-mpins/verify-otp`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -185,7 +180,7 @@ const verifyOTP = async (mobileNumber, otp) => {
 
 const verifyMPIN = async (mobileNumber, mpin) => {
   try {
-    const response = await fetch(`${baseApiUrl}/user-mpins/verify-mpin`, {
+    const response = await fetch(`${API_BASE}/user-mpins/verify-mpin`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -250,7 +245,7 @@ const Login = () => {
         if (response?.data?.[0]) {
           const data = response.data[0];
           const logoUrl = data.logo?.url ? 
-            (data.logo.url.startsWith('http') ? data.logo.url : `${API_URL}${data.logo.url}`) : 
+            (data.logo.url.startsWith('http') ? data.logo.url : `${API_BASE}${data.logo.url}`) : 
             null;
           
           setPageData({
