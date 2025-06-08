@@ -34,6 +34,13 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const otp = Math.floor(1000 + Math.random() * 9000);
     const formattedNumber = mobileNumber;
     
+    console.log('Sending OTP request with:', {
+      api_key: 'S4YKGP5ZB9Q2J8LIDNM6OACTX',
+      number: formattedNumber,
+      route: 1,
+      country_code: 91,
+      otp
+    });
     
     const sendOtpResponse = await fetch(`${WPSENDERS_BASE}/sendMessage`, {
       method: 'POST',
@@ -42,7 +49,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: new URLSearchParams({
-        api_key: 'HVW5LEKQ8IBPR3SJU6F7TCMYZ',
+        api_key: 'S4YKGP5ZB9Q2J8LIDNM6OACTX',
         number: formattedNumber,
         message: `Your OTP for Gahoi Shakti login is: ${otp}. Valid for 10 minutes.`,
         route: 1,
