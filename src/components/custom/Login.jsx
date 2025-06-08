@@ -17,6 +17,7 @@ const API_BASE = import.meta.env.MODE === 'production'
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6Lc4VVkrAAAAAIxY8hXck_UVMmmIqNxjFWaLqq3u';
+const WHATSAPP_API_TOKEN = import.meta.env.VITE_WHATSAPP_API_TOKEN;
 
 console.log('Using API BASE:', API_BASE);
 
@@ -46,22 +47,36 @@ const checkUserAndMPIN = async (mobileNumber) => {
   }
 };
 
+// Generate a 4-digit OTP
+const generateOTP = () => {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+};
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
     // Log the request details for debugging
     console.log('Sending OTP request for:', mobileNumber);
 
-    const response = await fetch(`${API_BASE}/api/send-whatsapp-otp`, {
+    // Generate OTP
+    const otp = generateOTP();
+    
+    // Store OTP in sessionStorage for verification
+    sessionStorage.setItem('currentOTP', otp);
+    sessionStorage.setItem('otpTimestamp', Date.now().toString());
+    sessionStorage.setItem('otpMobile', mobileNumber);
+
+    const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      credentials: 'include',
-      body: JSON.stringify({
-        mobileNumber: mobileNumber.toString() // Ensure it's a string
+      body: new URLSearchParams({
+        api_key: WHATSAPP_API_TOKEN,
+        number: mobileNumber,
+        message: `Your OTP for Gahoi Shakti login is: ${otp}. Valid for 10 minutes.`,
+        route: '1',
+        country_code: '91'
       })
     });
 
@@ -83,9 +98,9 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     try {
       result = JSON.parse(responseText);
       
-      // In development, log the OTP if it's returned
-      if (import.meta.env.MODE === 'development' && result.otp) {
-        console.log('Development OTP:', result.otp);
+      // In development, log the OTP
+      if (import.meta.env.MODE === 'development') {
+        console.log('Development OTP:', otp);
       }
     } catch {
       result = { success: true, message: 'OTP sent successfully' };
@@ -101,42 +116,36 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 // Updated OTP verification function
 const verifyOTP = async (mobileNumber, otp) => {
   try {
-    const response = await fetch(`${API_BASE}/api/verify-otp`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        mobileNumber: mobileNumber,
-        otp: otp
-      })
-    });
-
-    const responseText = await response.text();
-    console.log('Verify OTP Response:', response.status, responseText);
-
-    if (!response.ok) {
-      let errorMessage = 'OTP verification failed';
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.message || errorData.error?.message || errorMessage;
-      } catch {
-        errorMessage = responseText || errorMessage;
-      }
-      throw new Error(errorMessage);
+    // Get stored OTP details
+    const storedOTP = sessionStorage.getItem('currentOTP');
+    const storedMobile = sessionStorage.getItem('otpMobile');
+    const timestamp = parseInt(sessionStorage.getItem('otpTimestamp') || '0');
+    
+    // Check if OTP is expired (10 minutes)
+    const isExpired = Date.now() - timestamp > 10 * 60 * 1000;
+    
+    if (isExpired) {
+      throw new Error('OTP has expired. Please request a new one.');
     }
 
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch {
-      throw new Error('Invalid response format');
+    if (!storedOTP || storedMobile !== mobileNumber) {
+      throw new Error('Invalid OTP request. Please request a new OTP.');
     }
 
-    return result;
+    if (storedOTP !== otp) {
+      throw new Error('Invalid OTP. Please try again.');
+    }
+
+    // Clear OTP data after successful verification
+    sessionStorage.removeItem('currentOTP');
+    sessionStorage.removeItem('otpTimestamp');
+    sessionStorage.removeItem('otpMobile');
+
+    // Return success
+    return {
+      success: true,
+      message: 'OTP verified successfully'
+    };
   } catch (error) {
     console.error('Error verifying OTP:', error);
     throw error;
