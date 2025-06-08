@@ -120,24 +120,5 @@ body {
   }
 }
 
-/* Hide only reCAPTCHA test message text */
-.grecaptcha-badge { 
-    visibility: hidden !important;
-}
 
-/* Target only the test message text */
-.rc-anchor-light .rc-anchor-pt {
-    display: none !important;
-}
-
-/* Keep reCAPTCHA checkbox visible */
-.g-recaptcha {
-    display: block !important;
-    opacity: 1 !important;
-}
-
-/* Hide reCAPTCHA v2 test message */
-.grecaptcha-logo iframe {
-    opacity: 0;
-}
 
