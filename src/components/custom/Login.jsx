@@ -140,33 +140,6 @@ const verifyOTP = async (mobileNumber, otp) => {
   }
 };
 
-const verifyMPIN = async (mobileNumber, mpin) => {
-  try {
-    const response = await fetch(`${API_BASE}/user-mpins/verify-mpin`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
-      },
-      body: JSON.stringify({
-        mobileNumber,
-        mpin
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'MPIN verification failed');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error verifying MPIN:', error);
-    throw error;
-  }
-};
-
 const Login = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -177,16 +150,13 @@ const Login = () => {
   });
   const [formData, setFormData] = useState({
     mobileNumber: '',
-    otp: '',
-    mpin: ''
+    otp: ''
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [checkingUser, setCheckingUser] = useState(false);
-  const [userExists, setUserExists] = useState(false);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const recaptchaRef = useRef(null);
   const [processSteps, setProcessSteps] = useState([
@@ -196,8 +166,6 @@ const Login = () => {
     { name: t('login.steps.completion'), completed: false }
   ]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [showMpinInput, setShowMpinInput] = useState(false);
-  const [verifyingMPIN, setVerifyingMPIN] = useState(false);
 
   
   React.useEffect(() => {
@@ -243,9 +211,8 @@ const Login = () => {
       }));
     }
 
-    // Reset user existence when mobile number changes
+    // Reset OTP state when mobile number changes
     if (name === 'mobileNumber') {
-      setUserExists(false);
       setShowOtpInput(false);
       setOtpSent(false);
     }
@@ -291,60 +258,6 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Function to check user existence before sending OTP
-  const handleCheckUserAndProceed = async () => {
-    if (formData.mobileNumber.length === 10 && recaptchaVerified) {
-      setCheckingUser(true);
-      setErrors({});
-      
-      try {
-        // For new users, proceed directly with OTP
-        try {
-          await sendWhatsAppOTP(formData.mobileNumber);
-          setShowOtpInput(true);
-          setOtpSent(true);
-          setCurrentStep(2); // Move to OTP step
-        } catch (error) {
-          console.error('Error sending WhatsApp OTP:', error);
-          setErrors({ 
-            mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
-          });
-        }
-      } catch (error) {
-        console.error('Error in user check:', error);
-        setErrors({ 
-          mobileNumber: t('login.errors.serverError') || 'Server error. Please try again.'
-        });
-      } finally {
-        setCheckingUser(false);
-      }
-    }
-  };
-
-  const handleMPINSubmit = async () => {
-    if (formData.mpin.length === 4) {
-      setVerifyingMPIN(true);
-      setErrors({});
-      try {
-        const result = await verifyMPIN(formData.mobileNumber, formData.mpin);
-        if (result.token) {
-          // Store token and redirect
-          localStorage.setItem('token', result.token);
-          navigate('/dashboard');
-        } else {
-          throw new Error('No token received');
-        }
-      } catch (error) {
-        console.error('MPIN verification error:', error);
-        setErrors({
-          mpin: t('login.errors.invalidMPIN') || 'Invalid MPIN. Please try again.'
-        });
-      } finally {
-        setVerifyingMPIN(false);
-      }
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
@@ -356,13 +269,19 @@ const Login = () => {
           setErrors({ mobileNumber: t('login.errors.recaptcha') });
           return;
         }
+        setLoading(true);
         try {
-          await handleCheckUserAndProceed();
+          await sendWhatsAppOTP(formData.mobileNumber);
+          setShowOtpInput(true);
+          setOtpSent(true);
+          setCurrentStep(2); // Move to OTP step
         } catch (error) {
-          console.error('Error in form submission:', error);
+          console.error('Error sending WhatsApp OTP:', error);
           setErrors({ 
-            mobileNumber: t('login.errors.serverError') || 'Server error. Please try again.'
+            mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
           });
+        } finally {
+          setLoading(false);
         }
       } else {
         setLoading(true);
@@ -407,11 +326,6 @@ const Login = () => {
 
   const hasError = (fieldName) => {
     return submitted && errors[fieldName];
-  };
-
-  // Add event handler for MPIN input button
-  const handleMpinButtonClick = () => {
-    handleMPINSubmit();
   };
 
   // Update processSteps when currentStep changes
@@ -547,7 +461,7 @@ const Login = () => {
                     inputMode="numeric"
                     maxLength={10}
                     placeholder={t('login.mobilePlaceholder')}
-                    disabled={showOtpInput || loading || checkingUser}
+                    disabled={showOtpInput || loading}
                   />
                   {hasError('mobileNumber') && (
                     <p className="text-red-500 text-[10px] sm:text-xs">{errors.mobileNumber}</p>
@@ -555,7 +469,7 @@ const Login = () => {
                 </div>
 
                 {/* CAPTCHA - Only show if user doesn't exist and OTP input is not shown */}
-                {!showOtpInput && !userExists && (
+                {!showOtpInput && (
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex justify-center transform scale-90 sm:scale-100 origin-top">
                       <ReCAPTCHA
@@ -569,7 +483,7 @@ const Login = () => {
                 )}
 
                 {/* OTP Input - Only show if user doesn't exist */}
-                {showOtpInput && !userExists && (
+                {showOtpInput && (
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex justify-between items-center">
                       <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
@@ -582,7 +496,7 @@ const Login = () => {
                         <div className="flex space-x-2">
                           <button
                             type="button"
-                            onClick={handleCheckUserAndProceed}
+                            onClick={handleSubmit}
                             className="text-[10px] sm:text-xs text-red-700 hover:text-red-800"
                           >
                             {t('login.resendOtp')}
@@ -615,54 +529,21 @@ const Login = () => {
                   </div>
                 )}
 
-                {/* MPIN Input - Only show if user exists and MPIN input is not shown */}
-                {showMpinInput && (
-                  <div className="mt-4">
-                    <input
-                      type="password"
-                      maxLength={4}
-                      value={formData.mpin}
-                      onChange={(e) => setFormData({ ...formData, mpin: e.target.value })}
-                      placeholder={t('login.mpinPlaceholder')}
-                      className="w-full p-2 border rounded"
-                    />
-                    <button
-                      onClick={handleMpinButtonClick}
-                      disabled={formData.mpin.length !== 4 || verifyingMPIN}
-                      className="mt-2 w-full bg-red-600 text-white p-2 rounded disabled:bg-gray-400"
-                    >
-                      {verifyingMPIN ? t('login.verifying') : t('login.verifyMPIN')}
-                    </button>
-                  </div>
-                )}
-
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between pt-1">
-                  {!showOtpInput && !userExists ? (
+                  {!showOtpInput && (
                     <div className="flex w-full justify-between gap-2">
                       <button 
                         type="submit" 
-                        disabled={loading || checkingUser || (!showOtpInput && !recaptchaVerified)}
+                        disabled={loading || (!showOtpInput && !recaptchaVerified)}
                         className={`bg-red-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 font-medium text-xs sm:text-sm ${
-                          loading || checkingUser || (!showOtpInput && !recaptchaVerified) ? 'opacity-75 cursor-not-allowed' : ''
+                          loading || (!showOtpInput && !recaptchaVerified) ? 'opacity-75 cursor-not-allowed' : ''
                         }`}
                       >
-                        {checkingUser ? 'Checking...' : (loading ? t('login.sending') : t('login.sendOtp'))}
+                        {loading ? t('login.sending') : t('login.sendOtp')}
                       </button>
                     </div>
-                  ) : showOtpInput && !userExists ? (
-                    <div className="flex w-full justify-between gap-2">
-                      <button 
-                        type="submit" 
-                        disabled={loading}
-                        className={`bg-red-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 font-medium text-xs sm:text-sm ${
-                          loading ? 'opacity-75 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        {loading ? t('login.verifying') : t('login.verifyOtp')}
-                      </button>
-                    </div>
-                  ) : null}
+                  )}
                 </div>
               </form>
             </div>

@@ -12,14 +12,32 @@ export default defineConfig({
         target: 'https://api.gahoishakti.in',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => {
+          console.log('API Request:', path);
+          return path.replace(/^\/api/, '');
+        },
         configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('Proxying API request:', {
+              originalUrl: req.url,
+              targetUrl: proxyReq.path,
+              method: req.method
+            });
+          });
+
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log('Received API response:', {
+              status: proxyRes.statusCode,
+              url: req.url
+            });
+          });
+
           proxy.on('error', (err, req, res) => {
-            console.log('Proxy Error:', err);
+            console.error('API Proxy Error:', err);
             res.writeHead(500, {
               'Content-Type': 'application/json',
             });
-            res.end(JSON.stringify({ error: 'Proxy Error', message: err.message }));
+            res.end(JSON.stringify({ error: 'API Proxy Error', message: err.message }));
           });
         }
       },
@@ -27,10 +45,28 @@ export default defineConfig({
         target: 'https://www.wpsenders.in',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/wpsenders/, '/api'),
+        rewrite: (path) => {
+          console.log('WP Senders Request:', path);
+          return path.replace(/^\/wpsenders/, '/api');
+        },
         configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('Proxying WP Senders request:', {
+              originalUrl: req.url,
+              targetUrl: proxyReq.path,
+              method: req.method
+            });
+          });
+
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log('Received WP Senders response:', {
+              status: proxyRes.statusCode,
+              url: req.url
+            });
+          });
+
           proxy.on('error', (err, req, res) => {
-            console.log('WP Senders Proxy Error:', err);
+            console.error('WP Senders Proxy Error:', err);
             res.writeHead(500, {
               'Content-Type': 'application/json',
             });
