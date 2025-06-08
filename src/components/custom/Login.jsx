@@ -52,7 +52,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     // Log the request details for debugging
     console.log('Sending OTP request for:', mobileNumber);
 
-    const response = await fetch(`${API_BASE}/api/auth/send-whatsapp-otp`, {
+    const response = await fetch(`${API_BASE}/api/send-whatsapp-otp`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
