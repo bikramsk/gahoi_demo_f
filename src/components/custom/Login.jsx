@@ -7,7 +7,8 @@ import { getLoginPageData } from "../../data/loader";
 
 
 console.log('Environment Variables:', {
-  MODE: import.meta.env.MODE
+  MODE: import.meta.env.MODE,
+  RECAPTCHA_SITE_KEY: import.meta.env.VITE_RECAPTCHA_SITE_KEY
 });
 
 // Use direct URLs in production, proxy in development
@@ -22,6 +23,9 @@ const WPSENDERS_BASE = import.meta.env.MODE === 'production'
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
 console.log('Using API BASE:', API_BASE);
+
+// Add this constant at the top level
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6Lc4VVkrAAAAAIxY8hXck_UVMmmIqNxjFWaLqq3u';
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
@@ -614,7 +618,7 @@ const Login = () => {
                     <div className="flex justify-center transform scale-90 sm:scale-100 origin-top">
                       <ReCAPTCHA
                         ref={recaptchaRef}
-                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                        sitekey={RECAPTCHA_SITE_KEY}
                         onChange={handleRecaptchaChange}
                         size="normal"
                       />
