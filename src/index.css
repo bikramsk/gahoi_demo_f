@@ -120,3 +120,12 @@ body {
   }
 }
 
+.grecaptcha-badge { 
+    visibility: hidden !important;
+}
+
+/* Hide reCAPTCHA v2 test message */
+.grecaptcha-logo iframe {
+    opacity: 0;
+}
+

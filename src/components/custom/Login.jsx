@@ -31,7 +31,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const otp = Math.floor(1000 + Math.random() * 9000);
     const formattedNumber = mobileNumber;
     
-    // Send OTP via WhatsApp
+    
     const sendOtpResponse = await fetch(`${WPSENDERS_BASE}/sendMessage`, {
       method: 'POST',
       headers: {
@@ -237,7 +237,7 @@ const Login = () => {
   const [showMpinInput, setShowMpinInput] = useState(false);
   const [verifyingMPIN, setVerifyingMPIN] = useState(false);
 
-  // Load page data
+  
   React.useEffect(() => {
     const loadPageData = async () => {
       try {
@@ -613,12 +613,19 @@ const Login = () => {
                 {!showOtpInput && !userExists && (
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex justify-center transform scale-90 sm:scale-100 origin-top">
-                      <ReCAPTCHA
-                        ref={recaptchaRef}
-                        sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-                        onChange={handleRecaptchaChange}
-                        size="normal"
-                      />
+                      <div style={{ position: 'relative' }}>
+                        <ReCAPTCHA
+                          ref={recaptchaRef}
+                          sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                          onChange={handleRecaptchaChange}
+                          size="normal"
+                        />
+                        <style jsx>{`
+                          .grecaptcha-badge {
+                            visibility: hidden;
+                          }
+                        `}</style>
+                      </div>
                     </div>
                   </div>
                 )}
