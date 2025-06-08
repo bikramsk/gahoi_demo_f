@@ -6,9 +6,19 @@ import { useTranslation } from "react-i18next";
 
 import { getLoginPageData } from "../../data/loader";
 
-const API_URL = import.meta.env.VITE_API_URL;
-const WPSENDERS_URL = import.meta.env.VITE_WPSENDERS_URL;
-const API_TOKEN = import.meta.env.VITE_API_TOKEN;
+// Debug log
+console.log('Environment Variables:', {
+  API_URL: import.meta.env.VITE_API_URL,
+  WPSENDERS_URL: import.meta.env.VITE_WPSENDERS_URL,
+  MODE: import.meta.env.MODE // 'development' or 'production'
+});
+
+const API_URL = import.meta.env.VITE_API_URL || '';
+const WPSENDERS_URL = import.meta.env.VITE_WPSENDERS_URL || '';
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+
+
+const baseApiUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
@@ -17,7 +27,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const otp = Math.floor(1000 + Math.random() * 9000);
     const formattedNumber = mobileNumber;
     
-    // Send OTP via WhatsApp using WP Senders API
+    // Send OTP via WhatsApp
     const sendOtpResponse = await fetch(`${WPSENDERS_URL}/sendMessage`, {
       method: 'POST',
       headers: {
@@ -53,11 +63,11 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       throw new Error(`Invalid response format from WP Senders: ${parseError.message}`);
     }
 
-    // If we got here, the message was scheduled successfully
+    
     console.log('WhatsApp message scheduled successfully');
 
     // Store OTP in backend for verification
-    const storeOtpResponse = await fetch(`${API_URL}/user-mpins/store-otp`, {
+    const storeOtpResponse = await fetch(`${baseApiUrl}/user-mpins/store-otp`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -91,9 +101,10 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
 const checkUserAndMPIN = async (mobileNumber) => {
   try {
-    console.log('Checking user and MPIN for:', mobileNumber);
+    const url = `${baseApiUrl}/user-mpins/check-user-mpin/${mobileNumber}`;
+    console.log('Making API request to:', url);
     
-    const userResponse = await fetch(`${API_URL}/user-mpins/check-user-mpin/${mobileNumber}`, {
+    const userResponse = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -139,7 +150,7 @@ const checkUserAndMPIN = async (mobileNumber) => {
 
 const verifyOTP = async (mobileNumber, otp) => {
   try {
-    const response = await fetch(`${API_URL}/user-mpins/verify-otp`, {
+    const response = await fetch(`${baseApiUrl}/user-mpins/verify-otp`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -166,7 +177,7 @@ const verifyOTP = async (mobileNumber, otp) => {
 
 const verifyMPIN = async (mobileNumber, mpin) => {
   try {
-    const response = await fetch(`${API_URL}/user-mpins/verify-mpin`, {
+    const response = await fetch(`${baseApiUrl}/user-mpins/verify-mpin`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
