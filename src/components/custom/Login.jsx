@@ -10,15 +10,24 @@ import { getLoginPageData } from "../../data/loader";
 console.log('Environment Variables:', {
   API_URL: import.meta.env.VITE_API_URL,
   WPSENDERS_URL: import.meta.env.VITE_WPSENDERS_URL,
-  MODE: import.meta.env.MODE // 'development' or 'production'
+  MODE: import.meta.env.MODE
 });
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-const WPSENDERS_URL = import.meta.env.VITE_WPSENDERS_URL || '';
+// In production, we want to use the full URLs
+const API_URL = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : (import.meta.env.VITE_API_URL || '');
+
+const WPSENDERS_URL = import.meta.env.MODE === 'production'
+  ? 'https://www.wpsenders.in/api'
+  : (import.meta.env.VITE_WPSENDERS_URL || '');
+
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
-
+// Remove trailing slash if present
 const baseApiUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+
+console.log('Using API URL:', baseApiUrl);
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
@@ -129,7 +138,6 @@ const checkUserAndMPIN = async (mobileNumber) => {
     }
 
     try {
-      // Only try to parse as JSON if it doesn't look like HTML
       if (responseText.trim().startsWith('{')) {
         const data = JSON.parse(responseText);
         console.log('Parsed response:', data);
