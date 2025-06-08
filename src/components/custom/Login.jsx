@@ -46,33 +46,74 @@ const checkUserAndMPIN = async (mobileNumber) => {
   }
 };
 
-// Generate a 4-digit OTP
-const generateOTP = () => {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-};
 
+// const sendWhatsAppOTP = async (mobileNumber) => {
+//   try {
+//     // Generate OTP
+//     const otp = generateOTP();
+    
+//     // Store OTP in sessionStorage for verification
+//     sessionStorage.setItem('currentOTP', otp);
+//     sessionStorage.setItem('otpTimestamp', Date.now().toString());
+//     sessionStorage.setItem('otpMobile', mobileNumber);
+
+//     const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
+//       method: 'POST',
+//       headers: {
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/x-www-form-urlencoded'
+//       },
+//       body: new URLSearchParams({
+//         api_key: 'S4YKGP5ZB9Q2J8LIDNM6OACTX',
+//         number: mobileNumber,
+//         message: `Your OTP for Gahoi Shakti login is: ${otp}. Valid for 10 minutes.`,
+//         route: '1',
+//         country_code: '91'
+//       })
+//     });
+
+//     const responseText = await response.text();
+//     console.log('Send OTP Response:', response.status, responseText);
+
+//     if (!response.ok) {
+//       let errorMessage = 'Failed to send OTP';
+//       try {
+//         const errorData = JSON.parse(responseText);
+//         errorMessage = errorData.error?.message || errorData.message || 'Failed to send OTP';
+//       } catch {
+//         errorMessage = responseText || errorMessage;
+//       }
+//       throw new Error(errorMessage);
+//     }
+
+//     let result;
+//     try {
+//       result = JSON.parse(responseText);
+      
+//       // In development, log the OTP
+//       if (import.meta.env.MODE === 'development') {
+//         console.log('Development OTP:', otp);
+//       }
+//     } catch {
+//       result = { success: true, message: 'OTP sent successfully' };
+//     }
+
+//     return result;
+//   } catch (error) {
+//     console.error('Error sending WhatsApp OTP:', error);
+//     throw error;
+//   }
+// };
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    // Generate OTP
-    const otp = generateOTP();
-    
-    // Store OTP in sessionStorage for verification
-    sessionStorage.setItem('currentOTP', otp);
-    sessionStorage.setItem('otpTimestamp', Date.now().toString());
-    sessionStorage.setItem('otpMobile', mobileNumber);
-
-    const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
+    const response = await fetch('/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/json'
       },
-      body: new URLSearchParams({
-        api_key: 'S4YKGP5ZB9Q2J8LIDNM6OACTX',
-        number: mobileNumber,
-        message: `Your OTP for Gahoi Shakti login is: ${otp}. Valid for 10 minutes.`,
-        route: '1',
-        country_code: '91'
+      body: JSON.stringify({
+        mobileNumber: mobileNumber
       })
     });
 
@@ -94,9 +135,12 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     try {
       result = JSON.parse(responseText);
       
-      // In development, log the OTP
-      if (import.meta.env.MODE === 'development') {
-        console.log('Development OTP:', otp);
+      // Store OTP in sessionStorage if we're in development and OTP is returned
+      if (import.meta.env.MODE === 'development' && result.otp) {
+        console.log('Development OTP:', result.otp);
+        sessionStorage.setItem('currentOTP', result.otp);
+        sessionStorage.setItem('otpTimestamp', Date.now().toString());
+        sessionStorage.setItem('otpMobile', mobileNumber);
       }
     } catch {
       result = { success: true, message: 'OTP sent successfully' };
