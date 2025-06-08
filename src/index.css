@@ -120,12 +120,27 @@ body {
   }
 }
 
+/* Hide reCAPTCHA test badge and message */
 .grecaptcha-badge { 
     visibility: hidden !important;
 }
 
-/* Hide reCAPTCHA v2 test message */
-.grecaptcha-logo iframe {
-    opacity: 0;
+iframe[src*="recaptcha"] {
+    opacity: 0.0001 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    position: absolute !important;
+}
+
+.recaptcha-checkbox {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+/* Force hide test message */
+div[style*="z-index: 2000000000"] {
+    display: none !important;
 }
 

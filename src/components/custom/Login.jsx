@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
-
 import { getLoginPageData } from "../../data/loader";
 
 
@@ -613,18 +612,13 @@ const Login = () => {
                 {!showOtpInput && !userExists && (
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex justify-center transform scale-90 sm:scale-100 origin-top">
-                      <div style={{ position: 'relative' }}>
+                      <div className="recaptcha-wrapper" style={{ transform: 'scale(0.9)', transformOrigin: '0 0' }}>
                         <ReCAPTCHA
                           ref={recaptchaRef}
                           sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
                           onChange={handleRecaptchaChange}
                           size="normal"
                         />
-                        <style jsx>{`
-                          .grecaptcha-badge {
-                            visibility: hidden;
-                          }
-                        `}</style>
                       </div>
                     </div>
                   </div>
