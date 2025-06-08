@@ -58,7 +58,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       },
       credentials: 'include',
       body: JSON.stringify({
-        mobileNumber: mobileNumber
+        mobileNumber
       })
     });
 
