@@ -34,16 +34,10 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const otp = Math.floor(1000 + Math.random() * 9000);
     const formattedNumber = mobileNumber;
     
-    console.log('Sending OTP request with:', {
-      api_key: 'S4YKGP5ZB9Q2J8LIDNM6OACTX',
-      number: formattedNumber,
-      route: 1,
-      country_code: 91,
-      otp
-    });
+    console.log('Sending OTP request for:', formattedNumber);
 
-    // In production, use a different approach to handle CORS
-    const sendOtpResponse = await fetch(`${WPSENDERS_BASE}/sendMessage`, {
+    // Send WhatsApp message and ignore response due to CORS
+    await fetch(`${WPSENDERS_BASE}/sendMessage`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -57,10 +51,8 @@ const sendWhatsAppOTP = async (mobileNumber) => {
         country_code: 91
       })
     }).catch(error => {
-      
       if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
         console.log('CORS error occurred, but the message might have been sent');
-     
         return new Response(JSON.stringify({ status: true }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -69,31 +61,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       throw error;
     });
 
-    const responseText = await sendOtpResponse.text();
-    console.log('Raw WP Senders response:', responseText);
-
-    let responseData;
-    try {
-      responseData = JSON.parse(responseText);
-      console.log('Parsed WP Senders response:', responseData);
-      
-      if (!responseData.status) {
-        throw new Error(responseData.message || 'Failed to schedule WhatsApp message');
-      }
-    } catch (parseError) {
-      console.error('Failed to parse WP Senders response as JSON:', parseError);
-      // If we got a CORS error but the message might have been sent
-      if (sendOtpResponse.status === 200) {
-        console.log('Response parsing failed but status was 200, assuming success');
-        responseData = { status: true };
-      } else {
-        throw new Error(`Invalid response format from WP Senders: ${parseError.message}`);
-      }
-    }
-
-    console.log('WhatsApp message scheduled successfully');
-
-    // Store OTP in backend
+    // Store OTP in backend regardless of CORS error
     const storeOtpResponse = await fetch(`${API_BASE}/user-mpins/store-otp`, {
       method: 'POST',
       headers: {
@@ -122,7 +90,8 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     };
   } catch (error) {
     console.error('Error in sendWhatsAppOTP:', error);
-    // If it's a CORS error and we're in production, we'll assume success
+    
+    // For CORS errors in production, continue with the flow
     if (import.meta.env.PROD && error.name === 'TypeError' && error.message === 'Failed to fetch') {
       console.log('Production CORS error - assuming WhatsApp message was sent');
       return {
@@ -292,15 +261,24 @@ const Login = () => {
         }
         setLoading(true);
         try {
-          await sendWhatsAppOTP(formData.mobileNumber);
-          setShowOtpInput(true);
-          setOtpSent(true);
-          setCurrentStep(2); // Move to OTP step
+          const result = await sendWhatsAppOTP(formData.mobileNumber);
+          if (result.success) {
+            setShowOtpInput(true);
+            setOtpSent(true);
+            setCurrentStep(2); // Move to OTP step
+          }
         } catch (error) {
           console.error('Error sending WhatsApp OTP:', error);
-          setErrors({ 
-            mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
-          });
+          // For CORS errors in production, still show OTP input
+          if (import.meta.env.PROD && error.name === 'TypeError' && error.message === 'Failed to fetch') {
+            setShowOtpInput(true);
+            setOtpSent(true);
+            setCurrentStep(2);
+          } else {
+            setErrors({ 
+              mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
+            });
+          }
         } finally {
           setLoading(false);
         }
