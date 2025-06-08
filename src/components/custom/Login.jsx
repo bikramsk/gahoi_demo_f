@@ -113,54 +113,6 @@ const sendWhatsAppOTP = async (mobileNumber) => {
   }
 };
 
-const checkUserAndMPIN = async (mobileNumber) => {
-  try {
-    const url = `${API_BASE}/user-mpins/check-user-mpin/${mobileNumber}`;
-    console.log('Making API request to:', url);
-    
-    const userResponse = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
-      }
-    });
-
-    // Log full response details
-    console.log('User check response:', {
-      status: userResponse.status,
-      statusText: userResponse.statusText,
-      headers: Object.fromEntries(userResponse.headers.entries()),
-      url: userResponse.url
-    });
-
-    const responseText = await userResponse.text();
-    console.log('Raw response body:', responseText);
-
-    if (!userResponse.ok) {
-      throw new Error(`HTTP error! status: ${userResponse.status}, body: ${responseText}`);
-    }
-
-    try {
-      if (responseText.trim().startsWith('{')) {
-        const data = JSON.parse(responseText);
-        console.log('Parsed response:', data);
-        return data;
-      } else {
-        console.error('Received HTML instead of JSON:', responseText.substring(0, 100));
-        throw new Error('Received HTML response instead of JSON');
-      }
-    } catch (parseError) {
-      console.error('Failed to parse response as JSON:', parseError);
-      throw new Error(`Invalid response format from server: ${parseError.message}`);
-    }
-  } catch (error) {
-    console.error('Error checking user and MPIN:', error);
-    throw error;
-  }
-};
-
 const verifyOTP = async (mobileNumber, otp) => {
   try {
     const response = await fetch(`${API_BASE}/user-mpins/verify-otp`, {
@@ -346,34 +298,17 @@ const Login = () => {
       setErrors({});
       
       try {
-        const { exists, hasMPIN } = await checkUserAndMPIN(formData.mobileNumber);
-        
-        if (!exists) {
-          // New user - proceed with WhatsApp OTP
-          try {
-            await sendWhatsAppOTP(formData.mobileNumber);
-            setCurrentStep(2); // Move to OTP step
-          } catch (error) {
-            console.error('Error sending WhatsApp OTP:', error);
-            setErrors({ 
-              mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
-            });
-          }
-        } else {
-          setUserExists(true);
-          if (hasMPIN) {
-            setShowMpinInput(true);
-          } else {
-            try {
-              await sendWhatsAppOTP(formData.mobileNumber);
-              setCurrentStep(2); // Move to OTP step
-            } catch (error) {
-              console.error('Error sending WhatsApp OTP:', error);
-              setErrors({ 
-                mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
-              });
-            }
-          }
+        // For new users, proceed directly with OTP
+        try {
+          await sendWhatsAppOTP(formData.mobileNumber);
+          setShowOtpInput(true);
+          setOtpSent(true);
+          setCurrentStep(2); // Move to OTP step
+        } catch (error) {
+          console.error('Error sending WhatsApp OTP:', error);
+          setErrors({ 
+            mobileNumber: t('login.errors.otpSendFailed') || 'Failed to send OTP. Please try again.'
+          });
         }
       } catch (error) {
         console.error('Error in user check:', error);
