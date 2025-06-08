@@ -49,7 +49,10 @@ const checkUserAndMPIN = async (mobileNumber) => {
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    const response = await fetch(`${API_BASE}/api/send-whatsapp-otp`, {
+    // Log the request details for debugging
+    console.log('Sending OTP request for:', mobileNumber);
+
+    const response = await fetch(`${API_BASE}/api/auth/send-whatsapp-otp`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -58,7 +61,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       },
       credentials: 'include',
       body: JSON.stringify({
-        mobileNumber
+        mobileNumber: mobileNumber.toString() // Ensure it's a string
       })
     });
 
@@ -69,7 +72,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       let errorMessage = 'Failed to send OTP';
       try {
         const errorData = JSON.parse(responseText);
-        errorMessage = errorData.message || errorData.error?.message || errorMessage;
+        errorMessage = errorData.error?.message || errorData.message || 'Failed to send OTP';
       } catch {
         errorMessage = responseText || errorMessage;
       }
@@ -79,6 +82,11 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     let result;
     try {
       result = JSON.parse(responseText);
+      
+      // In development, log the OTP if it's returned
+      if (import.meta.env.MODE === 'development' && result.otp) {
+        console.log('Development OTP:', result.otp);
+      }
     } catch {
       result = { success: true, message: 'OTP sent successfully' };
     }
