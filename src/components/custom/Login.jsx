@@ -17,7 +17,6 @@ const API_BASE = import.meta.env.MODE === 'production'
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6Lc4VVkrAAAAAIxY8hXck_UVMmmIqNxjFWaLqq3u';
-const WHATSAPP_API_TOKEN = import.meta.env.VITE_WHATSAPP_API_TOKEN;
 
 console.log('Using API BASE:', API_BASE);
 
@@ -54,9 +53,6 @@ const generateOTP = () => {
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    // Log the request details for debugging
-    console.log('Sending OTP request for:', mobileNumber);
-
     // Generate OTP
     const otp = generateOTP();
     
@@ -72,7 +68,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: new URLSearchParams({
-        api_key: WHATSAPP_API_TOKEN,
+        api_key: 'S4YKGP5ZB9Q2J8LIDNM6OACTX',
         number: mobileNumber,
         message: `Your OTP for Gahoi Shakti login is: ${otp}. Valid for 10 minutes.`,
         route: '1',
