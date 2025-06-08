@@ -12,7 +12,7 @@ console.log('Environment Variables:', {
 
 
 const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://admin.gahoishakti.in'
+  ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337'; 
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
@@ -54,7 +54,9 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_TOKEN}`
       },
+      credentials: 'include',
       body: JSON.stringify({
         mobileNumber: mobileNumber
       })
