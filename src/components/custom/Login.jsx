@@ -47,113 +47,37 @@ const checkUserAndMPIN = async (mobileNumber) => {
 };
 
 
-// const sendWhatsAppOTP = async (mobileNumber) => {
-//   try {
-//     // Generate OTP
-//     const otp = generateOTP();
-    
-//     // Store OTP in sessionStorage for verification
-//     sessionStorage.setItem('currentOTP', otp);
-//     sessionStorage.setItem('otpTimestamp', Date.now().toString());
-//     sessionStorage.setItem('otpMobile', mobileNumber);
 
-//     const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
-//       method: 'POST',
-//       headers: {
-//         'Accept': 'application/json',
-//         'Content-Type': 'application/x-www-form-urlencoded'
-//       },
-//       body: new URLSearchParams({
-//         api_key: 'S4YKGP5ZB9Q2J8LIDNM6OACTX',
-//         number: mobileNumber,
-//         message: `Your OTP for Gahoi Shakti login is: ${otp}. Valid for 10 minutes.`,
-//         route: '1',
-//         country_code: '91'
-//       })
-//     });
-
-//     const responseText = await response.text();
-//     console.log('Send OTP Response:', response.status, responseText);
-
-//     if (!response.ok) {
-//       let errorMessage = 'Failed to send OTP';
-//       try {
-//         const errorData = JSON.parse(responseText);
-//         errorMessage = errorData.error?.message || errorData.message || 'Failed to send OTP';
-//       } catch {
-//         errorMessage = responseText || errorMessage;
-//       }
-//       throw new Error(errorMessage);
-//     }
-
-//     let result;
-//     try {
-//       result = JSON.parse(responseText);
-      
-//       // In development, log the OTP
-//       if (import.meta.env.MODE === 'development') {
-//         console.log('Development OTP:', otp);
-//       }
-//     } catch {
-//       result = { success: true, message: 'OTP sent successfully' };
-//     }
-
-//     return result;
-//   } catch (error) {
-//     console.error('Error sending WhatsApp OTP:', error);
-//     throw error;
-//   }
-// };
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    const response = await fetch('/api/send-whatsapp-otp', {
+    const response = await fetch('https://api.gahoishakti.in/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        mobileNumber: mobileNumber
-      })
+      body: JSON.stringify({ mobileNumber })
     });
 
-    const responseText = await response.text();
-    console.log('Send OTP Response:', response.status, responseText);
-
+    const data = await response.json();
     if (!response.ok) {
-      let errorMessage = 'Failed to send OTP';
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.error?.message || errorData.message || 'Failed to send OTP';
-      } catch {
-        errorMessage = responseText || errorMessage;
-      }
-      throw new Error(errorMessage);
+      throw new Error(data.message || 'Failed to send OTP');
     }
 
-    let result;
-    try {
-      result = JSON.parse(responseText);
-      
-      // Store OTP in sessionStorage if we're in development and OTP is returned
-      if (import.meta.env.MODE === 'development' && result.otp) {
-        console.log('Development OTP:', result.otp);
-        sessionStorage.setItem('currentOTP', result.otp);
-        sessionStorage.setItem('otpTimestamp', Date.now().toString());
-        sessionStorage.setItem('otpMobile', mobileNumber);
-      }
-    } catch {
-      result = { success: true, message: 'OTP sent successfully' };
+    // Store OTP in sessionStorage if we're in development and OTP is returned
+    if (import.meta.env.MODE === 'development' && data.otp) {
+      console.log('Development OTP:', data.otp);
+      sessionStorage.setItem('currentOTP', data.otp);
+      sessionStorage.setItem('otpTimestamp', Date.now().toString());
+      sessionStorage.setItem('otpMobile', mobileNumber);
     }
 
-    return result;
+    return data;
   } catch (error) {
-    console.error('Error sending WhatsApp OTP:', error);
+    console.error('Error sending OTP:', error);
     throw error;
   }
 };
 
-// Updated OTP verification function
 const verifyOTP = async (mobileNumber, otp) => {
   try {
     // Get stored OTP details
