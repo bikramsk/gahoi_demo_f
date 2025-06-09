@@ -17,28 +17,41 @@ const UserProfile = () => {
         const token = localStorage.getItem('token');
         const mobileNumber = localStorage.getItem('verifiedMobile');
 
+        // Debug logs
+        console.log('Token:', token ? 'Present' : 'Missing');
+        console.log('Mobile Number:', mobileNumber || 'Missing');
+        console.log('API Base URL:', API_BASE);
+
         if (!token || !mobileNumber) {
+          console.log('Missing credentials - redirecting to login');
           throw new Error('Please login first');
         }
 
-        const response = await fetch(
-          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}`;
+        console.log('Fetching from URL:', url);
 
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log('Response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+          const errorText = await response.text();
+          console.error('API Error:', errorText);
+          throw new Error(`Failed to fetch user data: ${response.status} ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('API Response:', data);
+
         if (data.data && data.data.length > 0) {
           setUserData(data.data[0].attributes);
         } else {
+          console.log('No user data found - redirecting to registration');
           navigate('/registration', { 
             state: { 
               mobileNumber,
@@ -47,6 +60,7 @@ const UserProfile = () => {
           });
         }
       } catch (error) {
+        console.error('Profile Error:', error);
         setError(error.message);
       } finally {
         setLoading(false);
