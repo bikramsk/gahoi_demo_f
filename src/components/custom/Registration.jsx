@@ -4981,8 +4981,8 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
   // Inside the RegistrationForm component, add this function after the imports
   const openWhatsAppShare = (mobileNumber) => {
     if (mobileNumber?.length === 10) {
-      const message = 'Join our Gahoi community! Register here:';
-      const url = window.location.origin + '/register';
+      const message = 'Join our Gahoi community:';
+      const url = window.location.origin + '/login';
       window.open(`https://wa.me/91${mobileNumber}?text=${encodeURIComponent(message + ' ' + url)}`, '_blank');
     }
   };
