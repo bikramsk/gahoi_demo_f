@@ -20,21 +20,25 @@ const UserProfile = () => {
         // Debug logs
         console.log('Token:', token ? 'Present' : 'Missing');
         console.log('Mobile Number:', mobileNumber || 'Missing');
-        console.log('API Base URL:', API_BASE);
 
         if (!token || !mobileNumber) {
           console.log('Missing credentials - redirecting to login');
-          throw new Error('Please login first');
+          navigate('/login');
+          return;
         }
 
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}`;
         console.log('Fetching from URL:', url);
 
+      
         const response = await fetch(url, {
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': token,
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
+          credentials: 'include'
         });
 
         console.log('Response status:', response.status);
@@ -42,11 +46,20 @@ const UserProfile = () => {
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API Error:', errorText);
+          
+          if (response.status === 401) {
+          
+            localStorage.removeItem('token');
+            localStorage.removeItem('verifiedMobile');
+            navigate('/login');
+            return;
+          }
+          
           throw new Error(`Failed to fetch user data: ${response.status} ${errorText}`);
         }
 
         const data = await response.json();
-        console.log('API Response:', data);
+        console.log('API Response data:', data);
 
         if (data.data && data.data.length > 0) {
           setUserData(data.data[0].attributes);
@@ -62,6 +75,11 @@ const UserProfile = () => {
       } catch (error) {
         console.error('Profile Error:', error);
         setError(error.message);
+        
+        
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       } finally {
         setLoading(false);
       }
