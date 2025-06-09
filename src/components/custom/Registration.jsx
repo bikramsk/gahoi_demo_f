@@ -143,11 +143,19 @@ const GUJARAT_CHAURASI_MAPPING = {
 
 const RegistrationForm = () => {
   const location = useLocation();
+  console.log("Location state received:", location.state);
+  
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState({
-    ...INITIAL_FORM_DATA,
-    mobileNumber: location.state?.mobileNumber || "",
-    workCategory: "professional",
+  const [formData, setFormData] = useState(() => {
+    // Get mobile number from location state or localStorage
+    const mobileNumber = location.state?.mobileNumber || localStorage.getItem('verifiedMobile') || "";
+    console.log("Setting initial mobile number:", mobileNumber);
+    
+    return {
+      ...INITIAL_FORM_DATA,
+      mobileNumber: mobileNumber,
+      workCategory: "professional",
+    };
   });
   const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
   const [progress, setProgress] = useState(50);
@@ -4993,10 +5001,13 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
 
   // Update useEffect for mobile number auto-fill
   useEffect(() => {
-    if (location.state?.mobileNumber) {
+    console.log("useEffect triggered with location state:", location.state);
+    const mobileNumber = location.state?.mobileNumber || localStorage.getItem('verifiedMobile');
+    if (mobileNumber) {
+      console.log("Setting mobile number from location/storage:", mobileNumber);
       setFormData(prev => ({
         ...prev,
-        mobileNumber: location.state.mobileNumber,
+        mobileNumber: mobileNumber,
       }));
     }
   }, [location.state]);

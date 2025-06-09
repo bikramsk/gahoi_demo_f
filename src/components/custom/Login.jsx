@@ -489,6 +489,7 @@ const Login = () => {
         try {
           await createMpin(mpinData.mpin);
         
+          console.log("Navigating to registration after MPIN creation with mobile:", formData.mobileNumber);
           navigate('/registration', { 
             state: { 
               mobileNumber: formData.mobileNumber,
@@ -582,7 +583,8 @@ const Login = () => {
             setShowMpinCreation(true);
             setCurrentStep(3);
           } else {
-            // User already has MPIN, go to registration with mobile number
+            // User already has MPIN, go to registration
+            console.log("Navigating to registration with mobile:", formData.mobileNumber);
             navigate('/registration', { 
               state: { 
                 mobileNumber: formData.mobileNumber,
