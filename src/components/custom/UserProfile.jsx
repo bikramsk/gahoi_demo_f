@@ -25,7 +25,7 @@ const UserProfile = () => {
           return;
         }
 
-        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=deep`;
+        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information`;
         console.log('API URL:', url);
         console.log('API Token available:', !!API_TOKEN);
 
