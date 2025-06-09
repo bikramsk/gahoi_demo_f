@@ -1217,7 +1217,7 @@ const RegistrationForm = () => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
           },
           body: formData,
         }
@@ -1267,13 +1267,18 @@ const RegistrationForm = () => {
         displayPictureId
       );
 
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ data: strapiData }),
         }
@@ -3830,7 +3835,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
 
 
 
-    // Bundelkhand Regional Assembly cases
+// Bundelkhand Regional Assembly cases
     if (formData.regionalAssembly === "Bundelkhand Regional Assembly") {
       if (formData.state === "Uttar Pradesh" && formData.district === "Jhansi") {
         return ["Jhansi"];
