@@ -45,9 +45,21 @@ const UserProfile = () => {
         console.log('Found user data:', result);
 
         if (result.data && result.data.length > 0) {
+          // Get the first record and its attributes
           const userRecord = result.data[0];
           console.log('Using user record:', userRecord);
-          setUserData(userRecord.attributes);
+          
+          if (!userRecord.attributes) {
+            console.error('No attributes found in user record:', userRecord);
+            throw new Error('Invalid user data format');
+          }
+
+          // Set the user data including the registration code
+          setUserData({
+            ...userRecord.attributes,
+            registration_code: userRecord.attributes.registration_code || 'N/A',
+            documentId: userRecord.attributes.documentId || userRecord.id
+          });
         } else {
           console.log('No registration found for mobile:', mobileNumber);
           navigate('/registration', { 
@@ -96,7 +108,10 @@ const UserProfile = () => {
     );
   }
 
-  if (!userData) {
+  // Debug log to check userData
+  console.log('Current userData state:', userData);
+
+  if (!userData || !userData.personal_information) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md">
