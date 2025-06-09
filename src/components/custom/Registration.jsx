@@ -5134,10 +5134,3 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
 };
 
 export default RegistrationForm;
-
-
-
-
-
-
-

@@ -52,11 +52,11 @@ const UserProfile = () => {
             const userRecord = result.data[0];
             console.log('Raw user record:', userRecord);
             
-            // Transform the data based on the exact API response structure
+            // Transform the data based on the flat API response structure
             const transformedData = {
               personal_information: {
-                full_name: userRecord.attributes?.full_name || '',
-                mobile_number: userRecord.attributes?.mobile_number || '',
+                full_name: userRecord.attributes?.name || '',
+                mobile_number: userRecord.attributes?.mobileNumber || '',
                 email_address: userRecord.attributes?.email || '',
                 village: userRecord.attributes?.village || '',
                 Gender: userRecord.attributes?.gender || '',
@@ -65,28 +65,27 @@ const UserProfile = () => {
                 display_picture: userRecord.attributes?.display_picture || null
               },
               family_details: {
-                father_name: userRecord.attributes?.father_name || '',
-                father_mobile: userRecord.attributes?.father_mobile || '',
-                mother_name: userRecord.attributes?.mother_name || '',
-                mother_mobile: userRecord.attributes?.mother_mobile || '',
-                spouse_name: userRecord.attributes?.spouse_name || '',
-                spouse_mobile: userRecord.attributes?.spouse_mobile || '',
-                phone_number: userRecord.attributes?.phone_number || '',
+                father_name: userRecord.attributes?.familyDetails?.[0]?.name || '',
+                father_mobile: userRecord.attributes?.familyDetails?.[0]?.mobileNumber || '',
+                mother_name: userRecord.attributes?.familyDetails?.[1]?.name || '',
+                mother_mobile: userRecord.attributes?.familyDetails?.[1]?.mobileNumber || '',
+                spouse_name: userRecord.attributes?.familyDetails?.[2]?.name || '',
+                spouse_mobile: userRecord.attributes?.familyDetails?.[2]?.mobileNumber || '',
                 gotra: userRecord.attributes?.gotra || '',
                 aakna: userRecord.attributes?.aakna || '',
-                siblingDetails: userRecord.attributes?.siblingDetails || []
+                siblingDetails: userRecord.attributes?.familyDetails?.filter(member => member.relation === 'Sibling') || []
               },
               biographical_details: {
                 manglik_status: userRecord.attributes?.manglik || '',
                 Grah: userRecord.attributes?.grah || '',
                 Handicap: userRecord.attributes?.handicap || '',
-                is_married: userRecord.attributes?.isMarried || '',
+                is_married: userRecord.attributes?.isMarried ? 'Married' : 'Unmarried',
                 marriage_to_another_caste: userRecord.attributes?.marriageToAnotherCaste || ''
               },
               work_information: {
                 occupation: userRecord.attributes?.occupation || '',
-                company_name: userRecord.attributes?.company_name || userRecord.attributes?.companyName || '',
-                work_area: userRecord.attributes?.work_area || userRecord.attributes?.workArea || '',
+                company_name: userRecord.attributes?.companyName || '',
+                work_area: userRecord.attributes?.workArea || '',
                 industrySector: userRecord.attributes?.industrySector || ''
               },
               additional_details: {
@@ -105,13 +104,11 @@ const UserProfile = () => {
                   SubLocalPanchayat: userRecord.attributes?.subLocalPanchayat || ''
                 }
               },
-              child_name: (userRecord.attributes?.familyDetails || [])
-                .filter(member => member?.relation === "Child")
-                .map(child => ({
-                  child_name: child.name || '',
-                  gender: child.gender || '',
-                  phone_number: child.mobileNumber || ''
-                })),
+              child_name: userRecord.attributes?.familyDetails?.filter(member => member.relation === 'Child')?.map(child => ({
+                child_name: child.name || '',
+                gender: child.gender || '',
+                phone_number: child.mobileNumber || ''
+              })) || [],
               your_suggestions: {
                 suggestions: userRecord.attributes?.suggestions || ''
               },
