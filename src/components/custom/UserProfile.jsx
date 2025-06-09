@@ -17,54 +17,40 @@ const UserProfile = () => {
         const token = localStorage.getItem('token');
         const mobileNumber = localStorage.getItem('verifiedMobile');
 
-        // Debug logs
         console.log('Token:', token ? 'Present' : 'Missing');
         console.log('Mobile Number:', mobileNumber || 'Missing');
 
         if (!token || !mobileNumber) {
-          console.log('Missing credentials - redirecting to login');
           navigate('/login');
           return;
         }
 
+        // This URL filters to get only the data for the logged-in user's mobile number
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}`;
-        console.log('Fetching from URL:', url);
+        console.log('Fetching user data for mobile:', mobileNumber);
 
-      
         const response = await fetch(url, {
           method: 'GET',
           headers: {
-            'Authorization': token,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          credentials: 'include'
+          }
         });
 
-        console.log('Response status:', response.status);
-        
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API Error:', errorText);
-          
-          if (response.status === 401) {
-          
-            localStorage.removeItem('token');
-            localStorage.removeItem('verifiedMobile');
-            navigate('/login');
-            return;
-          }
-          
-          throw new Error(`Failed to fetch user data: ${response.status} ${errorText}`);
+          throw new Error('Failed to fetch user data');
         }
 
-        const data = await response.json();
-        console.log('API Response data:', data);
+        const result = await response.json();
+        console.log('Found user data:', result);
 
-        if (data.data && data.data.length > 0) {
-          setUserData(data.data[0].attributes);
+        if (result.data && result.data.length > 0) {
+          // filtering by mobile number
+          const userRecord = result.data[0];
+          console.log('Using user record:', userRecord);
+          setUserData(userRecord.attributes);
         } else {
-          console.log('No user data found - redirecting to registration');
+          console.log('No registration found for mobile:', mobileNumber);
           navigate('/registration', { 
             state: { 
               mobileNumber,
@@ -76,6 +62,10 @@ const UserProfile = () => {
         console.error('Profile Error:', error);
         setError(error.message);
         
+        if (error.message.includes('401')) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('verifiedMobile');
+        }
         
         setTimeout(() => {
           navigate('/login');
@@ -114,7 +104,20 @@ const UserProfile = () => {
   }
 
   if (!userData) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
+          <p className="text-gray-600">Please complete your registration first.</p>
+          <button
+            onClick={() => navigate('/registration')}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Go to Registration
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
