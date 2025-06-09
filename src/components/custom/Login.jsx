@@ -262,17 +262,17 @@ const Login = () => {
           setUserExists(result.exists);
           setUserHasMPIN(result.hasMPIN);
           
-          // If user exists and has MPIN, show MPIN option
+        
           if (result.exists && result.hasMPIN) {
-            // User can choose between OTP or MPIN
-            setAuthMode('mpin'); // Default to MPIN for existing users
+         
+            setAuthMode('mpin'); 
           } else {
-            // New user or user without MPIN - use OTP
+           
             setAuthMode('otp');
           }
         } catch (error) {
           console.error('Error checking user:', error);
-          // Default to OTP if check fails
+         
           setAuthMode('otp');
         }
       }

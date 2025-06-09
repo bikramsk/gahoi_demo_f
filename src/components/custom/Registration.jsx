@@ -1217,7 +1217,7 @@ const RegistrationForm = () => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
           body: formData,
         }
@@ -1273,7 +1273,7 @@ const RegistrationForm = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
           body: JSON.stringify({ data: strapiData }),
         }
