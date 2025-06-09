@@ -55,6 +55,10 @@ const UserProfile = () => {
               mobile_number: userRecord.attributes?.personal_information?.mobile_number || '',
               email_address: userRecord.attributes?.personal_information?.email_address || '',
               village: userRecord.attributes?.personal_information?.village || '',
+              Gender: userRecord.attributes?.personal_information?.Gender || '',
+              nationality: userRecord.attributes?.personal_information?.nationality || '',
+              is_gahoi: userRecord.attributes?.personal_information?.is_gahoi || '',
+              display_picture: userRecord.attributes?.personal_information?.display_picture || null,
             },
             family_details: {
               father_name: userRecord.attributes?.family_details?.father_name || '',
@@ -80,7 +84,15 @@ const UserProfile = () => {
               date_of_birth: userRecord.attributes?.additional_details?.date_of_birth || '',
               higher_education: userRecord.attributes?.additional_details?.higher_education || '',
               current_address: userRecord.attributes?.additional_details?.current_address || '',
-              regional_information: userRecord.attributes?.additional_details?.regional_information || {},
+              regional_information: {
+                RegionalAssembly: userRecord.attributes?.additional_details?.regional_information?.RegionalAssembly || '',
+                LocalPanchayatName: userRecord.attributes?.additional_details?.regional_information?.LocalPanchayatName || '',
+                LocalPanchayat: userRecord.attributes?.additional_details?.regional_information?.LocalPanchayat || '',
+                SubLocalPanchayat: userRecord.attributes?.additional_details?.regional_information?.SubLocalPanchayat || '',
+                State: userRecord.attributes?.additional_details?.regional_information?.State || '',
+                city: userRecord.attributes?.additional_details?.regional_information?.city || '',
+                district: userRecord.attributes?.additional_details?.regional_information?.district || ''
+              },
             },
             registration_code: userRecord.attributes?.registration_code || '',
             documentId: userRecord.id || '',
@@ -187,6 +199,30 @@ const UserProfile = () => {
                   <label className="block text-sm font-medium text-gray-600">Village</label>
                   <p className="mt-1 text-gray-800">{userData.personal_information?.village || 'N/A'}</p>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Gender</label>
+                  <p className="mt-1 text-gray-800">{userData.personal_information?.Gender || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Nationality</label>
+                  <p className="mt-1 text-gray-800">{userData.personal_information?.nationality || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Gahoi Community Member</label>
+                  <p className="mt-1 text-gray-800">{userData.personal_information?.is_gahoi || 'N/A'}</p>
+                </div>
+                {userData.personal_information?.display_picture && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-600">Profile Picture</label>
+                    <div className="mt-2">
+                      <img 
+                        src={`${API_BASE}${userData.personal_information.display_picture.url}`}
+                        alt="Profile"
+                        className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -377,13 +413,37 @@ const UserProfile = () => {
             </section>
 
             {/* Regional Information */}
-            <section>
+            <section className="mb-8">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Regional Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">State</label>
+                  <p className="mt-1 text-gray-800">
+                    {userData.additional_details?.regional_information?.State || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">District</label>
+                  <p className="mt-1 text-gray-800">
+                    {userData.additional_details?.regional_information?.district || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">City</label>
+                  <p className="mt-1 text-gray-800">
+                    {userData.additional_details?.regional_information?.city || 'N/A'}
+                  </p>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-600">Regional Assembly</label>
                   <p className="mt-1 text-gray-800">
                     {userData.additional_details?.regional_information?.RegionalAssembly || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Local Panchayat Name</label>
+                  <p className="mt-1 text-gray-800">
+                    {userData.additional_details?.regional_information?.LocalPanchayatName || 'N/A'}
                   </p>
                 </div>
                 <div>
@@ -393,9 +453,9 @@ const UserProfile = () => {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600">State</label>
+                  <label className="block text-sm font-medium text-gray-600">Sub Local Panchayat</label>
                   <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.State || 'N/A'}
+                    {userData.additional_details?.regional_information?.SubLocalPanchayat || 'N/A'}
                   </p>
                 </div>
               </div>
