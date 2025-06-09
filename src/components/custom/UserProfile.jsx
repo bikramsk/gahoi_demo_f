@@ -56,6 +56,19 @@ const UserProfile = () => {
               email_address: userRecord.attributes?.personal_information?.email_address || '',
               village: userRecord.attributes?.personal_information?.village || '',
             },
+            family_details: {
+              father_name: userRecord.attributes?.family_details?.father_name || '',
+              father_mobile: userRecord.attributes?.family_details?.father_mobile || '',
+              mother_name: userRecord.attributes?.family_details?.mother_name || '',
+              mother_mobile: userRecord.attributes?.family_details?.mother_mobile || '',
+              spouse_name: userRecord.attributes?.family_details?.spouse_name || '',
+              spouse_mobile: userRecord.attributes?.family_details?.spouse_mobile || '',
+              gotra: userRecord.attributes?.family_details?.gotra || '',
+              aakna: userRecord.attributes?.family_details?.aakna || '',
+              siblingDetails: userRecord.attributes?.family_details?.siblingDetails || [],
+            },
+            child_name: userRecord.attributes?.child_name || [],
+            biographical_details: userRecord.attributes?.biographical_details || {},
             work_information: {
               occupation: userRecord.attributes?.work_information?.occupation || '',
               company_name: userRecord.attributes?.work_information?.company_name || '',
@@ -173,6 +186,146 @@ const UserProfile = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-600">Village</label>
                   <p className="mt-1 text-gray-800">{userData.personal_information?.village || 'N/A'}</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Family Details */}
+            <section className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Family Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Father's Name</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.father_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Father's Mobile</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.father_mobile || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Mother's Name</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.mother_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Mother's Mobile</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.mother_mobile || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Spouse's Name</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.spouse_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Spouse's Mobile</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.spouse_mobile || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Gotra</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.gotra || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Aakna</label>
+                  <p className="mt-1 text-gray-800">{userData.family_details?.aakna || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Siblings Information */}
+              {userData.family_details?.siblingDetails?.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Siblings</h3>
+                  <div className="space-y-4">
+                    {userData.family_details.siblingDetails.map((sibling, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Name</label>
+                            <p className="mt-1 text-gray-800">{sibling.sibling_name || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Gender</label>
+                            <p className="mt-1 text-gray-800">{sibling.gender || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Phone</label>
+                            <p className="mt-1 text-gray-800">{sibling.phone_number || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Age</label>
+                            <p className="mt-1 text-gray-800">{sibling.age || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Education</label>
+                            <p className="mt-1 text-gray-800">{sibling.education || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Occupation</label>
+                            <p className="mt-1 text-gray-800">{sibling.occupation || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Marital Status</label>
+                            <p className="mt-1 text-gray-800">{sibling.marital_status || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Relation</label>
+                            <p className="mt-1 text-gray-800">{sibling.sibling_relation || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Children Information */}
+              {userData.child_name?.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Children</h3>
+                  <div className="space-y-4">
+                    {userData.child_name.map((child, index) => (
+                      <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Name</label>
+                            <p className="mt-1 text-gray-800">{child.child_name || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Gender</label>
+                            <p className="mt-1 text-gray-800">{child.gender || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Phone</label>
+                            <p className="mt-1 text-gray-800">{child.phone_number || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* Biographical Details */}
+            <section className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Biographical Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Manglik Status</label>
+                  <p className="mt-1 text-gray-800">{userData.biographical_details?.manglik_status || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Grah</label>
+                  <p className="mt-1 text-gray-800">{userData.biographical_details?.Grah || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Handicap</label>
+                  <p className="mt-1 text-gray-800">{userData.biographical_details?.Handicap || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Marital Status</label>
+                  <p className="mt-1 text-gray-800">{userData.biographical_details?.is_married || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">Marriage Status</label>
+                  <p className="mt-1 text-gray-800">{userData.biographical_details?.marriage_to_another_caste || 'N/A'}</p>
                 </div>
               </div>
             </section>
