@@ -5,6 +5,8 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+
 const UserProfile = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
@@ -14,25 +16,23 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
         const mobileNumber = localStorage.getItem('verifiedMobile');
 
-        console.log('Token:', token ? 'Present' : 'Missing');
         console.log('Mobile Number:', mobileNumber || 'Missing');
 
-        if (!token || !mobileNumber) {
+        if (!mobileNumber) {
+          console.log('No mobile number found - redirecting to login');
           navigate('/login');
           return;
         }
 
-        // This URL filters to get only the data for the logged-in user's mobile number
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}`;
         console.log('Fetching user data for mobile:', mobileNumber);
 
         const response = await fetch(url, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${API_TOKEN}`,
             'Content-Type': 'application/json',
           }
         });
@@ -45,7 +45,6 @@ const UserProfile = () => {
         console.log('Found user data:', result);
 
         if (result.data && result.data.length > 0) {
-          // filtering by mobile number
           const userRecord = result.data[0];
           console.log('Using user record:', userRecord);
           setUserData(userRecord.attributes);
@@ -61,12 +60,6 @@ const UserProfile = () => {
       } catch (error) {
         console.error('Profile Error:', error);
         setError(error.message);
-        
-        if (error.message.includes('401')) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('verifiedMobile');
-        }
-        
         setTimeout(() => {
           navigate('/login');
         }, 3000);
