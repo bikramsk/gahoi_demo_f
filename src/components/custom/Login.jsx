@@ -80,24 +80,20 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
 const verifyOTP = async (mobileNumber, otp) => {
   try {
-    // Get stored OTP details
-    const storedOTP = sessionStorage.getItem('currentOTP');
-    const storedMobile = sessionStorage.getItem('otpMobile');
-    const timestamp = parseInt(sessionStorage.getItem('otpTimestamp') || '0');
-    
-    // Check if OTP is expired (10 minutes)
-    const isExpired = Date.now() - timestamp > 10 * 60 * 1000;
-    
-    if (isExpired) {
-      throw new Error('OTP has expired. Please request a new one.');
-    }
+    const response = await fetch('https://api.gahoishakti.in/api/verify-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        mobileNumber,
+        otp
+      })
+    });
 
-    if (!storedOTP || storedMobile !== mobileNumber) {
-      throw new Error('Invalid OTP request. Please request a new OTP.');
-    }
-
-    if (storedOTP !== otp) {
-      throw new Error('Invalid OTP. Please try again.');
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error?.message || data.message || 'Failed to verify OTP');
     }
 
     // Clear OTP data after successful verification
@@ -105,11 +101,7 @@ const verifyOTP = async (mobileNumber, otp) => {
     sessionStorage.removeItem('otpTimestamp');
     sessionStorage.removeItem('otpMobile');
 
-    // Return success
-    return {
-      success: true,
-      message: 'OTP verified successfully'
-    };
+    return data;
   } catch (error) {
     console.error('Error verifying OTP:', error);
     throw error;
