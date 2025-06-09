@@ -488,8 +488,14 @@ const Login = () => {
         setLoading(true);
         try {
           await createMpin(mpinData.mpin);
-          // After MPIN creation, navigate to registration
-          navigate('/registration');
+        
+          navigate('/registration', { 
+            state: { 
+              mobileNumber: formData.mobileNumber,
+              fromLogin: true,
+              processSteps: processSteps 
+            } 
+          });
         } catch (error) {
           setErrors({
             mpin: error.message || 'Failed to create MPIN'
@@ -576,8 +582,14 @@ const Login = () => {
             setShowMpinCreation(true);
             setCurrentStep(3);
           } else {
-            // User already has MPIN, go to dashboard
-            navigate('/registration');
+            // User already has MPIN, go to registration with mobile number
+            navigate('/registration', { 
+              state: { 
+                mobileNumber: formData.mobileNumber,
+                fromLogin: true,
+                processSteps: processSteps 
+              } 
+            });
           }
         } else {
           throw new Error(response.message || 'Invalid OTP');
