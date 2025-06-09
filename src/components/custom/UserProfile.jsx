@@ -25,7 +25,7 @@ const UserProfile = () => {
           return;
         }
 
-        const url = `${API_BASE}/api/registration-pages?filters[mobileNumber]=${mobileNumber}&populate=*`;
+        const url = `${API_BASE}/api/registration-pages?filters[mobile_number]=${mobileNumber}&populate=*`;
         console.log('Fetching user data for mobile:', mobileNumber);
 
         const response = await fetch(url, {
@@ -47,72 +47,61 @@ const UserProfile = () => {
           const userRecord = result.data[0];
           console.log('Raw user record:', userRecord);
           
-          // Transform the data using the attributes directly
+          // Transform the data based on the actual structure
           const transformedData = {
             personal_information: {
-              full_name: userRecord.attributes.name,
-              mobile_number: userRecord.attributes.mobileNumber,
-              email_address: userRecord.attributes.email,
-              village: userRecord.attributes.village,
-              Gender: userRecord.attributes.gender,
-              nationality: userRecord.attributes.nationality,
-              is_gahoi: userRecord.attributes.isGahoi,
-              display_picture: userRecord.attributes.display_picture
+              full_name: userRecord.full_name || '',
+              mobile_number: userRecord.mobile_number || '',
+              email_address: userRecord.email || '',
+              village: userRecord.village || '',
+              Gender: userRecord.gender || '',
+              nationality: userRecord.nationality || '',
+              is_gahoi: userRecord.isGahoi || '',
+              display_picture: userRecord.display_picture
             },
             family_details: {
-              father_name: userRecord.attributes.familyDetails?.[0]?.name,
-              father_mobile: userRecord.attributes.familyDetails?.[0]?.mobileNumber,
-              mother_name: userRecord.attributes.familyDetails?.[1]?.name,
-              mother_mobile: userRecord.attributes.familyDetails?.[1]?.mobileNumber,
-              spouse_name: userRecord.attributes.familyDetails?.[2]?.name,
-              spouse_mobile: userRecord.attributes.familyDetails?.[2]?.mobileNumber,
-              gotra: userRecord.attributes.gotra,
-              aakna: userRecord.attributes.aakna,
-              siblingDetails: userRecord.attributes.familyDetails
-                ?.filter(f => f.relation === 'Sibling')
-                ?.map(s => ({
-                  sibling_name: s.name,
-                  gender: s.gender,
-                  phone_number: s.mobileNumber,
-                  age: s.age,
-                  education: s.education,
-                  occupation: s.occupation,
-                  marital_status: s.maritalStatus,
-                  sibling_relation: s.relation
-                }))
+              father_name: userRecord.father_name || '',
+              father_mobile: userRecord.phone_number || '',
+              mother_name: userRecord.mother_name || '',
+              mother_mobile: userRecord.mother_mobile || '',
+              spouse_name: userRecord.spouse_name || '',
+              spouse_mobile: userRecord.spouse_mobile || '',
+              gotra: userRecord.gotra || '',
+              aakna: userRecord.aakna || '',
+              siblingDetails: []
             },
             biographical_details: {
-              manglik_status: userRecord.attributes.manglik,
-              Grah: userRecord.attributes.grah,
-              Handicap: userRecord.attributes.handicap,
-              is_married: userRecord.attributes.isMarried ? 'Married' : 'Unmarried',
-              marriage_to_another_caste: userRecord.attributes.marriageToAnotherCaste
+              manglik_status: userRecord.manglik_status || '',
+              Grah: userRecord.Grah || '',
+              Handicap: userRecord.Handicap || '',
+              is_married: userRecord.is_married || '',
+              marriage_to_another_caste: userRecord.marriage_to_another_caste || ''
             },
             work_information: {
-              occupation: userRecord.attributes.occupation,
-              company_name: userRecord.attributes.companyName,
-              work_area: userRecord.attributes.workArea,
-              industrySector: userRecord.attributes.industrySector,
-              businessSize: userRecord.attributes.businessSize,
-              workType: userRecord.attributes.workType,
-              employmentType: userRecord.attributes.employmentType
+              occupation: userRecord.occupation || '',
+              company_name: userRecord.company_name || '',
+              work_area: userRecord.work_area || '',
+              industrySector: userRecord.industrySector || '',
+              businessSize: userRecord.businessSize || '',
+              workType: userRecord.workType || '',
+              employmentType: userRecord.employmentType || ''
             },
             additional_details: {
-              blood_group: userRecord.attributes.bloodGroup,
-              date_of_birth: userRecord.attributes.birthDate,
-              higher_education: userRecord.attributes.education,
-              current_address: userRecord.attributes.currentAddress,
+              blood_group: userRecord.blood_group || '',
+              date_of_birth: userRecord.date_of_birth || '',
+              higher_education: userRecord.education || '',
+              current_address: userRecord.current_address || '',
               regional_information: {
-                State: userRecord.attributes.state,
-                district: userRecord.attributes.district,
-                city: userRecord.attributes.city,
-                RegionalAssembly: userRecord.attributes.regionalAssembly,
-                LocalPanchayatName: userRecord.attributes.localPanchayatName,
-                LocalPanchayat: userRecord.attributes.localPanchayat,
-                SubLocalPanchayat: userRecord.attributes.subLocalPanchayat
+                State: userRecord.state || '',
+                district: userRecord.district || '',
+                city: userRecord.city || '',
+                RegionalAssembly: userRecord.regionalAssembly || '',
+                LocalPanchayatName: userRecord.localPanchayatName || '',
+                LocalPanchayat: userRecord.localPanchayat || '',
+                SubLocalPanchayat: userRecord.subLocalPanchayat || ''
               }
             },
-            registration_code: userRecord.attributes.registration_code,
+            registration_code: userRecord.registration_code || '',
             documentId: userRecord.id
           };
 
