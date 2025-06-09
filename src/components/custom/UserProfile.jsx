@@ -25,96 +25,110 @@ const UserProfile = () => {
           return;
         }
 
-        const url = `${API_BASE}/api/registration-pages?filters[mobile_number]=${mobileNumber}&populate=*`;
-        console.log('Fetching user data for mobile:', mobileNumber);
+        const url = `${API_BASE}/api/registration-pages?filters[mobileNumber]=${mobileNumber}`;
+        console.log('API URL:', url);
+        console.log('API Token available:', !!API_TOKEN);
 
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${API_TOKEN}`,
-            'Content-Type': 'application/json',
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch user data');
-        }
-
-        const result = await response.json();
-        console.log('Found user data:', result);
-
-        if (result.data && result.data.length > 0) {
-          const userRecord = result.data[0];
-          console.log('Raw user record:', userRecord);
-          
-          // Transform the data based on the actual structure
-          const transformedData = {
-            personal_information: {
-              full_name: userRecord.full_name || '',
-              mobile_number: userRecord.mobile_number || '',
-              email_address: userRecord.email || '',
-              village: userRecord.village || '',
-              Gender: userRecord.gender || '',
-              nationality: userRecord.nationality || '',
-              is_gahoi: userRecord.isGahoi || '',
-              display_picture: userRecord.display_picture
-            },
-            family_details: {
-              father_name: userRecord.father_name || '',
-              father_mobile: userRecord.phone_number || '',
-              mother_name: userRecord.mother_name || '',
-              mother_mobile: userRecord.mother_mobile || '',
-              spouse_name: userRecord.spouse_name || '',
-              spouse_mobile: userRecord.spouse_mobile || '',
-              gotra: userRecord.gotra || '',
-              aakna: userRecord.aakna || '',
-              siblingDetails: []
-            },
-            biographical_details: {
-              manglik_status: userRecord.manglik_status || '',
-              Grah: userRecord.Grah || '',
-              Handicap: userRecord.Handicap || '',
-              is_married: userRecord.is_married || '',
-              marriage_to_another_caste: userRecord.marriage_to_another_caste || ''
-            },
-            work_information: {
-              occupation: userRecord.occupation || '',
-              company_name: userRecord.company_name || '',
-              work_area: userRecord.work_area || '',
-              industrySector: userRecord.industrySector || '',
-              businessSize: userRecord.businessSize || '',
-              workType: userRecord.workType || '',
-              employmentType: userRecord.employmentType || ''
-            },
-            additional_details: {
-              blood_group: userRecord.blood_group || '',
-              date_of_birth: userRecord.date_of_birth || '',
-              higher_education: userRecord.education || '',
-              current_address: userRecord.current_address || '',
-              regional_information: {
-                State: userRecord.state || '',
-                district: userRecord.district || '',
-                city: userRecord.city || '',
-                RegionalAssembly: userRecord.regionalAssembly || '',
-                LocalPanchayatName: userRecord.localPanchayatName || '',
-                LocalPanchayat: userRecord.localPanchayat || '',
-                SubLocalPanchayat: userRecord.subLocalPanchayat || ''
-              }
-            },
-            registration_code: userRecord.registration_code || '',
-            documentId: userRecord.id
-          };
-
-          console.log('Transformed data:', transformedData);
-          setUserData(transformedData);
-        } else {
-          console.log('No registration found for mobile:', mobileNumber);
-          navigate('/registration', { 
-            state: { 
-              mobileNumber,
-              fromLogin: true 
-            } 
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${API_TOKEN}`,
+              'Content-Type': 'application/json',
+            }
           });
+
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
+            throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+          }
+
+          const result = await response.json();
+          console.log('API Response data:', result);
+
+          if (result.data && result.data.length > 0) {
+            const userRecord = result.data[0];
+            console.log('Found user record:', userRecord);
+            
+            // Transform the data based on the actual structure
+            const transformedData = {
+              personal_information: {
+                full_name: userRecord.full_name || '',
+                mobile_number: userRecord.mobile_number || '',
+                email_address: userRecord.email || '',
+                village: userRecord.village || '',
+                Gender: userRecord.gender || '',
+                nationality: userRecord.nationality || '',
+                is_gahoi: userRecord.isGahoi || '',
+                display_picture: userRecord.display_picture
+              },
+              family_details: {
+                father_name: userRecord.father_name || '',
+                father_mobile: userRecord.phone_number || '',
+                mother_name: userRecord.mother_name || '',
+                mother_mobile: userRecord.mother_mobile || '',
+                spouse_name: userRecord.spouse_name || '',
+                spouse_mobile: userRecord.spouse_mobile || '',
+                gotra: userRecord.gotra || '',
+                aakna: userRecord.aakna || '',
+                siblingDetails: []
+              },
+              biographical_details: {
+                manglik_status: userRecord.manglik_status || '',
+                Grah: userRecord.Grah || '',
+                Handicap: userRecord.Handicap || '',
+                is_married: userRecord.is_married || '',
+                marriage_to_another_caste: userRecord.marriage_to_another_caste || ''
+              },
+              work_information: {
+                occupation: userRecord.occupation || '',
+                company_name: userRecord.company_name || '',
+                work_area: userRecord.work_area || '',
+                industrySector: userRecord.industrySector || '',
+                businessSize: userRecord.businessSize || '',
+                workType: userRecord.workType || '',
+                employmentType: userRecord.employmentType || ''
+              },
+              additional_details: {
+                blood_group: userRecord.blood_group || '',
+                date_of_birth: userRecord.date_of_birth || '',
+                higher_education: userRecord.education || '',
+                current_address: userRecord.current_address || '',
+                regional_information: {
+                  State: userRecord.state || '',
+                  district: userRecord.district || '',
+                  city: userRecord.city || '',
+                  RegionalAssembly: userRecord.regionalAssembly || '',
+                  LocalPanchayatName: userRecord.localPanchayatName || '',
+                  LocalPanchayat: userRecord.localPanchayat || '',
+                  SubLocalPanchayat: userRecord.subLocalPanchayat || ''
+                }
+              },
+              registration_code: userRecord.registration_code || '',
+              documentId: userRecord.id
+            };
+
+            console.log('Transformed data:', transformedData);
+            setUserData(transformedData);
+          } else {
+            console.log('No registration found for mobile:', mobileNumber);
+            navigate('/registration', { 
+              state: { 
+                mobileNumber,
+                fromLogin: true 
+              } 
+            });
+          }
+        } catch (fetchError) {
+          console.error('Fetch Error:', fetchError);
+          setError(fetchError.message);
+          setTimeout(() => {
+            navigate('/login');
+          }, 3000);
         }
       } catch (error) {
         console.error('Profile Error:', error);
