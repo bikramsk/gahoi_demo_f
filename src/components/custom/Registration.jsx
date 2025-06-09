@@ -153,6 +153,7 @@ const RegistrationForm = () => {
       const userData = location.state.userData;
       return {
         ...INITIAL_FORM_DATA,
+        workCategory: "professional",
         // Personal Information
         name: userData.personal_information?.full_name || '',
         mobileNumber: userData.personal_information?.mobile_number || '',
@@ -181,7 +182,13 @@ const RegistrationForm = () => {
           },
           ...(userData.family_details?.siblingDetails || []).map(sibling => ({
             relation: 'Sibling',
-            ...sibling
+            name: sibling.sibling_name,
+            mobileNumber: sibling.phone_number,
+            gender: sibling.gender,
+            age: sibling.age,
+            education: sibling.education,
+            occupation: sibling.occupation,
+            maritalStatus: sibling.marital_status
           }))
         ],
         
@@ -221,7 +228,8 @@ const RegistrationForm = () => {
     }
     return {
       ...INITIAL_FORM_DATA,
-      mobileNumber: location.state?.mobileNumber || '',
+      mobileNumber: location.state?.mobileNumber || "",
+      workCategory: "professional",
     };
   });
   const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
@@ -1356,7 +1364,6 @@ const RegistrationForm = () => {
     }
   };
 
-  // Update handleSubmit to use PUT for edit mode
   const handleSubmit = async () => {
     try {
       setLoading(true);

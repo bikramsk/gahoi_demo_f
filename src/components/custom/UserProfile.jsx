@@ -47,17 +47,71 @@ const UserProfile = () => {
         if (result.data && result.data.length > 0) {
           const userRecord = result.data[0];
           console.log('Raw user record:', userRecord);
-          console.log('User attributes:', userRecord.attributes);
           
-          // Transform the data 
+          // Transform the data - using direct properties instead of attributes
           const transformedData = {
-            personal_information: userRecord.attributes.personal_information,
-            family_details: userRecord.attributes.family_details,
-            child_name: userRecord.attributes.child_name,
-            biographical_details: userRecord.attributes.biographical_details,
-            work_information: userRecord.attributes.work_information,
-            additional_details: userRecord.attributes.additional_details,
-            registration_code: userRecord.attributes.registration_code,
+            personal_information: {
+              full_name: userRecord.name,
+              mobile_number: userRecord.mobileNumber,
+              email_address: userRecord.email,
+              village: userRecord.village,
+              Gender: userRecord.gender,
+              nationality: userRecord.nationality,
+              is_gahoi: userRecord.isGahoi,
+              display_picture: userRecord.display_picture
+            },
+            family_details: {
+              father_name: userRecord.familyDetails?.[0]?.name,
+              father_mobile: userRecord.familyDetails?.[0]?.mobileNumber,
+              mother_name: userRecord.familyDetails?.[1]?.name,
+              mother_mobile: userRecord.familyDetails?.[1]?.mobileNumber,
+              spouse_name: userRecord.familyDetails?.[2]?.name,
+              spouse_mobile: userRecord.familyDetails?.[2]?.mobileNumber,
+              gotra: userRecord.gotra,
+              aakna: userRecord.aakna,
+              siblingDetails: userRecord.familyDetails?.filter(f => f.relation === 'Sibling')?.map(s => ({
+                sibling_name: s.name,
+                gender: s.gender,
+                phone_number: s.mobileNumber,
+                age: s.age,
+                education: s.education,
+                occupation: s.occupation,
+                marital_status: s.maritalStatus,
+                sibling_relation: s.relation
+              }))
+            },
+            biographical_details: {
+              manglik_status: userRecord.manglik,
+              Grah: userRecord.grah,
+              Handicap: userRecord.handicap,
+              is_married: userRecord.isMarried ? 'Married' : 'Unmarried',
+              marriage_to_another_caste: userRecord.marriageToAnotherCaste
+            },
+            work_information: {
+              occupation: userRecord.occupation,
+              company_name: userRecord.companyName,
+              work_area: userRecord.workArea,
+              industrySector: userRecord.industrySector,
+              businessSize: userRecord.businessSize,
+              workType: userRecord.workType,
+              employmentType: userRecord.employmentType
+            },
+            additional_details: {
+              blood_group: userRecord.bloodGroup,
+              date_of_birth: userRecord.birthDate,
+              higher_education: userRecord.education,
+              current_address: userRecord.currentAddress,
+              regional_information: {
+                State: userRecord.state,
+                district: userRecord.district,
+                city: userRecord.city,
+                RegionalAssembly: userRecord.regionalAssembly,
+                LocalPanchayatName: userRecord.localPanchayatName,
+                LocalPanchayat: userRecord.localPanchayat,
+                SubLocalPanchayat: userRecord.subLocalPanchayat
+              }
+            },
+            registration_code: userRecord.registration_code,
             documentId: userRecord.id
           };
 
