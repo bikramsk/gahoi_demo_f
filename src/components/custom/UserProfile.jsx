@@ -45,20 +45,22 @@ const UserProfile = () => {
         console.log('Found user data:', result);
 
         if (result.data && result.data.length > 0) {
-          // Get the first record and its attributes
           const userRecord = result.data[0];
           console.log('Using user record:', userRecord);
           
-          if (!userRecord.attributes) {
-            console.error('No attributes found in user record:', userRecord);
+          // Check if we have the necessary data
+          if (!userRecord || !userRecord.personal_information) {
+            console.error('Invalid data structure:', userRecord);
             throw new Error('Invalid user data format');
           }
 
-          // Set the user data including the registration code
+          // Set user data directly from the record
           setUserData({
-            ...userRecord.attributes,
-            registration_code: userRecord.attributes.registration_code || 'N/A',
-            documentId: userRecord.attributes.documentId || userRecord.id
+            personal_information: userRecord.personal_information || {},
+            work_information: userRecord.work_information || {},
+            additional_details: userRecord.additional_details || {},
+            registration_code: userRecord.registration_code,
+            documentId: userRecord.documentId
           });
         } else {
           console.log('No registration found for mobile:', mobileNumber);
