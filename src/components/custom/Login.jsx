@@ -488,7 +488,7 @@ const Login = () => {
         setLoading(true);
         try {
           await createMpin(mpinData.mpin);
-          // After MPIN creation, navigate to dashboard
+          // After MPIN creation, navigate to registration
           navigate('/registration');
         } catch (error) {
           setErrors({
@@ -511,7 +511,8 @@ const Login = () => {
         if (response.jwt) {
           localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          navigate('/registration');
+          // Redirect to user profile instead of registration
+          navigate('/profile');
         } else {
           throw new Error('Invalid MPIN');
         }

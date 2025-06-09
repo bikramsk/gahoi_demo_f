@@ -5,6 +5,7 @@ import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
 import Registration from "./components/custom/Registration";
 import Login from "./components/custom/Login";
+import UserProfile from "./components/custom/UserProfile";
 import PrivacyPolicy from "./components/custom/PrivacyPolicy";
 import SocialFlagSong from "./components/custom/SocialFlagSong";
 import Contact from "./components/custom/Contact";
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/registration" element={<Registration />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<UserProfile />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/socialflagsong" element={<SocialFlagSong />} />
           <Route path="/contact-us" element={<Contact />} />

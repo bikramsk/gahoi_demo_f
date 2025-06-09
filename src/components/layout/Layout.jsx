@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const hideHeaderFooter = ['/login', '/registration'].includes(location.pathname);
+  const hideHeaderFooter = ['/login', '/registration', '/profile'].includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col">
