@@ -52,58 +52,50 @@ const UserProfile = () => {
             const userRecord = result.data[0];
             console.log('Raw user record:', userRecord);
             
-            // Transform the data based on the exact component schemas
+            // Transform the data based on the exact API response structure
             const transformedData = {
               personal_information: {
-                full_name: userRecord?.attributes?.personal_information?.full_name || '',
-                mobile_number: userRecord?.attributes?.personal_information?.mobile_number || '',
-                email_address: userRecord?.attributes?.personal_information?.email_address || '',
-                village: userRecord?.attributes?.personal_information?.village || '',
-                Gender: userRecord?.attributes?.personal_information?.Gender || '',  // Enum: Male/Female
-                nationality: userRecord?.attributes?.personal_information?.nationality || '', // Enum: Indian/Non-Indian
-                is_gahoi: userRecord?.attributes?.personal_information?.is_gahoi || '', // Enum: Yes/No
-                display_picture: userRecord?.attributes?.personal_information?.display_picture || null
+                full_name: userRecord.attributes?.personal_information?.full_name || userRecord.attributes?.full_name || '',
+                mobile_number: userRecord.attributes?.personal_information?.mobile_number || userRecord.attributes?.mobile_number || '',
+                email_address: userRecord.attributes?.personal_information?.email_address || '',
+                village: userRecord.attributes?.personal_information?.village || userRecord.attributes?.village || '',
+                Gender: userRecord.attributes?.personal_information?.Gender || userRecord.attributes?.gender || '',
+                nationality: userRecord.attributes?.personal_information?.nationality || '',
+                is_gahoi: userRecord.attributes?.personal_information?.is_gahoi || '',
+                display_picture: userRecord.attributes?.personal_information?.display_picture || null
               },
               family_details: {
-                father_name: userRecord?.attributes?.family_details?.father_name || '',
-                father_mobile: userRecord?.attributes?.family_details?.father_mobile || '',
-                mother_name: userRecord?.attributes?.family_details?.mother_name || '',
-                mother_mobile: userRecord?.attributes?.family_details?.mother_mobile || '',
-                spouse_name: userRecord?.attributes?.family_details?.spouse_name || '',
-                spouse_mobile: userRecord?.attributes?.family_details?.spouse_mobile || '',
-                phone_number: userRecord?.attributes?.family_details?.phone_number || '',
-                gotra: userRecord?.attributes?.family_details?.gotra || '',
-                aakna: userRecord?.attributes?.family_details?.aakna || '',
-                siblingDetails: userRecord?.attributes?.family_details?.siblingDetails || []
+                father_name: userRecord.attributes?.family_details?.father_name || userRecord.attributes?.father_name || '',
+                father_mobile: userRecord.attributes?.family_details?.father_mobile || '',
+                mother_name: userRecord.attributes?.family_details?.mother_name || userRecord.attributes?.mother_name || '',
+                mother_mobile: userRecord.attributes?.family_details?.mother_mobile || '',
+                spouse_name: userRecord.attributes?.family_details?.spouse_name || userRecord.attributes?.spouse_name || '',
+                spouse_mobile: userRecord.attributes?.family_details?.spouse_mobile || '',
+                phone_number: userRecord.attributes?.family_details?.phone_number || '',
+                gotra: userRecord.attributes?.family_details?.gotra || '',
+                aakna: userRecord.attributes?.family_details?.aakna || '',
+                siblingDetails: userRecord.attributes?.family_details?.siblingDetails || []
               },
               biographical_details: {
-                manglik_status: userRecord?.attributes?.biographical_details?.manglik_status || '',
-                Grah: userRecord?.attributes?.biographical_details?.Grah || '',
-                Handicap: userRecord?.attributes?.biographical_details?.Handicap || '',
-                is_married: userRecord?.attributes?.biographical_details?.is_married || '',
-                marriage_to_another_caste: userRecord?.attributes?.biographical_details?.marriage_to_another_caste || '',
-                Gotra: userRecord?.attributes?.biographical_details?.Gotra || '',
-                Aakna: userRecord?.attributes?.biographical_details?.Aakna || '',
-                Mama_Aakna: userRecord?.attributes?.biographical_details?.Mama_Aakna || ''
+                manglik_status: userRecord.attributes?.biographical_details?.manglik_status || '',
+                Grah: userRecord.attributes?.biographical_details?.Grah || '',
+                Handicap: userRecord.attributes?.biographical_details?.Handicap || '',
+                is_married: userRecord.attributes?.biographical_details?.is_married || '',
+                marriage_to_another_caste: userRecord.attributes?.biographical_details?.marriage_to_another_caste || ''
               },
               work_information: {
-                occupation: userRecord?.attributes?.work_information?.occupation || '',
-                company_name: userRecord?.attributes?.work_information?.company_name || '',
-                work_area: userRecord?.attributes?.work_information?.work_area || '',
-                industrySector: userRecord?.attributes?.work_information?.industrySector || '',
-                businessSize: userRecord?.attributes?.work_information?.businessSize || '',
-                workType: userRecord?.attributes?.work_information?.workType || '',
-                employmentType: userRecord?.attributes?.work_information?.employmentType || '',
-                businessType: userRecord?.attributes?.work_information?.businessType || '',
-                businessYears: userRecord?.attributes?.work_information?.businessYears || ''
+                occupation: userRecord.attributes?.work_information?.occupation || userRecord.attributes?.occupation || '',
+                company_name: userRecord.attributes?.work_information?.company_name || userRecord.attributes?.company_name || '',
+                work_area: userRecord.attributes?.work_information?.work_area || userRecord.attributes?.work_area || '',
+                industrySector: userRecord.attributes?.work_information?.industrySector || userRecord.attributes?.industrySector || ''
               },
               additional_details: {
-                blood_group: userRecord?.attributes?.additional_details?.blood_group || '',
-                date_of_birth: userRecord?.attributes?.additional_details?.date_of_birth || '',
-                date_of_marriage: userRecord?.attributes?.additional_details?.date_of_marriage || '',
-                higher_education: userRecord?.attributes?.additional_details?.higher_education || '',
-                current_address: userRecord?.attributes?.additional_details?.current_address || '',
-                regional_information: userRecord?.attributes?.additional_details?.regional_information || {
+                blood_group: userRecord.attributes?.additional_details?.blood_group || '',
+                date_of_birth: userRecord.attributes?.additional_details?.date_of_birth || userRecord.attributes?.date_of_birth || '',
+                date_of_marriage: userRecord.attributes?.additional_details?.date_of_marriage || '',
+                higher_education: userRecord.attributes?.additional_details?.higher_education || userRecord.attributes?.higher_education || '',
+                current_address: userRecord.attributes?.additional_details?.current_address || '',
+                regional_information: userRecord.attributes?.additional_details?.regional_information || {
                   State: '',
                   district: '',
                   city: '',
@@ -113,16 +105,16 @@ const UserProfile = () => {
                   SubLocalPanchayat: ''
                 }
               },
-              child_name: (userRecord?.attributes?.child_name || []).map(child => ({
+              child_name: (userRecord.attributes?.child_name || []).map(child => ({
                 child_name: child.child_name || '',
-                gender: child.gender || '',  // Enum: Male/Female
+                gender: child.gender || '',
                 phone_number: child.phone_number || ''
               })),
               your_suggestions: {
-                suggestions: userRecord?.attributes?.your_suggestions?.suggestions || ''
+                suggestions: userRecord.attributes?.your_suggestions?.suggestions || ''
               },
-              registration_code: userRecord?.attributes?.registration_code || '',
-              documentId: userRecord?.id
+              registration_code: userRecord.attributes?.registration_code || '',
+              documentId: userRecord.id
             };
 
             console.log('Transformed data:', transformedData);
