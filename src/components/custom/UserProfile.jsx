@@ -26,7 +26,7 @@ const UserProfile = () => {
           return;
         }
 
-        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}`;
+        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         console.log('Fetching user data for mobile:', mobileNumber);
 
         const response = await fetch(url, {
@@ -46,58 +46,22 @@ const UserProfile = () => {
 
         if (result.data && result.data.length > 0) {
           const userRecord = result.data[0];
-          console.log('Using user record:', userRecord);
+          console.log('Raw user record:', userRecord);
+          console.log('User attributes:', userRecord.attributes);
           
           // Transform the data 
           const transformedData = {
-            personal_information: {
-              full_name: userRecord.attributes?.personal_information?.full_name || '',
-              mobile_number: userRecord.attributes?.personal_information?.mobile_number || '',
-              email_address: userRecord.attributes?.personal_information?.email_address || '',
-              village: userRecord.attributes?.personal_information?.village || '',
-              Gender: userRecord.attributes?.personal_information?.Gender || '',
-              nationality: userRecord.attributes?.personal_information?.nationality || '',
-              is_gahoi: userRecord.attributes?.personal_information?.is_gahoi || '',
-              display_picture: userRecord.attributes?.personal_information?.display_picture || null,
-            },
-            family_details: {
-              father_name: userRecord.attributes?.family_details?.father_name || '',
-              father_mobile: userRecord.attributes?.family_details?.father_mobile || '',
-              mother_name: userRecord.attributes?.family_details?.mother_name || '',
-              mother_mobile: userRecord.attributes?.family_details?.mother_mobile || '',
-              spouse_name: userRecord.attributes?.family_details?.spouse_name || '',
-              spouse_mobile: userRecord.attributes?.family_details?.spouse_mobile || '',
-              gotra: userRecord.attributes?.family_details?.gotra || '',
-              aakna: userRecord.attributes?.family_details?.aakna || '',
-              siblingDetails: userRecord.attributes?.family_details?.siblingDetails || [],
-            },
-            child_name: userRecord.attributes?.child_name || [],
-            biographical_details: userRecord.attributes?.biographical_details || {},
-            work_information: {
-              occupation: userRecord.attributes?.work_information?.occupation || '',
-              company_name: userRecord.attributes?.work_information?.company_name || '',
-              work_area: userRecord.attributes?.work_information?.work_area || '',
-              industrySector: userRecord.attributes?.work_information?.industrySector || '',
-            },
-            additional_details: {
-              blood_group: userRecord.attributes?.additional_details?.blood_group || '',
-              date_of_birth: userRecord.attributes?.additional_details?.date_of_birth || '',
-              higher_education: userRecord.attributes?.additional_details?.higher_education || '',
-              current_address: userRecord.attributes?.additional_details?.current_address || '',
-              regional_information: {
-                RegionalAssembly: userRecord.attributes?.additional_details?.regional_information?.RegionalAssembly || '',
-                LocalPanchayatName: userRecord.attributes?.additional_details?.regional_information?.LocalPanchayatName || '',
-                LocalPanchayat: userRecord.attributes?.additional_details?.regional_information?.LocalPanchayat || '',
-                SubLocalPanchayat: userRecord.attributes?.additional_details?.regional_information?.SubLocalPanchayat || '',
-                State: userRecord.attributes?.additional_details?.regional_information?.State || '',
-                city: userRecord.attributes?.additional_details?.regional_information?.city || '',
-                district: userRecord.attributes?.additional_details?.regional_information?.district || ''
-              },
-            },
-            registration_code: userRecord.attributes?.registration_code || '',
-            documentId: userRecord.id || '',
+            personal_information: userRecord.attributes.personal_information,
+            family_details: userRecord.attributes.family_details,
+            child_name: userRecord.attributes.child_name,
+            biographical_details: userRecord.attributes.biographical_details,
+            work_information: userRecord.attributes.work_information,
+            additional_details: userRecord.attributes.additional_details,
+            registration_code: userRecord.attributes.registration_code,
+            documentId: userRecord.id
           };
 
+          console.log('Transformed data:', transformedData);
           setUserData(transformedData);
         } else {
           console.log('No registration found for mobile:', mobileNumber);
@@ -471,13 +435,18 @@ const UserProfile = () => {
               Back to Home
             </button>
             <button
-              onClick={() => navigate('/registration', { 
-                state: { 
-                  mobileNumber: userData.personal_information?.mobile_number,
-                  fromLogin: true,
-                  isEdit: true
-                } 
-              })}
+              onClick={() => {
+                // Store the current user data in localStorage for the registration form
+                localStorage.setItem('editUserData', JSON.stringify(userData));
+                navigate('/registration', { 
+                  state: { 
+                    mobileNumber: userData.personal_information?.mobile_number,
+                    fromLogin: true,
+                    isEdit: true,
+                    userData: userData // Pass the full user data to registration form
+                  } 
+                });
+              }}
               className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700"
             >
               Edit Profile
