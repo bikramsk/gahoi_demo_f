@@ -1216,9 +1216,6 @@ const RegistrationForm = () => {
         `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/upload`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
-          },
           body: formData,
         }
       );
@@ -1231,7 +1228,6 @@ const RegistrationForm = () => {
       const result = await response.json();
       console.log("Image upload response:", result);
 
-      // Return the first uploaded image's ID
       if (result && result.length > 0) {
         const uploadedImage = result[0];
         return uploadedImage.id;
@@ -1267,18 +1263,12 @@ const RegistrationForm = () => {
         displayPictureId
       );
 
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const response = await fetch(
         `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ data: strapiData }),
         }
