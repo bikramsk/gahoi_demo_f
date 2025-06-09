@@ -1,9 +1,9 @@
 {
   "common": {
     "readMore": "और पढ़ें",
-    "search": "खोज",
+    "search": "खोजें",
     "loading": "लोड हो रहा है...",
-    "submit": "जमा करें",
+    "submit": "सबमिट करें",
     "cancel": "रद्द करें",
     "save": "सहेजें",
     "delete": "हटाएं",
@@ -542,7 +542,11 @@
       "otpRequired": "OTP आवश्यक है",
       "invalidMobile": "कृपया एक वैध मोबाइल नंबर दर्ज करें",
       "tooManyAttempts": "बहुत अधिक प्रयास। कृपया बाद में पुनः प्रयास करें",
-      "serverError": "सर्वर त्रुटि। कृपया पुनः प्रयास करें"
+      "serverError": "सर्वर त्रुटि। कृपया पुनः प्रयास करें",
+      "mpinRequired": "एमपिन आवश्यक है",
+      "mpinLength": "एमपिन 4 अंकों का होना चाहिए",
+      "mpinMismatch": "एमपिन मेल नहीं खाता",
+      "confirmMpinRequired": "कृपया एमपिन की पुष्टि करें"
     },
     "success": {
       "otpSent": "OTP सफलतापूर्वक भेजा गया",
@@ -584,7 +588,17 @@
     "sending": "भेजा जा रहा है...",
     "termsOfService": "सेवा की शर्तें",
     "privacyPolicy": "गोपनीयता नीति",
-    "slogan": "अपने समुदाय से जुड़ाव को सशक्त बनाएं।"
+    "slogan": "अपने समुदाय से जुड़ाव को सशक्त बनाएं।",
+    "mpinAuth": "एमपिन प्रमाणीकरण",
+    "enterMpin": "एमपिन दर्ज करें",
+    "mpinPlaceholder": "4 अंकों का एमपिन दर्ज करें",
+    "setupMpin": "एमपिन सेट करें",
+    "newMpinPlaceholder": "नया 4 अंकों का एमपिन दर्ज करें",
+    "confirmMpin": "एमपिन की पुष्टि करें",
+    "confirmMpinPlaceholder": "एमपिन दोबारा दर्ज करें",
+    "useWhatsAppOtp": "व्हाट्सएप ओटीपी का उपयोग करें",
+    "setMpin": "एमपिन सेट करें",
+    "setting": "एमपिन सेट हो रहा है..."
   },
   "latestNews": {
     "meta": {

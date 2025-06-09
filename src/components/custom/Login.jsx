@@ -603,7 +603,7 @@ const Login = () => {
       const result = await sendWhatsAppOTP(formData.mobileNumber);
       
       if (result.success !== false && (result.success || result.data || result.message)) {
-        setCountdown(60);
+        setCountdown(30);
         setFormData(prev => ({ ...prev, otp: '' }));
         setErrors({});
       } else {
@@ -763,7 +763,7 @@ const Login = () => {
                           checked={authMode === 'mpin'}
                           onChange={() => handleAuthModeChange('mpin')}
                         />
-                        <span className="ml-2 text-gray-700 font-medium text-xs sm:text-sm">{t('login.mpinAuth') || 'MPIN'}</span>
+                        <span className="ml-2 text-gray-700 font-medium text-xs sm:text-sm">{t('login.mpinAuth')}</span>
                       </label>
                       <label className="inline-flex items-center">
                         <input
@@ -1002,7 +1002,8 @@ const Login = () => {
                       t('login.sending') || 'Sending...'
                     ) : (
                       showMpinCreation ? t('login.setMpin') || 'Set MPIN' :
-                      showOtpInput ? t('login.verifyOtp') || 'Verify OTP' : 
+                      showOtpInput ? t('login.verifyOtp') || 'Verify OTP' :
+                      showMpinInput ? t('common.submit') || 'Submit' :
                       t('login.sendOtp') || 'Send OTP'
                     )}
                   </button>
