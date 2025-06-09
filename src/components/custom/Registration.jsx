@@ -141,96 +141,13 @@ const GUJARAT_CHAURASI_MAPPING = {
   }
 };
 
-const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
-
 const RegistrationForm = () => {
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
-  
-  // Initialize form data with existing user data if in edit mode
-  const [formData, setFormData] = useState(() => {
-    if (location.state?.isEdit && location.state?.userData) {
-      const userData = location.state.userData;
-      return {
-        ...INITIAL_FORM_DATA,
-        workCategory: "professional",
-        // Personal Information
-        name: userData.personal_information?.full_name || '',
-        mobileNumber: userData.personal_information?.mobile_number || '',
-        email: userData.personal_information?.email_address || '',
-        village: userData.personal_information?.village || '',
-        gender: userData.personal_information?.Gender || '',
-        nationality: userData.personal_information?.nationality || '',
-        isGahoi: userData.personal_information?.is_gahoi || 'Yes',
-        
-        // Family Details
-        familyDetails: [
-          {
-            relation: 'Father',
-            name: userData.family_details?.father_name || '',
-            mobileNumber: userData.family_details?.father_mobile || '',
-          },
-          {
-            relation: 'Mother',
-            name: userData.family_details?.mother_name || '',
-            mobileNumber: userData.family_details?.mother_mobile || '',
-          },
-          {
-            relation: 'Spouse',
-            name: userData.family_details?.spouse_name || '',
-            mobileNumber: userData.family_details?.spouse_mobile || '',
-          },
-          ...(userData.family_details?.siblingDetails || []).map(sibling => ({
-            relation: 'Sibling',
-            name: sibling.sibling_name,
-            mobileNumber: sibling.phone_number,
-            gender: sibling.gender,
-            age: sibling.age,
-            education: sibling.education,
-            occupation: sibling.occupation,
-            maritalStatus: sibling.marital_status
-          }))
-        ],
-        
-        // Work Information
-        occupation: userData.work_information?.occupation || '',
-        companyName: userData.work_information?.company_name || '',
-        workArea: userData.work_information?.work_area || '',
-        industrySector: userData.work_information?.industrySector || '',
-        businessSize: userData.work_information?.businessSize || '',
-        workType: userData.work_information?.workType || '',
-        employmentType: userData.work_information?.employmentType || '',
-        
-        // Additional Details
-        bloodGroup: userData.additional_details?.blood_group || '',
-        birthDate: userData.additional_details?.date_of_birth || '',
-        education: userData.additional_details?.higher_education || '',
-        currentAddress: userData.additional_details?.current_address || '',
-        
-        // Regional Information
-        state: userData.additional_details?.regional_information?.State || '',
-        district: userData.additional_details?.regional_information?.district || '',
-        city: userData.additional_details?.regional_information?.city || '',
-        regionalAssembly: userData.additional_details?.regional_information?.RegionalAssembly || '',
-        localPanchayatName: userData.additional_details?.regional_information?.LocalPanchayatName || '',
-        localPanchayat: userData.additional_details?.regional_information?.LocalPanchayat || '',
-        subLocalPanchayat: userData.additional_details?.regional_information?.SubLocalPanchayat || '',
-        
-        // Biographical Details
-        gotra: userData.family_details?.gotra || '',
-        aakna: userData.family_details?.aakna || '',
-        manglik: userData.biographical_details?.manglik_status || '',
-        grah: userData.biographical_details?.Grah || '',
-        handicap: userData.biographical_details?.Handicap || '',
-        isMarried: userData.biographical_details?.is_married === 'Married',
-        marriageToAnotherCaste: userData.biographical_details?.marriage_to_another_caste || 'Same Caste Marriage',
-      };
-    }
-    return {
-      ...INITIAL_FORM_DATA,
-      mobileNumber: location.state?.mobileNumber || "",
-      workCategory: "professional",
-    };
+  const [formData, setFormData] = useState({
+    ...INITIAL_FORM_DATA,
+    mobileNumber: location.state?.mobileNumber || "",
+    workCategory: "professional",
   });
   const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
   const [progress, setProgress] = useState(50);
@@ -1387,34 +1304,33 @@ const RegistrationForm = () => {
         displayPictureId
       );
 
-      const isEdit = location.state?.isEdit;
-      const url = `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages${isEdit ? `/${location.state.userData.documentId}` : ''}`;
-      
-      const response = await fetch(url, {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_TOKEN}`,
-        },
-        body: JSON.stringify({ data: strapiData }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: strapiData }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Server error:', errorData);
+        console.error("Server error:", errorData);
         throw new Error(
           errorData.error?.message ||
             errorData.error?.details?.errors?.[0]?.message ||
-            'Failed to submit form'
+            "Failed to submit form"
         );
       }
 
       const result = await response.json();
-      console.log(`Form ${isEdit ? 'updated' : 'submitted'} successfully:`, result);
+      console.log("Form submitted successfully:", result);
 
       showSuccessMessage();
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
       alert(`Failed to submit form: ${error.message}`);
     } finally {
       setLoading(false);
