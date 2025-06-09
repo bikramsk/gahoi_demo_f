@@ -1144,25 +1144,68 @@ const RegistrationForm = () => {
     }
   };
 
+  // Function to check if mobile number exists in Strapi backend
+  const checkMobileExists = async (mobileNumber) => {
+    try {
+      const baseUrl = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+      const url = `${baseUrl}/api/registration-pages?filters[personal_information][mobile_number]=${encodeURIComponent(mobileNumber)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check mobile number existence');
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length > 0;
+
+    } catch (error) {
+      console.error('Error checking mobile number existence:', error);
+      throw error;
+    }
+  };
+
+  // Update handleNext to include mobile number check
   const handleNext = async () => {
     setSubmitted(true);
     setLoading(true);
     
     try {
-      // Only validate email existence on the first step
-      if (currentStep === 0 && formData.email) {
-        const emailExists = await checkEmailExists(formData.email);
-        if (emailExists) {
-          setErrors(prev => ({
-            ...prev,
-            email: "This email address is already registered. Please use a different email."
-          }));
-          setLoading(false);
-          return;
+      // Only validate email and mobile on the first step
+      if (currentStep === 0) {
+        // Check email duplication
+        if (formData.email) {
+          const emailExists = await checkEmailExists(formData.email);
+          if (emailExists) {
+            setErrors(prev => ({
+              ...prev,
+              email: "This email address is already registered. Please use a different email."
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Check mobile number duplication only if not coming from login
+        if (!location.state?.fromLogin && formData.mobileNumber) {
+          const mobileExists = await checkMobileExists(formData.mobileNumber);
+          if (mobileExists) {
+            setErrors(prev => ({
+              ...prev,
+              mobileNumber: "This mobile number is already registered. Please use a different number."
+            }));
+            setLoading(false);
+            return;
+          }
         }
       }
       
-      // If this is the final step, skip validation and submit directly
+      // Rest of the handleNext function stays the same...
       if (currentStep === formSteps.length - 1) {
         if (!formData.confirmAccuracy) {
           setSubmitted(true);
@@ -1173,13 +1216,11 @@ const RegistrationForm = () => {
         return;
       }
       
-      // For other steps, validate as normal
       if (validateCurrentStep()) {
         setCurrentStep(currentStep + 1);
         setSubmitted(false);
         window.scrollTo(0, 0);
       } else {
-        // Scroll to first error
         const firstErrorField = document.querySelector(".error-field");
         if (firstErrorField) {
           firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1189,7 +1230,7 @@ const RegistrationForm = () => {
       console.error("Error in handleNext:", error);
       setErrors(prev => ({
         ...prev,
-        email: "Unable to verify email. Please try again."
+        [currentStep === 0 ? 'mobileNumber' : 'email']: "Unable to verify. Please try again."
       }));
     } finally {
       setLoading(false);
@@ -4949,6 +4990,16 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
       return [];
     }
   };
+
+  // Update useEffect for mobile number auto-fill
+  useEffect(() => {
+    if (location.state?.mobileNumber) {
+      setFormData(prev => ({
+        ...prev,
+        mobileNumber: location.state.mobileNumber,
+      }));
+    }
+  }, [location.state]);
 
   return (
     <div
