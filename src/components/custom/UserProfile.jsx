@@ -25,7 +25,7 @@ const UserProfile = () => {
           return;
         }
 
-        const url = `${API_BASE}/api/registration-pages?filters[mobileNumber]=${mobileNumber}`;
+        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         console.log('API URL:', url);
         console.log('API Token available:', !!API_TOKEN);
 
@@ -51,65 +51,65 @@ const UserProfile = () => {
           console.log('API Response data:', result);
 
           if (result.data && result.data.length > 0) {
-            const userRecord = result.data[0];
+            const userRecord = result.data[0].attributes;
             console.log('Found user record:', userRecord);
             
-            // Transform the data based on the actual structure
+            // Transform the data based on the registration form structure
             const transformedData = {
               personal_information: {
-                full_name: userRecord.full_name || '',
-                mobile_number: userRecord.mobile_number || '',
-                email_address: userRecord.email || '',
-                village: userRecord.village || '',
-                Gender: userRecord.gender || '',
-                nationality: userRecord.nationality || '',
-                is_gahoi: userRecord.isGahoi || '',
-                display_picture: userRecord.display_picture
+                full_name: userRecord.personal_information?.full_name || '',
+                mobile_number: userRecord.personal_information?.mobile_number || '',
+                email_address: userRecord.personal_information?.email_address || '',
+                village: userRecord.personal_information?.village || '',
+                Gender: userRecord.personal_information?.Gender || '',
+                nationality: userRecord.personal_information?.nationality || '',
+                is_gahoi: userRecord.personal_information?.is_gahoi || '',
+                display_picture: userRecord.personal_information?.display_picture
               },
               family_details: {
-                father_name: userRecord.father_name || '',
-                father_mobile: userRecord.phone_number || '',
-                mother_name: userRecord.mother_name || '',
-                mother_mobile: userRecord.mother_mobile || '',
-                spouse_name: userRecord.spouse_name || '',
-                spouse_mobile: userRecord.spouse_mobile || '',
-                gotra: userRecord.gotra || '',
-                aakna: userRecord.aakna || '',
-                siblingDetails: []
+                father_name: userRecord.family_details?.father_name || '',
+                father_mobile: userRecord.family_details?.father_mobile || '',
+                mother_name: userRecord.family_details?.mother_name || '',
+                mother_mobile: userRecord.family_details?.mother_mobile || '',
+                spouse_name: userRecord.family_details?.spouse_name || '',
+                spouse_mobile: userRecord.family_details?.spouse_mobile || '',
+                gotra: userRecord.family_details?.gotra || '',
+                aakna: userRecord.family_details?.aakna || '',
+                siblingDetails: userRecord.family_details?.siblingDetails || []
               },
               biographical_details: {
-                manglik_status: userRecord.manglik_status || '',
-                Grah: userRecord.Grah || '',
-                Handicap: userRecord.Handicap || '',
-                is_married: userRecord.is_married || '',
-                marriage_to_another_caste: userRecord.marriage_to_another_caste || ''
+                manglik_status: userRecord.biographical_details?.manglik_status || '',
+                Grah: userRecord.biographical_details?.Grah || '',
+                Handicap: userRecord.biographical_details?.Handicap || '',
+                is_married: userRecord.biographical_details?.is_married || '',
+                marriage_to_another_caste: userRecord.biographical_details?.marriage_to_another_caste || ''
               },
               work_information: {
-                occupation: userRecord.occupation || '',
-                company_name: userRecord.company_name || '',
-                work_area: userRecord.work_area || '',
-                industrySector: userRecord.industrySector || '',
-                businessSize: userRecord.businessSize || '',
-                workType: userRecord.workType || '',
-                employmentType: userRecord.employmentType || ''
+                occupation: userRecord.work_information?.occupation || '',
+                company_name: userRecord.work_information?.company_name || '',
+                work_area: userRecord.work_information?.work_area || '',
+                industrySector: userRecord.work_information?.industrySector || '',
+                businessSize: userRecord.work_information?.businessSize || '',
+                workType: userRecord.work_information?.workType || '',
+                employmentType: userRecord.work_information?.employmentType || ''
               },
               additional_details: {
-                blood_group: userRecord.blood_group || '',
-                date_of_birth: userRecord.date_of_birth || '',
-                higher_education: userRecord.education || '',
-                current_address: userRecord.current_address || '',
+                blood_group: userRecord.additional_details?.blood_group || '',
+                date_of_birth: userRecord.additional_details?.date_of_birth || '',
+                higher_education: userRecord.additional_details?.higher_education || '',
+                current_address: userRecord.additional_details?.current_address || '',
                 regional_information: {
-                  State: userRecord.state || '',
-                  district: userRecord.district || '',
-                  city: userRecord.city || '',
-                  RegionalAssembly: userRecord.regionalAssembly || '',
-                  LocalPanchayatName: userRecord.localPanchayatName || '',
-                  LocalPanchayat: userRecord.localPanchayat || '',
-                  SubLocalPanchayat: userRecord.subLocalPanchayat || ''
+                  State: userRecord.additional_details?.regional_information?.State || '',
+                  district: userRecord.additional_details?.regional_information?.district || '',
+                  city: userRecord.additional_details?.regional_information?.city || '',
+                  RegionalAssembly: userRecord.additional_details?.regional_information?.RegionalAssembly || '',
+                  LocalPanchayatName: userRecord.additional_details?.regional_information?.LocalPanchayatName || '',
+                  LocalPanchayat: userRecord.additional_details?.regional_information?.LocalPanchayat || '',
+                  SubLocalPanchayat: userRecord.additional_details?.regional_information?.SubLocalPanchayat || ''
                 }
               },
               registration_code: userRecord.registration_code || '',
-              documentId: userRecord.id
+              documentId: result.data[0].id
             };
 
             console.log('Transformed data:', transformedData);
