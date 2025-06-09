@@ -48,20 +48,32 @@ const UserProfile = () => {
           const userRecord = result.data[0];
           console.log('Using user record:', userRecord);
           
-          // Check if we have the necessary data
-          if (!userRecord || !userRecord.personal_information) {
-            console.error('Invalid data structure:', userRecord);
-            throw new Error('Invalid user data format');
-          }
+          // Transform the data 
+          const transformedData = {
+            personal_information: {
+              full_name: userRecord.attributes?.personal_information?.full_name || '',
+              mobile_number: userRecord.attributes?.personal_information?.mobile_number || '',
+              email_address: userRecord.attributes?.personal_information?.email_address || '',
+              village: userRecord.attributes?.personal_information?.village || '',
+            },
+            work_information: {
+              occupation: userRecord.attributes?.work_information?.occupation || '',
+              company_name: userRecord.attributes?.work_information?.company_name || '',
+              work_area: userRecord.attributes?.work_information?.work_area || '',
+              industrySector: userRecord.attributes?.work_information?.industrySector || '',
+            },
+            additional_details: {
+              blood_group: userRecord.attributes?.additional_details?.blood_group || '',
+              date_of_birth: userRecord.attributes?.additional_details?.date_of_birth || '',
+              higher_education: userRecord.attributes?.additional_details?.higher_education || '',
+              current_address: userRecord.attributes?.additional_details?.current_address || '',
+              regional_information: userRecord.attributes?.additional_details?.regional_information || {},
+            },
+            registration_code: userRecord.attributes?.registration_code || '',
+            documentId: userRecord.id || '',
+          };
 
-          // Set user data directly from the record
-          setUserData({
-            personal_information: userRecord.personal_information || {},
-            work_information: userRecord.work_information || {},
-            additional_details: userRecord.additional_details || {},
-            registration_code: userRecord.registration_code,
-            documentId: userRecord.documentId
-          });
+          setUserData(transformedData);
         } else {
           console.log('No registration found for mobile:', mobileNumber);
           navigate('/registration', { 
