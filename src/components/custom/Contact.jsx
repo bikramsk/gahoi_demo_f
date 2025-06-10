@@ -22,7 +22,7 @@ const Contact = () => {
 
  
   const contact1 = {
-    name: t('contact.addresses.primary.name'),
+    // name: t('contact.addresses.primary.name'),
     address1: t('contact.addresses.primary.address1'),
     address2: t('contact.addresses.primary.address2'),
     phone: "+91-7049004444",
@@ -31,7 +31,7 @@ const Contact = () => {
   };
 
   const contact2 = {
-    name: t('contact.addresses.secondary.name'),
+    // name: t('contact.addresses.secondary.name'),
     address1: t('contact.addresses.secondary.address1'),
     address2: t('contact.addresses.secondary.address2'),
     phone: "+91-7049004444",
@@ -210,11 +210,11 @@ const Contact = () => {
                     />
                   </svg>
                 </div>
-                <h3
+                {/* <h3
                   className={`text-lg md:text-xl font-bold text-gray-800 ${languageFontClass}`}
                 >
                   {t('contact.contactInfo.contact1.name')}
-                </h3>
+                </h3> */}
               </div>
 
               <ul className="space-y-3">
@@ -328,11 +328,11 @@ const Contact = () => {
                     />
                   </svg>
                 </div>
-                <h3
+                {/* <h3
                   className={`text-lg md:text-xl font-bold text-gray-800 ${languageFontClass}`}
                 >
                     {t('contact.contactInfo.contact2.name')}
-                </h3>
+                </h3> */}
               </div>
 
               <ul className="space-y-3">
