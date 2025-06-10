@@ -112,7 +112,7 @@ const UserProfile = () => {
               your_suggestions: {
                 suggestions: userRecord.attributes?.suggestions || ''
               },
-              registration_code: userRecord.attributes?.registration_code || '',
+              gahoi_code: userRecord.attributes?.gahoi_code || '',
               documentId: userRecord.id
             };
 
@@ -567,7 +567,7 @@ const UserProfile = () => {
                         localPanchayatName: userData.additional_details?.regional_information?.LocalPanchayatName,
                         localPanchayat: userData.additional_details?.regional_information?.LocalPanchayat,
                         subLocalPanchayat: userData.additional_details?.regional_information?.SubLocalPanchayat,
-                        registration_code: userData.registration_code
+                        gahoi_code: userData.gahoi_code
                       }
                     }
                   } 

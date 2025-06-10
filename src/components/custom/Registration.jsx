@@ -1342,15 +1342,15 @@ const RegistrationForm = () => {
       const result = await response.json();
       console.log("Form submitted successfully:", result);
 
-      // Extract registration code from the response
-      const registrationCode = result.data?.attributes?.registration_code || strapiData.registration_code;
+      // Extract gahoi code from the response
+      const gahoiCode = result.data?.attributes?.gahoi_code || strapiData.gahoi_code;
       
-      if (!registrationCode) {
-        throw new Error("Registration code not found in response");
+      if (!gahoiCode) {
+        throw new Error("Gahoi code not found in response");
       }
 
-      // Pass the registration code to showSuccessMessage
-      showSuccessMessage(registrationCode);
+      // Pass the gahoi code to showSuccessMessage
+      showSuccessMessage(gahoiCode);
     } catch (error) {
       console.error("Error submitting form:", error);
       alert(`Failed to submit form: ${error.message}`);
@@ -1360,7 +1360,7 @@ const RegistrationForm = () => {
   };
 
   // Separate function for showing success message
-  const showSuccessMessage = (registrationCode) => {
+  const showSuccessMessage = (gahoiCode) => {
     const successPopup = document.createElement("div");
     successPopup.className =
       "fixed inset-0 flex items-center justify-center z-50";
@@ -1376,7 +1376,7 @@ const RegistrationForm = () => {
           <h2 class="text-2xl font-bold text-gray-800 mb-2">Success!</h2>
           <p class="text-gray-600 mb-2">Registration successful!</p>
           <p class="text-gray-600 mb-2">Your Gahoi code is:</p>
-          <p class="text-xl font-bold text-[#FD7D01] mb-6">${registrationCode}</p>
+          <p class="text-xl font-bold text-[#FD7D01] mb-6">${gahoiCode}</p>
           <div class="w-full bg-gray-200 h-2 rounded-full mt-4">
             <div class="bg-[#FD7D01] h-2 rounded-full" style="width: 0%; transition: width 2s ease-in-out;" id="progress-bar"></div>
           </div>

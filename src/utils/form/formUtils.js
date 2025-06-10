@@ -526,7 +526,7 @@ export const formatFormData = (data, displayPictureId = null) => {
   // Generate registration code
   const genderCode = generateGenderCode(data.gender);
   const nationalityCode = generateNationalityCode(data.nationality);
-  const gahoiCode = generateGahoiCode(data.isGahoi);
+  const isGahoiCode = generateGahoiCode(data.isGahoi);
   const gotraCode = FIXED_CODES.gotra[data.gotra] 
     ? FIXED_CODES.gotra[data.gotra].padStart(2, '0')  // Ensure two digits
     : "01"; // Default to Vasar/Vastil/Vasal instead of "00"
@@ -538,7 +538,7 @@ export const formatFormData = (data, displayPictureId = null) => {
   const subLocalPanchayatCode = FIXED_CODES.subLocalPanchayat[data.subLocalPanchayat] || "80";
   const fullName = data.name || "";
 
-  const registrationCode = `${fullName ? fullName + '-' : ''}${genderCode}${nationalityCode}${gahoiCode}${gotraCode}${aaknaCode}${regionalAssemblyCode}${localPanchayatCode}${subLocalPanchayatCode}`;
+  const generatedGahoiCode = `${fullName ? fullName + '-' : ''}${genderCode}${nationalityCode}${isGahoiCode}${gotraCode}${aaknaCode}${regionalAssemblyCode}${localPanchayatCode}${subLocalPanchayatCode}`;
 
   // Check if state has regional assemblies
   const hasRegionalAssemblies = STATE_TO_ASSEMBLIES[data.state];
@@ -628,7 +628,7 @@ export const formatFormData = (data, displayPictureId = null) => {
     your_suggestions: {
       suggestions: data.suggestions ?? "",
     },
-    registration_code: registrationCode
+    gahoi_code: generatedGahoiCode
   };
 };
 
