@@ -1374,8 +1374,9 @@ const RegistrationForm = () => {
             </svg>
           </div>
           <h2 class="text-2xl font-bold text-gray-800 mb-2">Success!</h2>
-          <p class="text-gray-600 mb-6">Registration successful! Your Gahoi community code is: </p>
-          <p class="text-xl font-bold text-[#FD7D01] mb-6">Registration successful! Your Gahoi code is: ${registrationCode}</p>
+          <p class="text-gray-600 mb-2">Registration successful!</p>
+          <p class="text-gray-600 mb-2">Your Gahoi code is:</p>
+          <p class="text-xl font-bold text-[#FD7D01] mb-6">${registrationCode}</p>
           <div class="w-full bg-gray-200 h-2 rounded-full mt-4">
             <div class="bg-[#FD7D01] h-2 rounded-full" style="width: 0%; transition: width 2s ease-in-out;" id="progress-bar"></div>
           </div>
