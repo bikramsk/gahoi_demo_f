@@ -10,6 +10,8 @@ export const FORM_STEPS = [
       "birthDate",
       "marriageDate",
       "education",
+      "gotra",
+      "aakna",
       "currentAddress",
       "city",
       "district",
@@ -26,7 +28,7 @@ export const FORM_STEPS = [
   },
   {
     name: "Biographical Details",
-    fields: ["manglik", "grah", "handicap", "gotra", "aakna"],
+    fields: ["manglik", "grah", "handicap"],
   },
   {
     name: "Work Information",

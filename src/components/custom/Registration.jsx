@@ -1708,6 +1708,7 @@ const RegistrationForm = () => {
         return (
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Blood Group */}
               <div className="space-y-3">
                 <label className="block text-sm font-medium flex text-gray-700">
                 <svg
@@ -1748,6 +1749,7 @@ const RegistrationForm = () => {
                 )}
               </div>
 
+              {/* Birth Date */}
               <div className="space-y-3">
                 <label className=" text-sm font-medium text-gray-700 flex items-center">
                   <svg
@@ -1780,6 +1782,7 @@ const RegistrationForm = () => {
                 )}
               </div>
 
+              {/* Marriage Date */}
               <div className="space-y-3">
                 <label className=" text-sm font-medium text-gray-700 flex items-center">
                   <svg
@@ -1835,6 +1838,104 @@ const RegistrationForm = () => {
                 />
                 {hasError("education") && (
                   <p className="text-red-500 text-xs">{errors.education}</p>
+                )}
+              </div>
+
+              {/* Gotra */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Gotra
+                </label>
+                <select
+                  name="gotra"
+                  value={formData.gotra}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("gotra")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <option value="">Select Gotra</option>
+                  {[
+                    "Vasar/Vastil/Vasal",
+                    "Gol",
+                    "Gangal / Gagil",
+                    "Badal / Waghil / Bandal",
+                    "Kocchal / Kochil",
+                    "Jaital",
+                    "Vachhil",
+                    "Kachhil",
+                    "Bhaal",
+                    "Kohil",
+                    "Kasiv",
+                    "Kasav",
+                    "Single",
+                  ].map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                {hasError("gotra") && (
+                  <p className="text-red-500 text-xs mt-2 ml-1">
+                    {errors.gotra}
+                  </p>
+                )}
+              </div>
+
+              {/* Aakna */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                  </svg>
+                  Aakna
+                </label>
+                <select
+                  name="aakna"
+                  value={formData.aakna}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("aakna")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                  disabled={!formData.gotra}
+                >
+                  <option value="">Select Aakna</option>
+                  {getAaknaOptions().map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                {hasError("aakna") && (
+                  <p className="text-red-500 text-xs mt-2 ml-1">
+                    {errors.aakna}
+                  </p>
+                )}
+                {!formData.gotra && (
+                  <p className="text-gray-500 text-xs mt-2 ml-1 italic">
+                    Select a Gotra first to see available Aakna options
+                  </p>
                 )}
               </div>
 
@@ -2265,112 +2366,7 @@ const RegistrationForm = () => {
             </div>
             )}
 
-
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* Show Gotra fields only if marriageToAnotherCaste is false */}
-           
-                <>
-                  {/* Gotra */}
-                  <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 transition-all hover:shadow-md md:col-span-1 lg:col-span-1">
-                    <label className=" text-sm font-medium text-gray-700 mb-2 sm:mb-3 flex items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-red-600"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Gotra
-                    </label>
-                    <select
-                      name="gotra"
-                      value={formData.gotra}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
-                        hasError("gotra")
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      <option value="">Select Gotra</option>
-                      {[
-                        "Vasar/Vastil/Vasal",
-                        "Gol",
-                        "Gangal / Gagil",
-                        "Badal / Waghil / Bandal",
-                        "Kocchal / Kochil",
-                        "Jaital",
-                        "Vachhil",
-                        "Kachhil",
-                        "Bhaal",
-                        "Kohil",
-                        "Kasiv",
-                        "Kasav",
-                        "Single",
-                      ].map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    {hasError("gotra") && (
-                      <p className="text-red-500 text-xs mt-2 ml-1">
-                        {errors.gotra}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Aakna */}
-                  <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 transition-all hover:shadow-md md:col-span-1 lg:col-span-2">
-                    <label className=" text-sm font-medium text-gray-700 mb-2 sm:mb-3 flex items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 text-red-600"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-                      </svg>
-                      Aakna
-                    </label>
-                    <select
-                      name="aakna"
-                      value={formData.aakna}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
-                        hasError("aakna")
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-300"
-                      }`}
-                      disabled={!formData.gotra}
-                    >
-                      <option value="">Select Aakna</option>
-                      {getAaknaOptions().map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    {hasError("aakna") && (
-                      <p className="text-red-500 text-xs mt-2 ml-1">
-                        {errors.aakna}
-                      </p>
-                    )}
-                    {!formData.gotra && (
-                      <p className="text-gray-500 text-xs mt-2 ml-1 italic">
-                        Select a Gotra first to see available Aakna options
-                      </p>
-                    )}
-                  </div>
-                </>
-            
-            </div>
-            {/* Siblings Section */}
+           {/* Siblings Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-purple-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-800 flex items-center">
