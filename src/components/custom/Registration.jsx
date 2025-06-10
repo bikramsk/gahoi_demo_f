@@ -1048,11 +1048,17 @@ const RegistrationForm = () => {
         ),
       }));
 
+      // Clear field error
       if (errors[`familyDetails.${index}.${field}`]) {
         setErrors((prev) => ({
           ...prev,
           [`familyDetails.${index}.${field}`]: "",
         }));
+      }
+
+      // Auto-trigger WhatsApp invite for valid family member mobile numbers
+      if (field === "mobileNumber" && value.length === 10) {
+        openWhatsAppShare(value);
       }
     },
     [errors]
