@@ -71,14 +71,7 @@ const CommunityFunds = () => {
           photo: student.photo?.url ? 
             (student.photo.url.startsWith('http') ? student.photo.url : `${API_URL}${student.photo.url}`) : 
             '/placeholder-student.jpg',
-          supportAmount: student.supportAmount,
-          supporter: {
-            name: student.supporter_name,
-            role: student.supporter_role,
-            photo: student.supporter_photo?.url ? 
-              (student.supporter_photo.url.startsWith('http') ? student.supporter_photo.url : `${API_URL}${student.supporter_photo.url}`) : 
-              '/placeholder-supporter.jpg'
-          }
+     
         }));
 
         // Process contributors data
@@ -378,9 +371,7 @@ const CommunityFunds = () => {
                           <span className="text-sm font-medium text-red-800 bg-red-100 px-3 py-1 rounded-full">
                             {student.marks}
                           </span>
-                          <span className="text-sm font-medium text-green-800 bg-green-100 px-3 py-1 rounded-full">
-                            {student.supportAmount}
-                          </span>
+                       
                         </div>
                         <div className="overflow-y-auto mb-4 pr-2" style={{ maxHeight: '120px' }}>
                           <p className="text-gray-700 text-sm">{student.story}</p>
@@ -388,9 +379,9 @@ const CommunityFunds = () => {
                       </div>
                       <div className="border-t pt-4 mt-auto">
                         <p className="text-sm text-gray-500 mb-2">
-                          {t('funds.supportedBy')}
+                          {t('funds.HonoredBy')}
                         </p>
-                        <div className="flex items-center">
+                        {/* <div className="flex items-center">
                           <img
                             src={student.supporter.photo}
                             alt={student.supporter.name}
@@ -404,7 +395,7 @@ const CommunityFunds = () => {
                               {student.supporter.role}
                             </p>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>
@@ -576,3 +567,12 @@ const CommunityFunds = () => {
 };
 
 export default CommunityFunds;
+
+
+
+
+
+
+
+
+
