@@ -33,7 +33,8 @@
     "successStories": "Success Stories",
     "ongoingSupport": "Ongoing Support",
     "contributors": "Contributors",
-    "requests": "Fund Requests"
+    "requests": "Fund Requests",
+    "team": "Our Team"
   },
   "errors": {
     "required": "This field is required",
@@ -910,6 +911,25 @@
       "title": "Join Our Mission",
       "description": "Be a part of our community's growth. Your regular contribution can help shape the future of deserving students.",
       "button": "Contribute Now"
+    }
+  },
+  "team": {
+    "meta": {
+      "title": "Our Team - Gahoi Shakti",
+      "description": "Meet the dedicated team members of Gahoi Shakti who work tirelessly for our community's progress."
+    },
+    "hero": {
+      "title": "Meet Our Leadership Team",
+      "subtitle": "Dedicated individuals working together to strengthen and serve our community"
+    },
+    "tabs": {
+      "founders": "Founder Members",
+      "executive": "Executive Committee"
+    },
+    "memberCard": {
+      "contribution": "Contribution",
+      "contact": "Contact",
+      "email": "Email"
     }
   }
 } 

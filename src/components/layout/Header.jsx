@@ -41,6 +41,7 @@ const Header = () => {
     { to: '/', label: t('navigation.home') },
     { to: '/login', label: t('navigation.login') },
     { to: '/about-us', label: t('navigation.about') },
+    { to: '/our-team', label: t('navigation.team', 'Our Team') },
     { to: '/contact-us', label: t('navigation.contact') },
     { to: '/gau-seva', label: t('navigation.gauseva') },
     { to: '/gotra-aankna', label: t('navigation.gotraankna') },

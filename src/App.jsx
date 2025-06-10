@@ -16,8 +16,7 @@ import GotraAankna from "./components/custom/GotraAankna";
 import LatestNews from "./components/custom/LatestNews";
 import NotFound from "./components/NotFound";
 import CommunityFunds from "./components/custom/CommunityFunds";
-
-
+import OurTeam from "./components/custom/OurTeam";
 
 function App() {
   return (
@@ -32,6 +31,7 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/contact-us" element={<Contact />} />
           <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/our-team" element={<OurTeam />} />
           <Route path="/gau-seva" element={<CowSeva />} />
           <Route path="/gotra-aankna" element={<GotraAankna />} />
           <Route path="/video" element={<Video />} />
