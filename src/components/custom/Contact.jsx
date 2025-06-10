@@ -25,7 +25,7 @@ const Contact = () => {
     name: t('contact.addresses.primary.name'),
     address1: t('contact.addresses.primary.address1'),
     address2: t('contact.addresses.primary.address2'),
-    phone: "+91-9303872220",
+    phone: "+91-7049004444",
     email1: "gahoishakti@gmail.com",
     email2: ""
   };
@@ -34,7 +34,7 @@ const Contact = () => {
     name: t('contact.addresses.secondary.name'),
     address1: t('contact.addresses.secondary.address1'),
     address2: t('contact.addresses.secondary.address2'),
-    phone: "+91-9826260742",
+    phone: "+91-7049004444",
     email1: "gahoishakti@gmail.com"
   };
 
@@ -218,13 +218,13 @@ const Contact = () => {
               </div>
 
               <ul className="space-y-3">
-                <li className="flex items-start">
+                {/* <li className="flex items-start">
                   <span
                     className={`text-gray-800 font-medium ${languageFontClass}`}
                   >
                     {contact1.name}
                   </span>
-                </li>
+                </li> */}
               
                 <li className="flex items-start">
                   <span className={`text-gray-700 ${languageFontClass}`}>
@@ -336,13 +336,13 @@ const Contact = () => {
               </div>
 
               <ul className="space-y-3">
-                <li className="flex items-start">
+                {/* <li className="flex items-start">
                   <span
                     className={`text-gray-800 font-medium ${languageFontClass}`}
                   >
                     {contact2.name}
                   </span>
-                </li>
+                </li> */}
                 <li className="flex items-start">
                   <span className={`text-gray-700 ${languageFontClass}`}>
                     {contact2.address1}
@@ -560,7 +560,7 @@ const Contact = () => {
             <div className="bg-white shadow-md p-5 rounded-lg border-l-4 border-red-700 overflow-hidden">
               <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3571.902579839127!2d78.1901808!3d26.2052578!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3976c5b473dae069%3A0x52092015bef7d67b!2sGahoi%20Samaj%20India!5e0!3m2!1sen!2sin!4v1648123456789!5m2!1sen!2sin"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d229085.18221813333!2d78.02608282541516!3d26.214369957304502!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3976c5d1792291fb%3A0xff4fb56d65bc3adf!2sGwalior%2C%20Madhya%20Pradesh!5e0!3m2!1sen!2sin!4v1749533682285!5m2!1sen!2sin"
                   width="100%"
                   height="450"
                   style={{ border: 0 }}
