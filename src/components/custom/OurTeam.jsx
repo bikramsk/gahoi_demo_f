@@ -105,7 +105,7 @@ const OurTeam = () => {
       period: "2023-Present",
     image: "/dummy-profile.webp",
       contact: "+91 98XXXXXXXX",
-      email: "president@gahoisamaj.org"
+      email: "president@gahoishakti.in"
     },
     {
       name: "Shri Suresh Kumar Gahoi",
@@ -113,7 +113,7 @@ const OurTeam = () => {
       period: "2023-Present",
     image: "/dummy-profile.webp",
       contact: "+91 98XXXXXXXX",
-      email: "secretary@gahoisamaj.org"
+      email: "secretary@gahoishakti.in"
     },
     {
       name: "Shri Mahesh Kumar Gahoi",
@@ -121,7 +121,7 @@ const OurTeam = () => {
       period: "2023-Present",
     image: "/dummy-profile.webp",
       contact: "+91 98XXXXXXXX",
-      email: "treasurer@gahoisamaj.org"
+      email: "treasurer@gahoishakti.in"
     },
     {
         name: "Shri Rajesh Kumar Gahoi",
@@ -129,7 +129,7 @@ const OurTeam = () => {
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
-        email: "president@gahoisamaj.org"
+        email: "president@gahoishakti.in"
       },
       {
         name: "Shri Suresh Kumar Gahoi",
@@ -137,7 +137,7 @@ const OurTeam = () => {
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
-        email: "secretary@gahoisamaj.org"
+        email: "secretary@gahoishakti.in"
       },
       {
         name: "Shri Rajesh Kumar Gahoi",
@@ -145,7 +145,7 @@ const OurTeam = () => {
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
-        email: "president@gahoisamaj.org"
+        email: "president@gahoishakti.in"
       },
       {
         name: "Shri Suresh Kumar Gahoi",
@@ -153,7 +153,7 @@ const OurTeam = () => {
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
-        email: "secretary@gahoisamaj.org"
+        email: "secretary@gahoishakti.in"
       },
       {
         name: "Shri Rajesh Kumar Gahoi",
@@ -161,7 +161,7 @@ const OurTeam = () => {
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
-        email: "president@gahoisamaj.org"
+        email: "president@gahoishakti.in"
       },
       {
         name: "Shri Suresh Kumar Gahoi",
@@ -169,7 +169,7 @@ const OurTeam = () => {
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
-        email: "secretary@gahoisamaj.org"
+        email: "secretary@gahoishakti.in"
       },
   ];
 
