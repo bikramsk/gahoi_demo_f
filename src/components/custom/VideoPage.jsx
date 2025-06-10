@@ -27,66 +27,66 @@ const Video = () => {
       type: "local",
       title: "गहोई समुदाय के अग्रणी उद्यमियों की पहल"
     },
-    {
-      id: "d-e0ic5p658",
-      thumbnail: `https://img.youtube.com/vi/d-e0ic5p658/hqdefault.jpg`,
-      url: "https://youtu.be/d-e0ic5p658",
-      type: "youtube"
-    },
-    {
-      id: "gnJ6DxR2TuA",
-      thumbnail: `https://img.youtube.com/vi/gnJ6DxR2TuA/hqdefault.jpg`,
-      url: "https://youtu.be/gnJ6DxR2TuA",
-      type: "youtube"
-    },
-    {
-      id: "9GAF3Uj5BdY",
-      thumbnail: `https://img.youtube.com/vi/9GAF3Uj5BdY/hqdefault.jpg`,
-      url: "https://youtu.be/9GAF3Uj5BdY",
-      type: "youtube"
-    },
-    {
-      id: "K3edRRYRhtI",
-      thumbnail: `https://img.youtube.com/vi/K3edRRYRhtI/hqdefault.jpg`,
-      url: "https://youtu.be/K3edRRYRhtI",
-      type: "youtube"
-    },
-    {
-      id: "HTRAylDOagI",
-      thumbnail: `https://img.youtube.com/vi/HTRAylDOagI/hqdefault.jpg`,
-      url: "https://youtu.be/HTRAylDOagI",
-      type: "youtube"
-    },
-    {
-      id: "MagfvlEf2KI",
-      thumbnail: `https://img.youtube.com/vi/MagfvlEf2KI/hqdefault.jpg`,
-      url: "https://youtu.be/MagfvlEf2KI",
-      type: "youtube"
-    },
-    {
-      id: "1h343roqIvU",
-      thumbnail: `https://img.youtube.com/vi/1h343roqIvU/hqdefault.jpg`,
-      url: "https://youtu.be/1h343roqIvU",
-      type: "youtube"
-    },
-    {
-      id: "J4yCyLCgwd0",
-      thumbnail: `https://img.youtube.com/vi/J4yCyLCgwd0/hqdefault.jpg`,
-      url: "https://youtu.be/J4yCyLCgwd0",
-      type: "youtube"
-    },
-    {
-      id: "Zp884vfPTTA",
-      thumbnail: `https://img.youtube.com/vi/Zp884vfPTTA/hqdefault.jpg`,
-      url: "https://youtu.be/Zp884vfPTTA",
-      type: "youtube"
-    },
-    {
-      id: "F8iMz5U1ACs",
-      thumbnail: `https://img.youtube.com/vi/F8iMz5U1ACs/hqdefault.jpg`,
-      url: "https://youtu.be/F8iMz5U1ACs",
-      type: "youtube"
-    },
+    // {
+    //   id: "d-e0ic5p658",
+    //   thumbnail: `https://img.youtube.com/vi/d-e0ic5p658/hqdefault.jpg`,
+    //   url: "https://youtu.be/d-e0ic5p658",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "gnJ6DxR2TuA",
+    //   thumbnail: `https://img.youtube.com/vi/gnJ6DxR2TuA/hqdefault.jpg`,
+    //   url: "https://youtu.be/gnJ6DxR2TuA",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "9GAF3Uj5BdY",
+    //   thumbnail: `https://img.youtube.com/vi/9GAF3Uj5BdY/hqdefault.jpg`,
+    //   url: "https://youtu.be/9GAF3Uj5BdY",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "K3edRRYRhtI",
+    //   thumbnail: `https://img.youtube.com/vi/K3edRRYRhtI/hqdefault.jpg`,
+    //   url: "https://youtu.be/K3edRRYRhtI",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "HTRAylDOagI",
+    //   thumbnail: `https://img.youtube.com/vi/HTRAylDOagI/hqdefault.jpg`,
+    //   url: "https://youtu.be/HTRAylDOagI",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "MagfvlEf2KI",
+    //   thumbnail: `https://img.youtube.com/vi/MagfvlEf2KI/hqdefault.jpg`,
+    //   url: "https://youtu.be/MagfvlEf2KI",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "1h343roqIvU",
+    //   thumbnail: `https://img.youtube.com/vi/1h343roqIvU/hqdefault.jpg`,
+    //   url: "https://youtu.be/1h343roqIvU",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "J4yCyLCgwd0",
+    //   thumbnail: `https://img.youtube.com/vi/J4yCyLCgwd0/hqdefault.jpg`,
+    //   url: "https://youtu.be/J4yCyLCgwd0",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "Zp884vfPTTA",
+    //   thumbnail: `https://img.youtube.com/vi/Zp884vfPTTA/hqdefault.jpg`,
+    //   url: "https://youtu.be/Zp884vfPTTA",
+    //   type: "youtube"
+    // },
+    // {
+    //   id: "F8iMz5U1ACs",
+    //   thumbnail: `https://img.youtube.com/vi/F8iMz5U1ACs/hqdefault.jpg`,
+    //   url: "https://youtu.be/F8iMz5U1ACs",
+    //   type: "youtube"
+    // },
   
   ];
 
@@ -243,7 +243,7 @@ const Video = () => {
                   )}
 
                   {/* Video Info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+                  {/* <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
                     <h3 className="text-white font-medium text-lg mb-1">
                       {video.title || `गहोई वैश्य महासभा वीडियो ${index + 1}`}
                     </h3>
@@ -253,7 +253,7 @@ const Video = () => {
                       </svg>
                       {video.type === "youtube" ? "Watch on YouTube" : "Watch Video"}
                     </p>
-                  </div>
+                  </div> */}
                 </div>
               ))}
             </div>
