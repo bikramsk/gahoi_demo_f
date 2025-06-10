@@ -1342,8 +1342,15 @@ const RegistrationForm = () => {
       const result = await response.json();
       console.log("Form submitted successfully:", result);
 
+      // Extract registration code from the response
+      const registrationCode = result.data?.attributes?.registration_code || strapiData.registration_code;
+      
+      if (!registrationCode) {
+        throw new Error("Registration code not found in response");
+      }
+
       // Pass the registration code to showSuccessMessage
-      showSuccessMessage(result.data.attributes.registration_code);
+      showSuccessMessage(registrationCode);
     } catch (error) {
       console.error("Error submitting form:", error);
       alert(`Failed to submit form: ${error.message}`);
