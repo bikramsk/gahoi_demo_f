@@ -38,11 +38,11 @@ const Footer = () => {
                   {t('navigation.latestNews')}
                 </Link>
               </li>
-              <li className="w-1/2 mb-2">
+              {/* <li className="w-1/2 mb-2">
                 <Link to="/socialflagsong" className={`${hindiTextClass} text-red-200 hover:text-yellow-100 transition-colors`}>
                   {t('navigation.socialFlagSong')}
                 </Link>
-              </li>
+              </li> */}
               <li className="w-1/2 mb-2">
                 <Link to="/video" className={`${hindiTextClass} text-red-200 hover:text-yellow-100 transition-colors`}>
                   {t('navigation.video')}
