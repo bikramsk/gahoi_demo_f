@@ -22,7 +22,7 @@ const SupportedStudentsSection = () => {
             headers: {
               'Content-Type': 'application/json',
               ...(import.meta.env.VITE_API_TOKEN && {
-                // 'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
+                'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
               })
             }
           }
@@ -42,13 +42,13 @@ const SupportedStudentsSection = () => {
             (student.photo.url.startsWith('http') ? student.photo.url : `${API_URL}${student.photo.url}`) : 
             '/placeholder-student.jpg',
           supportAmount: student.supportAmount,
-          supporter: {
-            name: student.supporter_name,
-            role: student.supporter_role,
-            photo: student.supporter_photo?.url ? 
-              (student.supporter_photo.url.startsWith('http') ? student.supporter_photo.url : `${API_URL}${student.supporter_photo.url}`) : 
-              '/placeholder-supporter.jpg'
-          }
+          // supporter: {
+          //   name: student.supporter_name,
+          //   role: student.supporter_role,
+          //   photo: student.supporter_photo?.url ? 
+          //     (student.supporter_photo.url.startsWith('http') ? student.supporter_photo.url : `${API_URL}${student.supporter_photo.url}`) : 
+          //     '/placeholder-supporter.jpg'
+          // }
         }));
         setSupportedStudents(processedStudents);
         setIsLoading(false);
@@ -141,10 +141,10 @@ const SupportedStudentsSection = () => {
                     </div>
                   </div>
                   <div className="border-t pt-4 mt-auto">
-                    <p className="text-sm text-gray-500 mb-2">
-                      {t('funds.supportedBy')}
-                    </p>
-                    <div className="flex items-center">
+                        <p className="text-sm text-gray-500 mb-2">
+                          {t('funds.HonoredBy')}
+                        </p>
+                    {/* <div className="flex items-center">
                       <img
                         src={student.supporter.photo}
                         alt={student.supporter.name}
@@ -158,7 +158,7 @@ const SupportedStudentsSection = () => {
                           {student.supporter.role}
                         </p>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

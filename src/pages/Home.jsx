@@ -93,14 +93,8 @@ const SuccessStories = lazyImport(
   "SuccessStories"
 );
 
-const NewsSubmissionSection = lazyImport(
-  () => import("../components/sections/NewsSubmissionSection"),
-  "NewsSubmissionSection"
-);
-const StayConnected = lazyImport(
-  () => import("../components/sections/StayConnected"),
-  "StayConnected"
-);
+
+
 const LatestNewsSection = lazyImport(
   () => import("../components/sections/LatestNewsSection"),
   "LatestNewsSection"
@@ -242,15 +236,7 @@ const Home = () => {
         <SuccessStories />
       </SectionWrapper>
 
-      {/* Community Suggestions */}
-      <SectionWrapper name="NewsSubmissionSection">
-        <NewsSubmissionSection />
-      </SectionWrapper>
-
-      {/* Stay Connected */}
-      <SectionWrapper name="StayConnected">
-        <StayConnected />
-      </SectionWrapper>
+  
     </div>
   );
 };

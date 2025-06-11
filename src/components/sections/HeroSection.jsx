@@ -33,7 +33,7 @@ const HeroSection = () => {
                 'Content-Type': 'application/json',
                 // Only include Authorization if token exists
                 ...(import.meta.env.VITE_API_TOKEN && {
-                  // 'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
+                  'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
                 })
               }
             });
