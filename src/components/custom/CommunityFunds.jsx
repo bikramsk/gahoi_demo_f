@@ -125,7 +125,9 @@ const CommunityFunds = () => {
           gap: "4px",
           margin: "0",
           padding: "0",
-          listStyle: "none" 
+          listStyle: "none",
+          maxWidth: "100%",
+          overflow: "hidden" 
         }}> 
           {dots} 
         </ul>
@@ -155,7 +157,9 @@ const CommunityFunds = () => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
-          dots: true
+          dots: true,
+          centerMode: true,
+          centerPadding: '0px'
         }
       }
     ]
