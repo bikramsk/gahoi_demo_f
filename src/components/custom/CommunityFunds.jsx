@@ -112,24 +112,50 @@ const CommunityFunds = () => {
     infinite: true,
     speed: 500,
     slidesToShow: 3,
-    slidesToScroll: 1,
+    slidesToScroll: 3,
     autoplay: true,
     autoplaySpeed: 3000,
     arrows: true,
     className: "supported-students-slider",
+    appendDots: dots => (
+      <div style={{ bottom: "-40px" }}>
+        <ul style={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          gap: "4px",
+          margin: "0",
+          padding: "0",
+          listStyle: "none" 
+        }}> 
+          {dots} 
+        </ul>
+      </div>
+    ),
+    customPaging: () => (
+      <div style={{
+        width: "8px",
+        height: "8px",
+        borderRadius: "50%",
+        backgroundColor: "rgb(153, 27, 27)",
+        opacity: "0.5",
+        transition: "all 0.3s ease"
+      }}></div>
+    ),
     responsive: [
       {
         breakpoint: 1024,
         settings: {
           slidesToShow: 2,
-          slidesToScroll: 1,
+          slidesToScroll: 2,
+          dots: true
         }
       },
       {
         breakpoint: 640,
         settings: {
           slidesToShow: 1,
-          slidesToScroll: 1
+          slidesToScroll: 1,
+          dots: true
         }
       }
     ]
@@ -381,21 +407,7 @@ const CommunityFunds = () => {
                         <p className="text-sm text-gray-500 mb-2">
                           {t('funds.HonoredBy')}
                         </p>
-                        {/* <div className="flex items-center">
-                          <img
-                            src={student.supporter.photo}
-                            alt={student.supporter.name}
-                            className="w-10 h-10 rounded-full object-cover mr-3"
-                          />
-                          <div className="flex flex-col">
-                            <p className="text-sm font-medium text-gray-900">
-                              {student.supporter.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {student.supporter.role}
-                            </p>
-                          </div>
-                        </div> */}
+                       
                       </div>
                     </div>
                   </div>
