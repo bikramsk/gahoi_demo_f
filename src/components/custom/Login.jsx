@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { getLoginPageData } from "../../data/loader";
 
 console.log('Environment Variables:', {
   MODE: import.meta.env.MODE,
+  RECAPTCHA_SITE_KEY: import.meta.env.VITE_RECAPTCHA_SITE_KEY
 });
 
+
 const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://api.gahoishakti.in/'
+  ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337'; 
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6Lc4VVkrAAAAAIxY8hXck_UVMmmIqNxjFWaLqq3u';
 
-
+console.log('Using API BASE:', API_BASE);
 
 // Check if user exists and has MPIN
 const checkUserAndMPIN = async (mobileNumber) => {
@@ -29,7 +33,7 @@ const checkUserAndMPIN = async (mobileNumber) => {
     });
 
     const responseText = await response.text();
-   
+    console.log('Check User Response:', response.status, responseText);
 
     if (!response.ok) {
       throw new Error('Failed to check user status');
@@ -46,7 +50,7 @@ const checkUserAndMPIN = async (mobileNumber) => {
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    const response = await fetch('https://api.gahoishakti.in//api/send-whatsapp-otp', {
+    const response = await fetch('https://api.gahoishakti.in/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -76,7 +80,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
 const verifyOTP = async (mobileNumber, otp) => {
   try {
-    const response = await fetch('https://api.gahoishakti.in//api/verify-otp', {
+    const response = await fetch('https://api.gahoishakti.in/api/verify-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -185,9 +189,11 @@ const Login = () => {
   const [showMpinInput, setShowMpinInput] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const [userExists, setUserExists] = useState(false);
   const [userHasMPIN, setUserHasMPIN] = useState(false);
   const [hasMpin, setHasMpin] = useState(false);
+  const recaptchaRef = useRef(null);
   const [processSteps, setProcessSteps] = useState([
     { 
       id: 1,
@@ -530,6 +536,11 @@ const Login = () => {
 
     if (!showOtpInput) {
       // Sending OTP
+      if (!recaptchaVerified) {
+        setErrors({ mobileNumber: t('login.errors.recaptcha') });
+        return;
+      }
+      
       setLoading(true);
       try {
         const result = await sendWhatsAppOTP(formData.mobileNumber);
@@ -538,8 +549,13 @@ const Login = () => {
           setShowOtpInput(true);
           setOtpSent(true);
           setCurrentStep(2);
-          setCountdown(30);
+          setCountdown(60);
           setErrors({});
+          
+          if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+            setRecaptchaVerified(false);
+          }
         } else {
           throw new Error(result.message || 'Failed to send OTP');
         }
@@ -615,6 +631,16 @@ const Login = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRecaptchaChange = (value) => {
+    setRecaptchaVerified(!!value);
+    if (errors.mobileNumber && errors.mobileNumber.includes('captcha')) {
+      setErrors(prev => ({
+        ...prev,
+        mobileNumber: ''
+      }));
     }
   };
 
@@ -813,6 +839,20 @@ const Login = () => {
                   )}
                 </div>
 
+                {/* CAPTCHA - Only show if OTP input is not shown */}
+                {!showOtpInput && (
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex justify-center transform scale-90 sm:scale-100 origin-top">
+                      <ReCAPTCHA
+                        ref={recaptchaRef}
+                        sitekey={RECAPTCHA_SITE_KEY}
+                        onChange={handleRecaptchaChange}
+                        size="normal"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* MPIN Input for Existing Users */}
                 {hasMpin && showMpinInput && (
                   <div className="space-y-2">
@@ -960,9 +1000,9 @@ const Login = () => {
                 <div className="flex items-center justify-between pt-1">
                   <button 
                     type="submit" 
-                    disabled={loading}
+                    disabled={loading || (!showOtpInput && !showMpinCreation && !recaptchaVerified)}
                     className={`w-full bg-red-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 font-medium text-xs sm:text-sm flex items-center justify-center ${
-                      loading ? 'opacity-75 cursor-not-allowed' : ''
+                      loading || (!showOtpInput && !showMpinCreation && !recaptchaVerified) ? 'opacity-75 cursor-not-allowed' : ''
                     }`}
                   >
                     {loading && (

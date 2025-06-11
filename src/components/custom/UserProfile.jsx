@@ -17,7 +17,10 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
+        const token = localStorage.getItem('token');
+        
         console.log('Mobile Number:', mobileNumber || 'Missing');
+        console.log('Token:', token ? 'Present' : 'Missing');
 
         if (!mobileNumber) {
           console.log('No mobile number found - redirecting to login');
@@ -25,118 +28,108 @@ const UserProfile = () => {
           return;
         }
 
-        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information`;
+        // Updated API URL with proper filters and population
+        const url = `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
+
         console.log('API URL:', url);
 
-        try {
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            }
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`Failed to fetch user data: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('API Response data:', result);
+
+        if (result.data && result.data.length > 0) {
+          const userRecord = result.data[0];
+          console.log('Raw user record:', userRecord);
+          
+          // Transform the data
+          const transformedData = {
+            personal_information: {
+              full_name: userRecord.attributes?.name,
+              mobile_number: userRecord.attributes?.mobile_number,
+              email_address: userRecord.attributes?.email,
+              village: userRecord.attributes?.village,
+              Gender: userRecord.attributes?.gender,
+              nationality: userRecord.attributes?.nationality,
+              is_gahoi: userRecord.attributes?.is_gahoi,
+              display_picture: userRecord.attributes?.display_picture?.data?.attributes?.url
+            },
+            family_details: {
+              father_name: userRecord.attributes?.family_details?.father_name,
+              father_mobile: userRecord.attributes?.family_details?.father_mobile,
+              mother_name: userRecord.attributes?.family_details?.mother_name,
+              mother_mobile: userRecord.attributes?.family_details?.mother_mobile,
+              spouse_name: userRecord.attributes?.family_details?.spouse_name,
+              spouse_mobile: userRecord.attributes?.family_details?.spouse_mobile,
+              gotra: userRecord.attributes?.gotra,
+              aakna: userRecord.attributes?.aakna,
+              siblingDetails: userRecord.attributes?.family_details?.siblings || []
+            },
+            biographical_details: {
+              manglik_status: userRecord.attributes?.biographical_details?.manglik_status,
+              Grah: userRecord.attributes?.biographical_details?.grah,
+              Handicap: userRecord.attributes?.biographical_details?.handicap,
+              is_married: userRecord.attributes?.biographical_details?.is_married ? 'Married' : 'Unmarried',
+              marriage_to_another_caste: userRecord.attributes?.biographical_details?.marriage_to_another_caste
+            },
+            work_information: {
+              occupation: userRecord.attributes?.work_information?.occupation,
+              company_name: userRecord.attributes?.work_information?.company_name,
+              work_area: userRecord.attributes?.work_information?.work_area,
+              industrySector: userRecord.attributes?.work_information?.industry_sector
+            },
+            additional_details: {
+              blood_group: userRecord.attributes?.additional_details?.blood_group,
+              date_of_birth: userRecord.attributes?.additional_details?.date_of_birth,
+              higher_education: userRecord.attributes?.additional_details?.education,
+              current_address: userRecord.attributes?.additional_details?.current_address,
+              regional_information: {
+                State: userRecord.attributes?.additional_details?.regional_information?.state,
+                district: userRecord.attributes?.additional_details?.regional_information?.district,
+                city: userRecord.attributes?.additional_details?.regional_information?.city,
+                RegionalAssembly: userRecord.attributes?.additional_details?.regional_information?.regional_assembly,
+                LocalPanchayatName: userRecord.attributes?.additional_details?.regional_information?.local_panchayat_name,
+                LocalPanchayat: userRecord.attributes?.additional_details?.regional_information?.local_panchayat,
+                SubLocalPanchayat: userRecord.attributes?.additional_details?.regional_information?.sub_local_panchayat
+              }
+            },
+            child_name: userRecord.attributes?.child_name || [],
+            your_suggestions: {
+              suggestions: userRecord.attributes?.your_suggestions
+            },
+            gahoi_code: userRecord.attributes?.gahoi_code,
+            documentId: userRecord.id
+          };
+
+          console.log('Transformed data:', transformedData);
+          setUserData(transformedData);
+        } else {
+          console.log('No user found with mobile:', mobileNumber);
+          navigate('/registration', { 
+            state: { 
+              mobileNumber,
+              fromLogin: true 
+            } 
           });
-
-          console.log('Response status:', response.status);
-          console.log('Response ok:', response.ok);
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('API Error Response:', errorText);
-            throw new Error(`API request failed with status ${response.status}: ${errorText}`);
-          }
-
-          const result = await response.json();
-          console.log('API Response data:', result);
-
-          if (result.data && result.data.length > 0) {
-            const userRecord = result.data[0];
-            console.log('Raw user record:', userRecord);
-            
-            // Transform the data based on the flat API response structure
-            const transformedData = {
-              personal_information: {
-                full_name: userRecord.attributes?.name || '',
-                mobile_number: userRecord.attributes?.mobileNumber || '',
-                email_address: userRecord.attributes?.email || '',
-                village: userRecord.attributes?.village || '',
-                Gender: userRecord.attributes?.gender || '',
-                nationality: userRecord.attributes?.nationality || '',
-                is_gahoi: userRecord.attributes?.isGahoi || '',
-                display_picture: userRecord.attributes?.display_picture || null
-              },
-              family_details: {
-                father_name: userRecord.attributes?.familyDetails?.[0]?.name || '',
-                father_mobile: userRecord.attributes?.familyDetails?.[0]?.mobileNumber || '',
-                mother_name: userRecord.attributes?.familyDetails?.[1]?.name || '',
-                mother_mobile: userRecord.attributes?.familyDetails?.[1]?.mobileNumber || '',
-                spouse_name: userRecord.attributes?.familyDetails?.[2]?.name || '',
-                spouse_mobile: userRecord.attributes?.familyDetails?.[2]?.mobileNumber || '',
-                gotra: userRecord.attributes?.gotra || '',
-                aakna: userRecord.attributes?.aakna || '',
-                siblingDetails: userRecord.attributes?.familyDetails?.filter(member => member.relation === 'Sibling') || []
-              },
-              biographical_details: {
-                manglik_status: userRecord.attributes?.manglik || '',
-                Grah: userRecord.attributes?.grah || '',
-                Handicap: userRecord.attributes?.handicap || '',
-                is_married: userRecord.attributes?.isMarried ? 'Married' : 'Unmarried',
-                marriage_to_another_caste: userRecord.attributes?.marriageToAnotherCaste || ''
-              },
-              work_information: {
-                occupation: userRecord.attributes?.occupation || '',
-                company_name: userRecord.attributes?.companyName || '',
-                work_area: userRecord.attributes?.workArea || '',
-                industrySector: userRecord.attributes?.industrySector || ''
-              },
-              additional_details: {
-                blood_group: userRecord.attributes?.bloodGroup || '',
-                date_of_birth: userRecord.attributes?.birthDate || '',
-                date_of_marriage: userRecord.attributes?.marriageDate || '',
-                higher_education: userRecord.attributes?.education || '',
-                current_address: userRecord.attributes?.currentAddress || '',
-                regional_information: {
-                  State: userRecord.attributes?.state || '',
-                  district: userRecord.attributes?.district || '',
-                  city: userRecord.attributes?.city || '',
-                  RegionalAssembly: userRecord.attributes?.regionalAssembly || '',
-                  LocalPanchayatName: userRecord.attributes?.localPanchayatName || '',
-                  LocalPanchayat: userRecord.attributes?.localPanchayat || '',
-                  SubLocalPanchayat: userRecord.attributes?.subLocalPanchayat || ''
-                }
-              },
-              child_name: userRecord.attributes?.familyDetails?.filter(member => member.relation === 'Child')?.map(child => ({
-                child_name: child.name || '',
-                gender: child.gender || '',
-                phone_number: child.mobileNumber || ''
-              })) || [],
-              your_suggestions: {
-                suggestions: userRecord.attributes?.suggestions || ''
-              },
-              gahoi_code: userRecord.attributes?.gahoi_code || '',
-              documentId: userRecord.id
-            };
-
-            console.log('Transformed data:', transformedData);
-            setUserData(transformedData);
-          } else {
-            console.log('No registration found for mobile:', mobileNumber);
-            navigate('/registration', { 
-              state: { 
-                mobileNumber,
-                fromLogin: true 
-              } 
-            });
-          }
-        } catch (fetchError) {
-          console.error('Fetch Error:', fetchError);
-          setError(fetchError.message);
-          setTimeout(() => {
-            navigate('/login');
-          }, 3000);
         }
       } catch (error) {
-        console.error('Profile Error:', error);
+        console.error('Error fetching user data:', error);
         setError(error.message);
+        // Show error for 3 seconds before redirecting
         setTimeout(() => {
           navigate('/login');
         }, 3000);
@@ -242,7 +235,7 @@ const UserProfile = () => {
                     <label className="block text-sm font-medium text-gray-600">Profile Picture</label>
                     <div className="mt-2">
                       <img 
-                        src={`${API_BASE}${userData.personal_information.display_picture.url}`}
+                        src={`${API_BASE}${userData.personal_information.display_picture}`}
                         alt="Profile"
                         className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200"
                       />
