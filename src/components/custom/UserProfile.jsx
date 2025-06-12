@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = import.meta.env.MODE === 'production'
+const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
+
+// Add JWT debugging helper
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(window.atob(base64));
+    console.log('Decoded JWT:', {
+      id: decoded.id,
+      exp: new Date(decoded.exp * 1000).toLocaleString(),
+      iat: new Date(decoded.iat * 1000).toLocaleString()
+    });
+    return decoded;
+  } catch (e) {
+    console.error('Error decoding JWT:', e);
+    return null;
+  }
+};
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
@@ -27,13 +45,35 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const jwt = localStorage.getItem('jwt');
         
-        // Debug logging
-        console.log('Mobile Number:', mobileNumber);
-        console.log('JWT exists:', !!jwt);
-        console.log('JWT first 20 chars:', jwt ? jwt.substring(0, 20) : 'No JWT');
-        
+        // Enhanced debug logging
+        console.log('Debug Info:', {
+          mobileNumber,
+          hasJWT: !!jwt,
+          jwtFirstChars: jwt ? jwt.substring(0, 20) + '...' : 'No JWT'
+        });
+
         if (!jwt) {
           console.error('No JWT token found');
+          navigate('/login');
+          return;
+        }
+
+        // Decode and check JWT
+        const decodedToken = decodeJWT(jwt);
+        if (!decodedToken) {
+          console.error('Invalid JWT format');
+          navigate('/login');
+          return;
+        }
+
+        // Check if token is expired
+        const now = Math.floor(Date.now() / 1000);
+        if (decodedToken.exp && decodedToken.exp < now) {
+          console.error('JWT has expired', {
+            expiry: new Date(decodedToken.exp * 1000).toLocaleString(),
+            now: new Date().toLocaleString()
+          });
+          localStorage.removeItem('jwt');
           navigate('/login');
           return;
         }
@@ -41,58 +81,40 @@ const UserProfile = () => {
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         console.log('Request URL:', url);
 
-        try {
-          // First try with JWT
-          const response = await fetch(url, { 
-            headers: {
-              'Authorization': `Bearer ${jwt}`,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${jwt}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // Enhanced error logging
+        if (response.status === 401) {
+          const errorText = await response.text();
+          console.error('Authentication failed:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText,
+            headers: Object.fromEntries(response.headers.entries())
           });
-
-          // If JWT fails, try public access
-          if (response.status === 401) {
-            console.log('JWT auth failed, trying public access...');
-            const publicResponse = await fetch(url, {
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              }
-            });
-            
-            if (publicResponse.ok) {
-              const data = await publicResponse.json();
-              if (!data.data || data.data.length === 0) {
-                console.log('No user data found for mobile:', mobileNumber);
-                navigate('/login');
-                return;
-              }
-              setUserData(data.data[0].attributes);
-              setLoading(false);
-              return;
-            }
-          }
-
-          if (!response.ok) {
-            throw new Error(`Failed to fetch user data: ${response.status}`);
-          }
-
-          const data = await response.json();
-          if (!data.data || data.data.length === 0) {
-            console.log('No user data found for mobile:', mobileNumber);
-            navigate('/login');
-            return;
-          }
-
-          setUserData(data.data[0].attributes);
-          setLoading(false);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          setError('Failed to fetch user data');
-          setLoading(false);
           navigate('/login');
+          return;
         }
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.data || data.data.length === 0) {
+          console.log('No user data found for mobile:', mobileNumber);
+          navigate('/login');
+          return;
+        }
+
+        setUserData(data.data[0].attributes);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching user data:', error);
         setError('Failed to fetch user data');
@@ -259,7 +281,7 @@ const UserProfile = () => {
               <h1 className="text-gray-700 text-sm font-medium">{userData.personal_information?.full_name}</h1>
               <span className="text-gray-400">|</span>
               <p className="text-gray-600 text-sm">गहोई कोड: {userData.gahoi_code}</p>
-            </div>
+                </div>
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => {
@@ -291,10 +313,10 @@ const UserProfile = () => {
                 </svg>
                 लॉग आउट
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
+                </div>
+                </div>
+                </div>
+                </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
@@ -318,7 +340,7 @@ const UserProfile = () => {
                   </button>
                 ))}
               </nav>
-            </div>
+                </div>
 
             {/* Content Area */}
             <div className="flex-1 p-4 md:p-8">

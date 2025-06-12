@@ -367,15 +367,15 @@ const Login = () => {
 
   const verifyMPIN = async (mpin) => {
     try {
-      const response = await fetch(`${API_BASE}/api/verify-mpin`, {
+      const response = await fetch(`${API_BASE}/api/auth/local`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          mobileNumber: formData.mobileNumber,
-          mpin: mpin
+          identifier: formData.mobileNumber, 
+          password: mpin                     
         })
       });
 
@@ -387,16 +387,13 @@ const Login = () => {
       const data = await response.json();
       console.log('MPIN verification response:', data);
       
-      // Make sure we're storing the correct token format
       if (data.jwt) {
         localStorage.setItem('jwt', data.jwt);
-      } else if (data.token) {
-        localStorage.setItem('jwt', data.token);
+        localStorage.setItem('verifiedMobile', formData.mobileNumber);
+        return data;
       } else {
-        throw new Error('No token received from server');
+        throw new Error('No JWT token received from server');
       }
-      
-      return data;
     } catch (error) {
       console.error('Error verifying MPIN:', error);
       throw error;
