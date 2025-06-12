@@ -32,12 +32,12 @@ const UserProfile = () => {
           return;
         }
 
-        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
+        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=personal_information`;
         
         const response = await fetch(url, { 
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${jwt}`,
+            'Authorization': `Bearer ${jwt.trim()}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
@@ -68,7 +68,7 @@ const UserProfile = () => {
 
         setUserData(data.data[0].attributes);
         setLoading(false);
-      } catch (error) {
+      } catch (err) {
         setError('Failed to load profile data');
         setLoading(false);
       }
