@@ -33,26 +33,46 @@ const UserProfile = () => {
           return;
         }
 
-        // Clean the token of any whitespace or special characters
-        const cleanToken = jwt.replace(/\s+/g, '').trim();
+       
+        const cleanToken = jwt.trim().replace(/^Bearer\s+/i, '');
+        const authHeader = `Bearer ${cleanToken}`;
         
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=personal_information`;
         
-        console.log('Making request with token:', cleanToken.substring(0, 20) + '...');
+   
+        console.log('Request details:', {
+          url,
+          authHeader: authHeader.substring(0, 20) + '...',
+          mobileNumber
+        });
+
+        const headers = {
+          'Authorization': authHeader,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        };
+
+        console.log('Full headers:', headers);
         
         const response = await fetch(url, { 
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${cleanToken}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+          headers
         });
 
-        console.log('Response status:', response.status);
+        // Log complete response details
+        console.log('Response details:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers)
+        });
         
         if (response.status === 401) {
-          console.error('Authentication failed. Token might be invalid or expired.');
+          const errorText = await response.text();
+          console.error('Authentication failed:', {
+            status: response.status,
+            error: errorText,
+            token: cleanToken.substring(0, 20) + '...'
+          });
           localStorage.removeItem('jwt');
           localStorage.removeItem('verifiedMobile');
           navigate('/login');
