@@ -31,7 +31,7 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('token');
         
-        // Add detailed token validation
+      
         if (!token || token === 'undefined' || token === 'null') {
           console.log('Invalid or missing token - redirecting to login');
           navigate('/login');
@@ -50,7 +50,7 @@ const UserProfile = () => {
           tokenStart: token.substring(0, 10) + '...'
         });
 
-        // First, get the user data using mobile number
+        // user data using mobile number
         const userResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`, {
           method: 'GET',
           headers: {
@@ -60,7 +60,6 @@ const UserProfile = () => {
           }
         });
 
-        // Handle 401 specifically
         if (userResponse.status === 401) {
           console.log('Token expired or invalid - redirecting to login');
           localStorage.removeItem('token');
@@ -95,28 +94,33 @@ const UserProfile = () => {
 
         const userId = userData.data[0].id;
 
-        // Then fetch the complete profile with all relations
+        // complete profile with all relations
         const profileResponse = await fetch(
           `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`, 
           {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
             }
           }
         );
 
         if (!profileResponse.ok) {
           const errorText = await profileResponse.text();
-          console.error('Failed to fetch profile:', errorText);
-          throw new Error('Failed to fetch profile data');
+          console.error('Failed to fetch profile:', {
+            status: profileResponse.status,
+            statusText: profileResponse.statusText,
+            error: errorText
+          });
+          throw new Error(`Failed to fetch profile data: ${profileResponse.status} ${profileResponse.statusText}`);
         }
 
         const profileData = await profileResponse.json();
         console.log('Complete profile data:', profileData);
 
-        // Transform the data
+        // Transform data
         let transformedData = {
           personal_information: {
             full_name: profileData.data?.name || '',
