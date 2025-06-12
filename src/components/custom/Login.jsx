@@ -426,8 +426,21 @@ const Login = () => {
       try {
         const response = await verifyMPIN(formData.mpin);
         if (response.jwt) {
-          localStorage.setItem('jwt', response.jwt);
+          // Clean the token before storing
+          const cleanToken = response.jwt.replace(/^["'](.+)["']$/, '$1').trim();
+          
+          // Store credentials
+          localStorage.setItem('jwt', cleanToken);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
+          
+          // Debug log
+          console.log('Stored credentials:', {
+            jwt: `${cleanToken.substring(0, 20)}...`,
+            mobileNumber: formData.mobileNumber,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Navigate to profile
           navigate('/profile');
         }
       } catch (error) {

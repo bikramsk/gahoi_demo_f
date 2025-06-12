@@ -20,24 +20,53 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('personal');
+  const [authError, setAuthError] = useState(null);
+
+ 
+  const isValidToken = (token) => {
+    if (!token) return false;
+    
+
+    const cleanToken = token.replace(/^["'](.+)["']$/, '$1').trim();
+    
+   
+    const parts = cleanToken.split('.');
+    if (parts.length !== 3) return false;
+    
+  
+    return parts.every(part => /^[A-Za-z0-9-_]*$/.test(part));
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        // Add detailed debug logging
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const jwt = localStorage.getItem('jwt');
         
+        console.log('Auth State:', {
+          jwt: jwt ? `${jwt.substring(0, 20)}...` : null,
+          tokenLength: jwt?.length,
+          mobileNumber,
+          timestamp: new Date().toISOString()
+        });
+
         if (!jwt || !mobileNumber) {
-          console.error('Missing credentials:', { hasJwt: !!jwt, hasMobile: !!mobileNumber });
+          console.error('Missing auth credentials');
           navigate('/login');
           return;
         }
 
-       
-        const cleanToken = jwt.replace(/^"(.*)"$/, '$1').trim();
-        
+        if (!isValidToken(jwt)) {
+          console.error('Invalid token format detected');
+          localStorage.removeItem('jwt');
+          localStorage.removeItem('verifiedMobile');
+          navigate('/login');
+          return;
+        }
+
         const headers = {
-          'Authorization': `Bearer ${cleanToken}`,
+          'Authorization': `Bearer ${jwt}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         };
@@ -51,7 +80,7 @@ const UserProfile = () => {
         // Log the exact request being made
         console.log('Making request:', {
           url: `${url}?${params.toString()}`,
-          token: cleanToken.substring(0, 15) + '...',
+          token: jwt.substring(0, 15) + '...',
           headers
         });
 
@@ -176,6 +205,23 @@ const UserProfile = () => {
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
             Back to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h2>
+          <p className="text-gray-600">{authError}</p>
+          <button
+            onClick={() => navigate('/login')}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Return to Login
           </button>
         </div>
       </div>
