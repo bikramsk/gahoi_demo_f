@@ -5,17 +5,21 @@ import { useTranslation } from "react-i18next";
 import { getLoginPageData } from "../../data/loader";
 import { storeAuthData } from '../../utils/auth';
 
-console.log('Environment Variables:', {
-  MODE: import.meta.env.MODE
-});
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
-  : 'http://localhost:1337'; 
+  : 'http://localhost:1337';
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
 
+if (import.meta.env.MODE === 'development') {
+  console.log('Environment Variables:', {
+    MODE: import.meta.env.MODE,
+    API_BASE,
+    HAS_API_TOKEN: !!API_TOKEN
+  });
+}
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
