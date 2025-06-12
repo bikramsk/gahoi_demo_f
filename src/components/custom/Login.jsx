@@ -112,29 +112,6 @@ const verifyMPIN = async (mobileNumber, mpin) => {
   }
 };
 
-// Check if user has MPIN
-const checkUserMPIN = async (mobileNumber) => {
-  try {
-    const response = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
-      },
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to check user status');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error checking user MPIN:', error);
-    throw error;
-  }
-};
-
 const Login = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -231,22 +208,20 @@ const Login = () => {
             }
           });
 
-          if (!response.ok) {
-            throw new Error('Failed to check user status');
-          }
-
           const result = await response.json();
           console.log('User status check result:', result);
 
-          setUserExists(result.exists);
-          setUserHasMPIN(result.hasMPIN);
-          setHasMpin(result.hasMPIN);
-
-          if (result.exists && result.hasMPIN) {
+          if (result.exists) {
+            // Existing user - must have MPIN
+            setUserExists(true);
+            setHasMpin(true);
             setAuthMode('mpin');
             setShowMpinInput(true);
             setShowOtpInput(false);
           } else {
+            // New user - needs OTP and MPIN creation
+            setUserExists(false);
+            setHasMpin(false);
             setAuthMode('otp');
             setShowMpinInput(false);
           }
@@ -441,34 +416,10 @@ const Login = () => {
     setSubmitted(true);
     setErrors({});
 
-    if (showMpinCreation) {
-      if (validateMpin()) {
-        setLoading(true);
-        try {
-          await createMpin(mpinData.mpin);
-          console.log("Navigating to registration after MPIN creation with mobile:", formData.mobileNumber);
-          navigate('/registration', { 
-            state: { 
-              mobileNumber: formData.mobileNumber,
-              fromLogin: true,
-              processSteps: processSteps 
-            } 
-          });
-        } catch (error) {
-          setErrors({
-            mpin: error.message || 'Failed to create MPIN'
-          });
-        } finally {
-          setLoading(false);
-        }
-      }
-      return;
-    }
-
     if (!validateForm()) return;
 
-    if (hasMpin && showMpinInput) {
-      // MPIN Login flow
+    // Existing User Flow - MPIN Login
+    if (userExists && hasMpin) {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
@@ -487,8 +438,9 @@ const Login = () => {
       return;
     }
 
+    // New User Flow
     if (!showOtpInput) {
-      // Sending OTP - removed reCAPTCHA check
+      // Step 1: Send WhatsApp OTP
       setLoading(true);
       try {
         const result = await sendWhatsAppOTP(formData.mobileNumber);
@@ -506,32 +458,17 @@ const Login = () => {
       } finally {
         setLoading(false);
       }
-    } else {
-      // Verifying OTP
+    } else if (showOtpInput && !showMpinCreation) {
+      // Step 2: Verify OTP
       setLoading(true);
       try {
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
-        const token = response.jwt || response.token;
-        
-        if (token) {
-          localStorage.setItem('token', token);
+        if (response.jwt) {
+          localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          
-          // Check MPIN status again after OTP verification
-          const mpinStatus = await checkUserMPIN(formData.mobileNumber);
-          
-          if (!mpinStatus.hasMpin) {
-            setShowMpinCreation(true);
-            setCurrentStep(3);
-          } else {
-            navigate('/registration', {
-              state: {
-                mobileNumber: formData.mobileNumber,
-                fromLogin: true,
-                processSteps
-              }
-            });
-          }
+          // New user must create MPIN
+          setShowMpinCreation(true);
+          setCurrentStep(3);
         }
       } catch (error) {
         setErrors({
@@ -539,6 +476,27 @@ const Login = () => {
         });
       } finally {
         setLoading(false);
+      }
+    } else if (showMpinCreation) {
+      // Step 3: Create MPIN and complete registration
+      if (validateMpin()) {
+        setLoading(true);
+        try {
+          await createMpin(mpinData.mpin);
+          navigate('/registration', { 
+            state: { 
+              mobileNumber: formData.mobileNumber,
+              fromLogin: true,
+              processSteps: processSteps 
+            } 
+          });
+        } catch (error) {
+          setErrors({
+            mpin: error.message || 'Failed to create MPIN'
+          });
+        } finally {
+          setLoading(false);
+        }
       }
     }
   };
