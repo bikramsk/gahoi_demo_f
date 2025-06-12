@@ -367,32 +367,34 @@ const Login = () => {
 
   const verifyMPIN = async (mpin) => {
     try {
-      const response = await fetch(`${API_BASE}/api/auth/local`, {
+      // verify-mpin endpoint
+      const response = await fetch(`${API_BASE}/api/verify-mpin`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          identifier: formData.mobileNumber, 
-          password: mpin                     
+          mobileNumber: formData.mobileNumber,
+          mpin: mpin
         })
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Invalid MPIN');
+        throw new Error(data.error || 'Invalid MPIN');
       }
 
-      const data = await response.json();
       console.log('MPIN verification response:', data);
       
+      //  { jwt, isRegistered }
       if (data.jwt) {
         localStorage.setItem('jwt', data.jwt);
         localStorage.setItem('verifiedMobile', formData.mobileNumber);
         return data;
       } else {
-        throw new Error('No JWT token received from server');
+        throw new Error('No token received from server');
       }
     } catch (error) {
       console.error('Error verifying MPIN:', error);

@@ -46,80 +46,74 @@ const UserProfile = () => {
         const jwt = localStorage.getItem('jwt');
         
         // Enhanced debug logging
-        console.log('Debug Info:', {
+        console.log('Auth Debug:', {
           mobileNumber,
           hasJWT: !!jwt,
           jwtFirstChars: jwt ? jwt.substring(0, 20) + '...' : 'No JWT'
         });
-
-        if (!jwt) {
-          console.error('No JWT token found');
-          navigate('/login');
-          return;
-        }
-
-        // Decode and check JWT
-        const decodedToken = decodeJWT(jwt);
-        if (!decodedToken) {
-          console.error('Invalid JWT format');
-          navigate('/login');
-          return;
-        }
-
-        // Check if token is expired
-        const now = Math.floor(Date.now() / 1000);
-        if (decodedToken.exp && decodedToken.exp < now) {
-          console.error('JWT has expired', {
-            expiry: new Date(decodedToken.exp * 1000).toLocaleString(),
-            now: new Date().toLocaleString()
-          });
-          localStorage.removeItem('jwt');
+        
+        if (!jwt || !mobileNumber) {
+          console.error('Missing auth credentials');
           navigate('/login');
           return;
         }
 
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
-        console.log('Request URL:', url);
+        console.log('Fetching profile from:', url);
 
-        const response = await fetch(url, {
-          headers: {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
             'Authorization': `Bearer ${jwt}`,
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+              'Content-Type': 'application/json'
+            }
+          });
+
+        // Log response details for debugging
+        console.log('Profile Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
         });
 
-        // Enhanced error logging
         if (response.status === 401) {
-          const errorText = await response.text();
-          console.error('Authentication failed:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorText,
-            headers: Object.fromEntries(response.headers.entries())
-          });
+          console.error('JWT authentication failed');
+          localStorage.removeItem('jwt');
+          localStorage.removeItem('verifiedMobile');
           navigate('/login');
           return;
         }
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user data: ${response.status}`);
+          if (!response.ok) {
+            const errorText = await response.text();
+          console.error('API Error:', {
+            status: response.status,
+            error: errorText
+          });
+          throw new Error('Failed to fetch profile data');
         }
 
         const data = await response.json();
+        console.log('Profile Data:', data);
+
         if (!data.data || data.data.length === 0) {
-          console.log('No user data found for mobile:', mobileNumber);
-          navigate('/login');
+          console.log('No profile data found, redirecting to registration');
+            navigate('/registration', { 
+              state: { 
+                mobileNumber,
+                fromLogin: true 
+              } 
+            });
           return;
         }
 
         setUserData(data.data[0].attributes);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setError('Failed to fetch user data');
+        console.error('Profile fetch error:', error);
+        setError('Failed to load profile data');
         setLoading(false);
-        navigate('/login');
       }
     };
 
