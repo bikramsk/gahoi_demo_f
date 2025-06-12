@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { checkAuthState } from '../../utils/auth';
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
@@ -58,30 +59,16 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const mobileNumber = localStorage.getItem('verifiedMobile');
-        const jwt = localStorage.getItem('jwt');
-
-        // Enhanced debug logging
-        console.log('Auth Debug:', {
-          rawToken: jwt?.substring(0, 20) + '...',
-          hasToken: !!jwt,
-          mobileNumber,
-          timestamp: new Date().toISOString()
-        });
-
-        if (!jwt || !mobileNumber) {
-          console.error('Missing credentials');
-          localStorage.clear();
+        const { jwt, mobile } = checkAuthState();
+        
+        if (!jwt || !mobile) {
+          console.error('No auth data found');
           navigate('/login');
           return;
         }
 
-        // Clean and validate token
-        const cleanToken = jwt.replace(/^["'](.+)["']$/, '$1').trim();
-        
-        // Log exact headers being sent
         const headers = {
-          'Authorization': `Bearer ${cleanToken}`,
+          'Authorization': `Bearer ${jwt}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         };
@@ -93,7 +80,7 @@ const UserProfile = () => {
 
         const url = `${API_BASE}/api/registration-pages`;
         const params = new URLSearchParams({
-          'filters[personal_information][mobile_number][$eq]': mobileNumber,
+          'filters[personal_information][mobile_number][$eq]': mobile,
           'populate': 'personal_information'
         });
 
@@ -143,7 +130,7 @@ const UserProfile = () => {
           console.log('No profile data found, redirecting to registration');
           navigate('/registration', { 
             state: { 
-              mobileNumber,
+              mobileNumber: mobile,
               fromLogin: true 
             } 
           });

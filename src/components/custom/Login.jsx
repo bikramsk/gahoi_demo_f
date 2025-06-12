@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { getLoginPageData } from "../../data/loader";
+import { storeAuthData } from '../../utils/auth';
 
 console.log('Environment Variables:', {
   MODE: import.meta.env.MODE
@@ -426,21 +427,15 @@ const Login = () => {
       try {
         const response = await verifyMPIN(formData.mpin);
         if (response.jwt) {
-          // Clean the token before storing
-          const cleanToken = response.jwt.replace(/^["'](.+)["']$/, '$1').trim();
-          
-          // Store credentials
-          localStorage.setItem('jwt', cleanToken);
-          localStorage.setItem('verifiedMobile', formData.mobileNumber);
+          // Use the imported storeAuthData function instead of direct localStorage calls
+          storeAuthData(response.jwt, formData.mobileNumber);
           
           // Debug log
-          console.log('Stored credentials:', {
-            jwt: `${cleanToken.substring(0, 20)}...`,
-            mobileNumber: formData.mobileNumber,
+          console.log('Login successful:', {
+            mobile: formData.mobileNumber,
             timestamp: new Date().toISOString()
           });
           
-          // Navigate to profile
           navigate('/profile');
         }
       } catch (error) {
@@ -479,9 +474,8 @@ const Login = () => {
       try {
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
         if (response.jwt) {
-          localStorage.setItem('token', response.jwt);
-          localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          // New user must create MPIN
+          // Use storeAuthData here too
+          storeAuthData(response.jwt, formData.mobileNumber);
           setShowMpinCreation(true);
           setCurrentStep(3);
         }
