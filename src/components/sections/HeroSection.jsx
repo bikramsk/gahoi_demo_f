@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
 const HeroSection = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -15,7 +16,10 @@ const HeroSection = () => {
       try {
         // Try different API endpoints based on what works
         let response;
-        let apiUrl;
+        
+        // Get authentication token - try JWT first, fallback to API token
+        const jwt = localStorage.getItem('jwt');
+        const authToken = jwt || API_TOKEN;
         
         // Try multiple API patterns for Strapi v5
         const apiEndpoints = [
@@ -31,24 +35,19 @@ const HeroSection = () => {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',
-                // Only include Authorization if token exists
-                ...(import.meta.env.VITE_API_TOKEN && {
-                  'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
-                })
+                'Authorization': `Bearer ${authToken}`
               }
             });
 
             if (response.ok) {
-              apiUrl = endpoint;
               break;
             }
           } catch (err) {
-            // Continue to next endpoint
+            console.log('Trying next endpoint:', err);
           }
         }
 
         if (!response || !response.ok) {
-          const errorText = await response?.text() || 'No response received';
           throw new Error(`All API endpoints failed. Status: ${response?.status || 'Unknown'}`);
         }
 
@@ -61,14 +60,11 @@ const HeroSection = () => {
 
         const activeBanners = data
           .filter(item => {
-            // Filter for active banners with required images
-            // In Strapi v5, fields are directly on the item, not nested under attributes
             return item.isActive === true && 
                    item.desktopImage && 
                    item.mobileImage;
           })
           .map(item => {
-            // In Strapi v5, image objects are directly available (not nested under data.attributes)
             const desktopUrl = item.desktopImage.url;
             const mobileUrl = item.mobileImage.url;
             
@@ -80,7 +76,7 @@ const HeroSection = () => {
               order: item.order
             };
           })
-          .sort((a, b) => a.order - b.order); // Sort by order field
+          .sort((a, b) => a.order - b.order);
         
         if (activeBanners.length === 0) {
           throw new Error('No active banners found. Check that banners are published and isActive=true');
