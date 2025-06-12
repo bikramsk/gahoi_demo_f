@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.MODE === 'production'
-  ? 'https://api.gahoishakti.in'  
-  : 'http://localhost:1337';       
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1337';
 
-// for test
-const API_TOKEN = import.meta.env.VITE_API_TOKEN || '7155ea0ef2848c181d9a15d18f06a8cd5a4a42af4112e1ee7b7b80f7d718bc2c0e6ceab9fa83741775455557559dcc0d1c36478f20364ba001f46bdf0991749351a374cfdf9e67c4d252d83e45d7103a06619123763c882d93753deb86031e294be2f4b9a14ef5209a6e093c508adbd0bc6ad44c2bd20b182c4d739d1d9520b8';
+const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
-// Debug env
-console.log('Environment:', import.meta.env.MODE);
-console.log('API Token from env:', import.meta.env.VITE_API_TOKEN);
-console.log('Using API token:', API_TOKEN ? 'Yes' : 'No');
+if (!API_TOKEN) {
+  console.warn('API Token is not configured. Please check your environment variables.');
+}
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
