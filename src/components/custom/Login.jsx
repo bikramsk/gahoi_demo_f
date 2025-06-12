@@ -1,52 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { getLoginPageData } from "../../data/loader";
 
 console.log('Environment Variables:', {
-  MODE: import.meta.env.MODE,
-  RECAPTCHA_SITE_KEY: import.meta.env.VITE_RECAPTCHA_SITE_KEY
+  MODE: import.meta.env.MODE
 });
-
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337'; 
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6Lc4VVkrAAAAAIxY8hXck_UVMmmIqNxjFWaLqq3u';
 
 console.log('Using API BASE:', API_BASE);
-
-// Check if user exists and has MPIN
-const checkUserAndMPIN = async (mobileNumber) => {
-  try {
-    const response = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
-      },
-      credentials: 'include'
-    });
-
-    const responseText = await response.text();
-    console.log('Check User Response:', response.status, responseText);
-
-    if (!response.ok) {
-      throw new Error('Failed to check user status');
-    }
-
-    return JSON.parse(responseText);
-  } catch (error) {
-    console.error('Error checking user:', error);
-    throw error;
-  }
-};
-
-
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
@@ -181,19 +149,16 @@ const Login = () => {
     mpin: ''
   });
 
-  
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [authMode, setAuthMode] = useState('otp'); // 'otp' or 'mpin'
+  const [authMode, setAuthMode] = useState('otp');
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [showMpinInput, setShowMpinInput] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const [userExists, setUserExists] = useState(false);
   const [userHasMPIN, setUserHasMPIN] = useState(false);
   const [hasMpin, setHasMpin] = useState(false);
-  const recaptchaRef = useRef(null);
   const [processSteps, setProcessSteps] = useState([
     { 
       id: 1,
@@ -258,46 +223,39 @@ const Login = () => {
     const checkUser = async () => {
       if (formData.mobileNumber.length === 10) {
         try {
-          const result = await checkUserAndMPIN(formData.mobileNumber);
+          const response = await fetch(`${API_BASE}/api/check-user-mpin/${formData.mobileNumber}`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${API_TOKEN}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to check user status');
+          }
+
+          const result = await response.json();
+          console.log('User status check result:', result);
+
           setUserExists(result.exists);
           setUserHasMPIN(result.hasMPIN);
-          
-        
+          setHasMpin(result.hasMPIN);
+
           if (result.exists && result.hasMPIN) {
-         
-            setAuthMode('mpin'); 
-          } else {
-           
-            setAuthMode('otp');
-          }
-        } catch (error) {
-          console.error('Error checking user:', error);
-         
-          setAuthMode('otp');
-        }
-      }
-    };
-
-    if (formData.mobileNumber.length === 10) {
-      checkUser();
-    }
-  }, [formData.mobileNumber]);
-
-  // Check user MPIN status when mobile number is complete
-  useEffect(() => {
-    const checkUser = async () => {
-      if (formData.mobileNumber.length === 10) {
-        try {
-          const result = await checkUserMPIN(formData.mobileNumber);
-          setHasMpin(result.hasMpin);
-          if (result.hasMpin) {
+            setAuthMode('mpin');
             setShowMpinInput(true);
             setShowOtpInput(false);
+          } else {
+            setAuthMode('otp');
+            setShowMpinInput(false);
           }
         } catch (error) {
           console.error('Error checking user:', error);
-          setHasMpin(false);
-          setShowMpinInput(false);
+          setErrors(prev => ({
+            ...prev,
+            mobileNumber: 'Failed to check user status. Please try again.'
+          }));
         }
       }
     };
@@ -482,13 +440,12 @@ const Login = () => {
     e.preventDefault();
     setSubmitted(true);
     setErrors({});
-    
+
     if (showMpinCreation) {
       if (validateMpin()) {
         setLoading(true);
         try {
           await createMpin(mpinData.mpin);
-        
           console.log("Navigating to registration after MPIN creation with mobile:", formData.mobileNumber);
           navigate('/registration', { 
             state: { 
@@ -511,23 +468,19 @@ const Login = () => {
     if (!validateForm()) return;
 
     if (hasMpin && showMpinInput) {
-      // MPIN Login
+      // MPIN Login flow
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
         if (response.jwt) {
           localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          // Redirect to user profile instead of registration
           navigate('/profile');
-        } else {
-          throw new Error('Invalid MPIN');
         }
       } catch (error) {
         setErrors({
           mpin: error.message || 'Invalid MPIN'
         });
-        setFormData(prev => ({ ...prev, mpin: '' }));
       } finally {
         setLoading(false);
       }
@@ -535,33 +488,20 @@ const Login = () => {
     }
 
     if (!showOtpInput) {
-      // Sending OTP
-      if (!recaptchaVerified) {
-        setErrors({ mobileNumber: t('login.errors.recaptcha') });
-        return;
-      }
-      
+      // Sending OTP - removed reCAPTCHA check
       setLoading(true);
       try {
         const result = await sendWhatsAppOTP(formData.mobileNumber);
-        
-        if (result.success !== false && (result.success || result.data || result.message)) {
+        if (result.success !== false) {
           setShowOtpInput(true);
           setOtpSent(true);
           setCurrentStep(2);
           setCountdown(60);
           setErrors({});
-          
-          if (recaptchaRef.current) {
-            recaptchaRef.current.reset();
-            setRecaptchaVerified(false);
-          }
-        } else {
-          throw new Error(result.message || 'Failed to send OTP');
         }
       } catch (error) {
-        setErrors({ 
-          mobileNumber: error.message || t('login.errors.otpSendFailed')
+        setErrors({
+          mobileNumber: error.message || 'Failed to send OTP'
         });
       } finally {
         setLoading(false);
@@ -571,36 +511,32 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
-        
-        const token = response.jwt || response.token || response.data?.jwt || response.data?.token;
+        const token = response.jwt || response.token;
         
         if (token) {
           localStorage.setItem('token', token);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           
-          if (!response.hasMpin) {
-            // Show MPIN creation form if user doesn't have MPIN
+          // Check MPIN status again after OTP verification
+          const mpinStatus = await checkUserMPIN(formData.mobileNumber);
+          
+          if (!mpinStatus.hasMpin) {
             setShowMpinCreation(true);
             setCurrentStep(3);
           } else {
-            // User already has MPIN, go to registration
-            console.log("Navigating to registration with mobile:", formData.mobileNumber);
-            navigate('/registration', { 
-              state: { 
+            navigate('/registration', {
+              state: {
                 mobileNumber: formData.mobileNumber,
                 fromLogin: true,
-                processSteps: processSteps 
-              } 
+                processSteps
+              }
             });
           }
-        } else {
-          throw new Error(response.message || 'Invalid OTP');
         }
       } catch (error) {
-        setErrors({ 
-          otp: error.message || t('login.errors.invalidOtp')
+        setErrors({
+          otp: error.message || 'Invalid OTP'
         });
-        setFormData(prev => ({ ...prev, otp: '' }));
       } finally {
         setLoading(false);
       }
@@ -631,16 +567,6 @@ const Login = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleRecaptchaChange = (value) => {
-    setRecaptchaVerified(!!value);
-    if (errors.mobileNumber && errors.mobileNumber.includes('captcha')) {
-      setErrors(prev => ({
-        ...prev,
-        mobileNumber: ''
-      }));
     }
   };
 
@@ -839,20 +765,6 @@ const Login = () => {
                   )}
                 </div>
 
-                {/* CAPTCHA - Only show if OTP input is not shown */}
-                {!showOtpInput && (
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex justify-center transform scale-90 sm:scale-100 origin-top">
-                      <ReCAPTCHA
-                        ref={recaptchaRef}
-                        sitekey={RECAPTCHA_SITE_KEY}
-                        onChange={handleRecaptchaChange}
-                        size="normal"
-                      />
-                    </div>
-                  </div>
-                )}
-
                 {/* MPIN Input for Existing Users */}
                 {hasMpin && showMpinInput && (
                   <div className="space-y-2">
@@ -1000,9 +912,9 @@ const Login = () => {
                 <div className="flex items-center justify-between pt-1">
                   <button 
                     type="submit" 
-                    disabled={loading || (!showOtpInput && !showMpinCreation && !recaptchaVerified)}
+                    disabled={loading || (!showOtpInput && !showMpinCreation)}
                     className={`w-full bg-red-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 font-medium text-xs sm:text-sm flex items-center justify-center ${
-                      loading || (!showOtpInput && !showMpinCreation && !recaptchaVerified) ? 'opacity-75 cursor-not-allowed' : ''
+                      loading || (!showOtpInput && !showMpinCreation) ? 'opacity-75 cursor-not-allowed' : ''
                     }`}
                   >
                     {loading && (
