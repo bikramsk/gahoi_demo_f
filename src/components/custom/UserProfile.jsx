@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://api.gahoishakti.in'
-  : 'http://localhost:1337';
+const API_BASE = import.meta.env.MODE === 'production'
+  ? 'https://api.gahoirishta.com'  // Production URL
+  : 'http://localhost:1337';       // Development URL
+
+console.log('API Base URL:', API_BASE);
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
@@ -29,30 +31,52 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('token');
         
-        console.log('Attempting to fetch user data:', {
-          mobileNumber,
-          token: token ? 'Present' : 'Missing'
-        });
-
-        if (!mobileNumber || !token) {
-          console.log('Missing credentials - redirecting to login');
-          navigate('/home');
+        // Add detailed token validation
+        if (!token || token === 'undefined' || token === 'null') {
+          console.log('Invalid or missing token - redirecting to login');
+          navigate('/login');
           return;
         }
+
+        if (!mobileNumber || mobileNumber === 'undefined' || mobileNumber === 'null') {
+          console.log('Invalid or missing mobile number - redirecting to login');
+          navigate('/login');
+          return;
+        }
+
+        console.log('Attempting to fetch user data with:', {
+          mobileNumber,
+          tokenLength: token.length,
+          tokenStart: token.substring(0, 10) + '...'
+        });
 
         // First, get the user data using mobile number
         const userResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         });
 
+        // Handle 401 specifically
+        if (userResponse.status === 401) {
+          console.log('Token expired or invalid - redirecting to login');
+          localStorage.removeItem('token');
+          localStorage.removeItem('verifiedMobile');
+          navigate('/login');
+          return;
+        }
+
         if (!userResponse.ok) {
           const errorText = await userResponse.text();
-          console.error('Failed to fetch user:', errorText);
-          throw new Error('Failed to fetch user data');
+          console.error('Failed to fetch user:', {
+            status: userResponse.status,
+            statusText: userResponse.statusText,
+            error: errorText
+          });
+          throw new Error(`Failed to fetch user data: ${userResponse.status} ${userResponse.statusText}`);
         }
 
         const userData = await userResponse.json();
@@ -93,66 +117,66 @@ const UserProfile = () => {
         console.log('Complete profile data:', profileData);
 
         // Transform the data
-            const transformedData = {
-              personal_information: {
-            full_name: profileData.data.attributes?.name || '',
-            mobile_number: profileData.data.attributes?.mobile_number || '',
-            email_address: profileData.data.attributes?.email || '',
-            village: profileData.data.attributes?.village || '',
-            Gender: profileData.data.attributes?.gender || '',
-            nationality: profileData.data.attributes?.nationality || '',
-            is_gahoi: profileData.data.attributes?.is_gahoi || false,
-            display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
-              },
-              family_details: {
-            father_name: profileData.data.attributes?.family_details?.father_name || '',
-            father_mobile: profileData.data.attributes?.family_details?.father_mobile || '',
-            mother_name: profileData.data.attributes?.family_details?.mother_name || '',
-            mother_mobile: profileData.data.attributes?.family_details?.mother_mobile || '',
-            spouse_name: profileData.data.attributes?.family_details?.spouse_name || '',
-            spouse_mobile: profileData.data.attributes?.family_details?.spouse_mobile || '',
-            gotra: profileData.data.attributes?.gotra || '',
-            aakna: profileData.data.attributes?.aakna || '',
-            siblingDetails: profileData.data.attributes?.family_details?.siblings || []
-              },
-              biographical_details: {
-            manglik_status: profileData.data.attributes?.biographical_details?.manglik_status || '',
-            Grah: profileData.data.attributes?.biographical_details?.grah || '',
-            Handicap: profileData.data.attributes?.biographical_details?.handicap || '',
-            is_married: profileData.data.attributes?.biographical_details?.is_married ? 'Married' : 'Unmarried',
-            marriage_to_another_caste: profileData.data.attributes?.biographical_details?.marriage_to_another_caste || ''
-              },
-              work_information: {
-            occupation: profileData.data.attributes?.work_information?.occupation || '',
-            company_name: profileData.data.attributes?.work_information?.company_name || '',
-            work_area: profileData.data.attributes?.work_information?.work_area || '',
-            industrySector: profileData.data.attributes?.work_information?.industry_sector || ''
-              },
-              additional_details: {
-            blood_group: profileData.data.attributes?.additional_details?.blood_group || '',
-            date_of_birth: profileData.data.attributes?.additional_details?.date_of_birth || '',
-            higher_education: profileData.data.attributes?.additional_details?.education || '',
-            current_address: profileData.data.attributes?.additional_details?.current_address || '',
-                regional_information: {
-              State: profileData.data.attributes?.additional_details?.regional_information?.state || '',
-              district: profileData.data.attributes?.additional_details?.regional_information?.district || '',
-              city: profileData.data.attributes?.additional_details?.regional_information?.city || '',
-              RegionalAssembly: profileData.data.attributes?.additional_details?.regional_information?.regional_assembly || '',
-              LocalPanchayatName: profileData.data.attributes?.additional_details?.regional_information?.local_panchayat_name || '',
-              LocalPanchayat: profileData.data.attributes?.additional_details?.regional_information?.local_panchayat || '',
-              SubLocalPanchayat: profileData.data.attributes?.additional_details?.regional_information?.sub_local_panchayat || ''
+        let transformedData = {
+          personal_information: {
+            full_name: profileData.data?.name || '',
+            mobile_number: profileData.data?.mobile_number || '',
+            email_address: profileData.data?.email || '',
+            village: profileData.data?.village || '',
+            Gender: profileData.data?.gender || '',
+            nationality: profileData.data?.nationality || '',
+            is_gahoi: profileData.data?.is_gahoi || false,
+            display_picture: profileData.data?.display_picture?.url || null
+          },
+          family_details: {
+            father_name: profileData.data?.family_details?.father_name || '',
+            father_mobile: profileData.data?.family_details?.father_mobile || '',
+            mother_name: profileData.data?.family_details?.mother_name || '',
+            mother_mobile: profileData.data?.family_details?.mother_mobile || '',
+            spouse_name: profileData.data?.family_details?.spouse_name || '',
+            spouse_mobile: profileData.data?.family_details?.spouse_mobile || '',
+            gotra: profileData.data?.gotra || '',
+            aakna: profileData.data?.aakna || '',
+            siblingDetails: profileData.data?.family_details?.siblings || []
+          },
+          biographical_details: {
+            manglik_status: profileData.data?.biographical_details?.manglik_status || '',
+            Grah: profileData.data?.biographical_details?.grah || '',
+            Handicap: profileData.data?.biographical_details?.handicap || '',
+            is_married: profileData.data?.biographical_details?.is_married ? 'Married' : 'Unmarried',
+            marriage_to_another_caste: profileData.data?.biographical_details?.marriage_to_another_caste || ''
+          },
+          work_information: {
+            occupation: profileData.data?.work_information?.occupation || '',
+            company_name: profileData.data?.work_information?.company_name || '',
+            work_area: profileData.data?.work_information?.work_area || '',
+            industrySector: profileData.data?.work_information?.industry_sector || ''
+          },
+          additional_details: {
+            blood_group: profileData.data?.additional_details?.blood_group || '',
+            date_of_birth: profileData.data?.additional_details?.date_of_birth || '',
+            higher_education: profileData.data?.additional_details?.education || '',
+            current_address: profileData.data?.additional_details?.current_address || '',
+            regional_information: {
+              State: profileData.data?.additional_details?.regional_information?.state || '',
+              district: profileData.data?.additional_details?.regional_information?.district || '',
+              city: profileData.data?.additional_details?.regional_information?.city || '',
+              RegionalAssembly: profileData.data?.additional_details?.regional_information?.regional_assembly || '',
+              LocalPanchayatName: profileData.data?.additional_details?.regional_information?.local_panchayat_name || '',
+              LocalPanchayat: profileData.data?.additional_details?.regional_information?.local_panchayat || '',
+              SubLocalPanchayat: profileData.data?.additional_details?.regional_information?.sub_local_panchayat || ''
             }
           },
-          child_name: profileData.data.attributes?.child_name || [],
-              your_suggestions: {
-            suggestions: profileData.data.attributes?.your_suggestions || ''
-              },
-          gahoi_code: profileData.data.attributes?.gahoi_code || '',
-          documentId: profileData.data.id
-            };
+          child_name: profileData.data?.child_name || [],
+          your_suggestions: {
+            suggestions: profileData.data?.your_suggestions || ''
+          },
+          gahoi_code: profileData.data?.gahoi_code || '',
+          documentId: profileData.data?.id
+        };
 
         console.log('Transformed user data:', transformedData);
-            setUserData(transformedData);
+        setUserData(transformedData);
         setLoading(false);
       } catch (error) {
         console.error('Error in fetchUserData:', error);
