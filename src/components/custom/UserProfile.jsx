@@ -29,15 +29,22 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
-        const token = localStorage.getItem('jwt'); // Get JWT token
+        const token = localStorage.getItem('jwt');
         console.log('Fetching user data with token:', token);
         console.log('Mobile number:', mobileNumber);
 
+        if (!token) {
+          console.error('No JWT token found');
+          navigate('/login');
+          return;
+        }
+
         const response = await fetch(
-          `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
+          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
             }
           }
         );
@@ -75,7 +82,7 @@ const UserProfile = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('jwt');
     localStorage.removeItem('verifiedMobile');
     navigate('/login');
   };

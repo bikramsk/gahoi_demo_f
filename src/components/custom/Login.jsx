@@ -418,7 +418,7 @@ const Login = () => {
       try {
         const response = await verifyMPIN(formData.mpin);
         if (response.jwt) {
-          localStorage.setItem('token', response.jwt);
+          localStorage.setItem('jwt', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           navigate('/profile');
         }
