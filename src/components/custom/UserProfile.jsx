@@ -76,24 +76,18 @@ const UserProfile = () => {
           return;
         }
 
-        // If token is valid, proceed with user data fetch
-        console.log('Token verified, fetching user data...');
-
-        console.log('Attempting to fetch user data with:', {
-          mobileNumber,
-          tokenLength: token.length,
-          tokenStart: token.substring(0, 10) + '...'
-        });
-
-        // user data using mobile number
-        const userResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+        // Fetch complete user profile in one call using mobile number
+        const userResponse = await fetch(
+          `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
           }
-        });
+        );
 
         if (userResponse.status === 401) {
           console.log('Token expired or invalid - redirecting to login');
@@ -114,7 +108,7 @@ const UserProfile = () => {
         }
 
         const userData = await userResponse.json();
-        console.log('Initial user data response:', userData);
+        console.log('User data response:', userData);
 
         if (!userData.data || userData.data.length === 0) {
           console.log('No user found - redirecting to registration');
@@ -127,91 +121,66 @@ const UserProfile = () => {
           return;
         }
 
-        const userId = userData.data[0].id;
-
-        // complete profile with all relations
-        const profileResponse = await fetch(
-          `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`, 
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
-          }
-        );
-
-        if (!profileResponse.ok) {
-          const errorText = await profileResponse.text();
-          console.error('Failed to fetch profile:', {
-            status: profileResponse.status,
-            statusText: profileResponse.statusText,
-            error: errorText
-          });
-          throw new Error(`Failed to fetch profile data: ${profileResponse.status} ${profileResponse.statusText}`);
-        }
-
-        const profileData = await profileResponse.json();
-        console.log('Complete profile data:', profileData);
+        const profileData = userData.data[0];
+        console.log('Profile data:', profileData);
 
         // Transform data
         let transformedData = {
           personal_information: {
-            full_name: profileData.data?.name || '',
-            mobile_number: profileData.data?.mobile_number || '',
-            email_address: profileData.data?.email || '',
-            village: profileData.data?.village || '',
-            Gender: profileData.data?.gender || '',
-            nationality: profileData.data?.nationality || '',
-            is_gahoi: profileData.data?.is_gahoi || false,
-            display_picture: profileData.data?.display_picture?.url || null
+            full_name: profileData?.name || '',
+            mobile_number: profileData?.mobile_number || '',
+            email_address: profileData?.email || '',
+            village: profileData?.village || '',
+            Gender: profileData?.gender || '',
+            nationality: profileData?.nationality || '',
+            is_gahoi: profileData?.is_gahoi || false,
+            display_picture: profileData?.display_picture?.url || null
           },
           family_details: {
-            father_name: profileData.data?.family_details?.father_name || '',
-            father_mobile: profileData.data?.family_details?.father_mobile || '',
-            mother_name: profileData.data?.family_details?.mother_name || '',
-            mother_mobile: profileData.data?.family_details?.mother_mobile || '',
-            spouse_name: profileData.data?.family_details?.spouse_name || '',
-            spouse_mobile: profileData.data?.family_details?.spouse_mobile || '',
-            gotra: profileData.data?.gotra || '',
-            aakna: profileData.data?.aakna || '',
-            siblingDetails: profileData.data?.family_details?.siblings || []
+            father_name: profileData?.family_details?.father_name || '',
+            father_mobile: profileData?.family_details?.father_mobile || '',
+            mother_name: profileData?.family_details?.mother_name || '',
+            mother_mobile: profileData?.family_details?.mother_mobile || '',
+            spouse_name: profileData?.family_details?.spouse_name || '',
+            spouse_mobile: profileData?.family_details?.spouse_mobile || '',
+            gotra: profileData?.gotra || '',
+            aakna: profileData?.aakna || '',
+            siblingDetails: profileData?.family_details?.siblings || []
           },
           biographical_details: {
-            manglik_status: profileData.data?.biographical_details?.manglik_status || '',
-            Grah: profileData.data?.biographical_details?.grah || '',
-            Handicap: profileData.data?.biographical_details?.handicap || '',
-            is_married: profileData.data?.biographical_details?.is_married ? 'Married' : 'Unmarried',
-            marriage_to_another_caste: profileData.data?.biographical_details?.marriage_to_another_caste || ''
+            manglik_status: profileData?.biographical_details?.manglik_status || '',
+            Grah: profileData?.biographical_details?.grah || '',
+            Handicap: profileData?.biographical_details?.handicap || '',
+            is_married: profileData?.biographical_details?.is_married ? 'Married' : 'Unmarried',
+            marriage_to_another_caste: profileData?.biographical_details?.marriage_to_another_caste || ''
           },
           work_information: {
-            occupation: profileData.data?.work_information?.occupation || '',
-            company_name: profileData.data?.work_information?.company_name || '',
-            work_area: profileData.data?.work_information?.work_area || '',
-            industrySector: profileData.data?.work_information?.industry_sector || ''
+            occupation: profileData?.work_information?.occupation || '',
+            company_name: profileData?.work_information?.company_name || '',
+            work_area: profileData?.work_information?.work_area || '',
+            industrySector: profileData?.work_information?.industry_sector || ''
           },
           additional_details: {
-            blood_group: profileData.data?.additional_details?.blood_group || '',
-            date_of_birth: profileData.data?.additional_details?.date_of_birth || '',
-            higher_education: profileData.data?.additional_details?.education || '',
-            current_address: profileData.data?.additional_details?.current_address || '',
+            blood_group: profileData?.additional_details?.blood_group || '',
+            date_of_birth: profileData?.additional_details?.date_of_birth || '',
+            higher_education: profileData?.additional_details?.education || '',
+            current_address: profileData?.additional_details?.current_address || '',
             regional_information: {
-              State: profileData.data?.additional_details?.regional_information?.state || '',
-              district: profileData.data?.additional_details?.regional_information?.district || '',
-              city: profileData.data?.additional_details?.regional_information?.city || '',
-              RegionalAssembly: profileData.data?.additional_details?.regional_information?.regional_assembly || '',
-              LocalPanchayatName: profileData.data?.additional_details?.regional_information?.local_panchayat_name || '',
-              LocalPanchayat: profileData.data?.additional_details?.regional_information?.local_panchayat || '',
-              SubLocalPanchayat: profileData.data?.additional_details?.regional_information?.sub_local_panchayat || ''
+              State: profileData?.additional_details?.regional_information?.state || '',
+              district: profileData?.additional_details?.regional_information?.district || '',
+              city: profileData?.additional_details?.regional_information?.city || '',
+              RegionalAssembly: profileData?.additional_details?.regional_information?.regional_assembly || '',
+              LocalPanchayatName: profileData?.additional_details?.regional_information?.local_panchayat_name || '',
+              LocalPanchayat: profileData?.additional_details?.regional_information?.local_panchayat || '',
+              SubLocalPanchayat: profileData?.additional_details?.regional_information?.sub_local_panchayat || ''
             }
           },
-          child_name: profileData.data?.child_name || [],
+          child_name: profileData?.child_name || [],
           your_suggestions: {
-            suggestions: profileData.data?.your_suggestions || ''
+            suggestions: profileData?.your_suggestions || ''
           },
-          gahoi_code: profileData.data?.gahoi_code || '',
-          documentId: profileData.data?.id
+          gahoi_code: profileData?.gahoi_code || '',
+          documentId: profileData?.id
         };
 
         console.log('Transformed user data:', transformedData);
