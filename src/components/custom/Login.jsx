@@ -3,23 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { getLoginPageData } from "../../data/loader";
-import { storeAuthData } from '../../utils/auth';
 
+console.log('Environment Variables:', {
+  MODE: import.meta.env.MODE
+});
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
-  : 'http://localhost:1337';
+  : 'http://localhost:1337'; 
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
-
-if (import.meta.env.MODE === 'development') {
-  console.log('Environment Variables:', {
-    MODE: import.meta.env.MODE,
-    API_BASE,
-    HAS_API_TOKEN: !!API_TOKEN
-  });
-}
+console.log('Using API BASE:', API_BASE);
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
@@ -36,7 +31,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       throw new Error(data.message || 'Failed to send OTP');
     }
 
-    // Store OTP
+    // Store OTP in sessionStorage if we're in development and OTP is returned
     if (import.meta.env.MODE === 'development' && data.otp) {
       console.log('Development OTP:', data.otp);
       sessionStorage.setItem('currentOTP', data.otp);
@@ -81,6 +76,42 @@ const verifyOTP = async (mobileNumber, otp) => {
   }
 };
 
+// Add MPIN verification function
+const verifyMPIN = async (mobileNumber, mpin) => {
+  try {
+    const response = await fetch(`${API_BASE}/api/verify-mpin`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_TOKEN}`
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        mobileNumber: mobileNumber,
+        mpin: mpin
+      })
+    });
+
+    const responseText = await response.text();
+    if (!response.ok) {
+      let errorMessage = 'MPIN verification failed';
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorData.error?.message || errorMessage;
+      } catch {
+        errorMessage = responseText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return JSON.parse(responseText);
+  } catch (error) {
+    console.error('Error verifying MPIN:', error);
+    throw error;
+  }
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -92,8 +123,7 @@ const Login = () => {
   const [formData, setFormData] = useState({
     mobileNumber: '',
     otp: '',
-    mpin: '',
-    confirmMpin: ''
+    mpin: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -139,7 +169,6 @@ const Login = () => {
     mpin: '',
     confirmMpin: ''
   });
-  const [error, setError] = useState('');
 
   React.useEffect(() => {
     const loadPageData = async () => {
@@ -370,52 +399,7 @@ const Login = () => {
     }
   };
 
-  // Update the verifyMPIN function
-  const verifyMPIN = async (mpin) => {
-    try {
-      const response = await fetch(`${API_BASE}/api/verify-mpin`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          mobileNumber: formData.mobileNumber,
-          mpin: mpin
-        })
-      });
-
-      const data = await response.json();
-      console.log('MPIN verification response:', data);
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Invalid MPIN');
-      }
-
-      if (data.jwt) {
-        // Store clean token without quotes
-        const cleanToken = data.jwt.replace(/^["'](.+)["']$/, '$1').trim();
-        
-        // Store both token and mobile number
-        localStorage.setItem('jwt', cleanToken);
-        localStorage.setItem('verifiedMobile', formData.mobileNumber);
-        
-        // Debug log
-        console.log('Credentials stored:', {
-          tokenPreview: `${cleanToken.substring(0, 20)}...`,
-          mobile: formData.mobileNumber
-        });
-        
-        return data;
-      }
-      throw new Error('No token received from server');
-    } catch (error) {
-      console.error('MPIN verification error:', error);
-      throw error;
-    }
-  };
-
-  
+  // Add countdown timer effect
   useEffect(() => {
     let timer;
     if (countdown > 0) {
@@ -426,6 +410,7 @@ const Login = () => {
     return () => clearInterval(timer);
   }, [countdown]);
 
+  // Modified handleSubmit to include MPIN creation
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
@@ -433,25 +418,17 @@ const Login = () => {
 
     if (!validateForm()) return;
 
-
+    // Existing User Flow - MPIN Login
     if (userExists && hasMpin) {
       setLoading(true);
       try {
-        const response = await verifyMPIN(formData.mpin);
+        const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
         if (response.jwt) {
-          // Debug log before navigation
-          console.log('Authentication successful, navigating to profile...');
-          
-          // Navigate to profile with the mobile number
-          navigate('/profile', { 
-            state: { 
-              mobileNumber: formData.mobileNumber,
-              isAuthenticated: true
-            }
-          });
+          localStorage.setItem('token', response.jwt);
+          localStorage.setItem('verifiedMobile', formData.mobileNumber);
+          navigate('/profile');
         }
       } catch (error) {
-        console.error('Login error:', error);
         setErrors({
           mpin: error.message || 'Invalid MPIN'
         });
@@ -487,8 +464,9 @@ const Login = () => {
       try {
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
         if (response.jwt) {
-          // Use storeAuthData here too
-          storeAuthData(response.jwt, formData.mobileNumber);
+          localStorage.setItem('token', response.jwt);
+          localStorage.setItem('verifiedMobile', formData.mobileNumber);
+          // New user must create MPIN
           setShowMpinCreation(true);
           setCurrentStep(3);
         }
@@ -579,14 +557,6 @@ const Login = () => {
     setShowOtpInput(false);
     setFormData(prev => ({ ...prev, mpin: '', otp: '' }));
     setErrors({});
-  };
-
-  // Display error message in the UI
-  const renderError = () => {
-    if (error) {
-      return <div className="text-red-500 text-sm mt-2">{error}</div>;
-    }
-    return null;
   };
 
   return (

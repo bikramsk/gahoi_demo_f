@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuthHeaders } from '../../utils/auth';
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
+
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
@@ -15,78 +16,225 @@ const SECTIONS = [
   { id: 'regional', title: 'Regional Information', icon: 'map' }
 ];
 
+// Add validateData function
+const validateData = (data) => {
+  if (!data) return null;
+  
+  const requiredFields = {
+    personal_information: ['full_name', 'mobile_number', 'email_address'],
+    family_details: ['father_name', 'mother_name'],
+    biographical_details: ['manglik_status', 'is_married'],
+    work_information: ['occupation'],
+    additional_details: ['blood_group', 'date_of_birth'],
+    regional_information: ['State', 'district', 'city']
+  };
+
+  const validatedData = { ...data };
+  
+  Object.entries(requiredFields).forEach(([section, fields]) => {
+    if (!validatedData[section]) {
+      validatedData[section] = {};
+    }
+    
+    fields.forEach(field => {
+      if (!validatedData[section][field]) {
+        validatedData[section][field] = 'Not Provided';
+      }
+    });
+  });
+
+  return validatedData;
+};
+
+// Loading skeleton component
+const LoadingSkeleton = () => (
+  <div className="animate-pulse">
+    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+    <div className="space-y-3">
+      <div className="h-8 bg-gray-200 rounded"></div>
+      <div className="h-8 bg-gray-200 rounded"></div>
+      <div className="h-8 bg-gray-200 rounded"></div>
+    </div>
+  </div>
+);
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="text-center py-8">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Something went wrong</h2>
+          <button 
+            onClick={() => window.location.reload()}
+            className="text-sm text-red-600 hover:text-red-700 underline"
+          >
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const UserProfile = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('personal');
-  const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const jwt = localStorage.getItem('jwt');
-        const mobile = localStorage.getItem('verifiedMobile');
+        const mobileNumber = localStorage.getItem('verifiedMobile');
+        const token = localStorage.getItem('token');
+        
+        console.log('Attempting to fetch user data:', {
+          mobileNumber,
+          token: token ? 'Present' : 'Missing'
+        });
 
-        if (!jwt || !mobile) {
-          setAuthError('Please log in to continue.');
+        if (!mobileNumber || !token) {
+          console.log('Missing credentials - redirecting to login');
           navigate('/login');
           return;
         }
 
-        const headers = getAuthHeaders(jwt);
-        if (!headers) {
-          setAuthError('Invalid session. Please log in again.');
-          navigate('/login');
+        // First, get the user data using mobile number
+        const userResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!userResponse.ok) {
+          const errorText = await userResponse.text();
+          console.error('Failed to fetch user:', errorText);
+          throw new Error('Failed to fetch user data');
+        }
+
+        const userData = await userResponse.json();
+        console.log('Initial user data response:', userData);
+
+        if (!userData.data || userData.data.length === 0) {
+          console.log('No user found - redirecting to registration');
+          navigate('/registration', { 
+            state: { 
+              mobileNumber,
+              fromLogin: true 
+            } 
+          });
           return;
         }
 
-        // Updated URL structure for Strapi v5
-        const response = await fetch(
-          `${API_BASE}/api/registration-pages?populate=deep&filters[personal_information][mobile_number]=${mobile}`,
+        const userId = userData.data[0].id;
+
+        // Then fetch the complete profile with all relations
+        const profileResponse = await fetch(
+          `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`, 
           {
             method: 'GET',
-            headers,
-            credentials: 'include'
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           }
         );
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API Error:', {
-            status: response.status,
-            error: errorText
-          });
-
-          if (response.status === 401) {
-            localStorage.removeItem('jwt');
-            localStorage.removeItem('verifiedMobile');
-            setAuthError('Your session has expired. Please log in again.');
-            navigate('/login');
-            return;
-          }
-          throw new Error(`Failed to fetch profile data: ${response.status}`);
+        if (!profileResponse.ok) {
+          const errorText = await profileResponse.text();
+          console.error('Failed to fetch profile:', errorText);
+          throw new Error('Failed to fetch profile data');
         }
 
-        const data = await response.json();
-        console.log('API Response:', data); // Debug log
-        
-        if (!data.data || data.data.length === 0) {
-          navigate('/registration', {
-            state: {
-              mobileNumber: mobile,
-              fromLogin: true
+        const profileData = await profileResponse.json();
+        console.log('Complete profile data:', profileData);
+
+        // Transform the data
+        const transformedData = {
+          personal_information: {
+            full_name: profileData.data.attributes?.name || '',
+            mobile_number: profileData.data.attributes?.mobile_number || '',
+            email_address: profileData.data.attributes?.email || '',
+            village: profileData.data.attributes?.village || '',
+            Gender: profileData.data.attributes?.gender || '',
+            nationality: profileData.data.attributes?.nationality || '',
+            is_gahoi: profileData.data.attributes?.is_gahoi || false,
+            display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
+          },
+          family_details: {
+            father_name: profileData.data.attributes?.family_details?.father_name || '',
+            father_mobile: profileData.data.attributes?.family_details?.father_mobile || '',
+            mother_name: profileData.data.attributes?.family_details?.mother_name || '',
+            mother_mobile: profileData.data.attributes?.family_details?.mother_mobile || '',
+            spouse_name: profileData.data.attributes?.family_details?.spouse_name || '',
+            spouse_mobile: profileData.data.attributes?.family_details?.spouse_mobile || '',
+            gotra: profileData.data.attributes?.gotra || '',
+            aakna: profileData.data.attributes?.aakna || '',
+            siblingDetails: profileData.data.attributes?.family_details?.siblings || []
+          },
+          biographical_details: {
+            manglik_status: profileData.data.attributes?.biographical_details?.manglik_status || '',
+            Grah: profileData.data.attributes?.biographical_details?.grah || '',
+            Handicap: profileData.data.attributes?.biographical_details?.handicap || '',
+            is_married: profileData.data.attributes?.biographical_details?.is_married ? 'Married' : 'Unmarried',
+            marriage_to_another_caste: profileData.data.attributes?.biographical_details?.marriage_to_another_caste || ''
+          },
+          work_information: {
+            occupation: profileData.data.attributes?.work_information?.occupation || '',
+            company_name: profileData.data.attributes?.work_information?.company_name || '',
+            work_area: profileData.data.attributes?.work_information?.work_area || '',
+            industrySector: profileData.data.attributes?.work_information?.industry_sector || ''
+          },
+          additional_details: {
+            blood_group: profileData.data.attributes?.additional_details?.blood_group || '',
+            date_of_birth: profileData.data.attributes?.additional_details?.date_of_birth || '',
+            higher_education: profileData.data.attributes?.additional_details?.education || '',
+            current_address: profileData.data.attributes?.additional_details?.current_address || '',
+            regional_information: {
+              State: profileData.data.attributes?.additional_details?.regional_information?.state || '',
+              district: profileData.data.attributes?.additional_details?.regional_information?.district || '',
+              city: profileData.data.attributes?.additional_details?.regional_information?.city || '',
+              RegionalAssembly: profileData.data.attributes?.additional_details?.regional_information?.regional_assembly || '',
+              LocalPanchayatName: profileData.data.attributes?.additional_details?.regional_information?.local_panchayat_name || '',
+              LocalPanchayat: profileData.data.attributes?.additional_details?.regional_information?.local_panchayat || '',
+              SubLocalPanchayat: profileData.data.attributes?.additional_details?.regional_information?.sub_local_panchayat || ''
             }
-          });
-          return;
-        }
+          },
+          child_name: profileData.data.attributes?.child_name || [],
+          your_suggestions: {
+            suggestions: profileData.data.attributes?.your_suggestions || ''
+          },
+          gahoi_code: profileData.data.attributes?.gahoi_code || '',
+          documentId: profileData.data.id
+        };
 
-        setUserData(data.data[0].attributes);
+        console.log('Transformed user data:', transformedData);
+
+        const validatedData = validateData(transformedData);
+        setUserData(validatedData);
         setLoading(false);
       } catch (error) {
-        console.error('Profile fetch error:', error);
-        setError(error.message);
+        console.error('Error in fetchUserData:', error);
+        setError(error.message || 'Failed to fetch user data');
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } finally {
         setLoading(false);
       }
     };
@@ -95,7 +243,7 @@ const UserProfile = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('jwt');
+    localStorage.removeItem('token');
     localStorage.removeItem('verifiedMobile');
     navigate('/login');
   };
@@ -169,40 +317,17 @@ const UserProfile = () => {
     );
   }
 
-  if (authError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h2>
-          <p className="text-gray-600">{authError}</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Return to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (!userData || !userData.personal_information) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Profile Incomplete</h2>
-          <p className="text-gray-600 mb-2">Your profile information is incomplete.</p>
-          <p className="text-gray-600 mb-4">Please complete your registration to continue.</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
+          <p className="text-gray-600">Please complete your registration first.</p>
           <button
-            onClick={() => navigate('/registration', {
-              state: {
-                mobileNumber: localStorage.getItem('verifiedMobile'),
-                fromLogin: true
-              }
-            })}
+            onClick={() => navigate('/registration')}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
-            Complete Registration
+            Go to Registration
           </button>
         </div>
       </div>
@@ -211,63 +336,24 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Main Header */}
-      <header className="bg-red-900 text-white">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
+      {/* Header */}
+      <header className="bg-red-800 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
               <img 
-                src="/gahoi-logo.png" 
-                alt="Gahoi Logo" 
-                className="h-12 w-auto"
+                src={userData.personal_information?.display_picture ? 
+                  `${API_BASE}${userData.personal_information.display_picture}` : 
+                  '/default-avatar.png'} 
+                alt="Profile" 
+                className="w-10 h-10 rounded-full border-2 border-white object-cover"
               />
+              <div>
+                <h1 className="text-xl font-bold">{userData.personal_information?.full_name}</h1>
+                <p className="text-sm opacity-90">Gahoi Code: {userData.gahoi_code}</p>
+              </div>
             </div>
-            <nav className="flex space-x-4">
-              <button 
-                onClick={() => navigate('/')}
-                className="px-3 py-2 text-sm font-medium text-white hover:text-red-200"
-              >
-                होम
-              </button>
-              <button 
-                onClick={() => navigate('/gau-seva')}
-                className="px-3 py-2 text-sm font-medium text-white hover:text-red-200"
-              >
-                गौ सेवा
-              </button>
-              <button 
-                onClick={() => navigate('/gotra-aankna')}
-                className="px-3 py-2 text-sm font-medium text-white hover:text-red-200"
-              >
-                गोत्र और आंकना
-              </button>
-              <button 
-                onClick={() => navigate('/contact-us')}
-                className="px-3 py-2 text-sm font-medium text-white hover:text-red-200"
-              >
-                संपर्क करें
-              </button>
-              <button 
-                onClick={handleLogout}
-                className="px-3 py-2 text-sm font-medium text-white hover:text-red-200"
-              >
-                लॉग आउट
-              </button>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* Profile Header */}
-      <div className="bg-white border-b border-gray-200 mt-8">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-end h-14 gap-8">
-            <div className="flex items-center gap-2">
-              <h1 className="text-gray-700 text-sm font-medium">{userData.personal_information?.full_name}</h1>
-              <span className="text-gray-400">|</span>
-              <p className="text-gray-600 text-sm">गहोई कोड: {userData.gahoi_code}</p>
-                </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-4">
               <button 
                 onClick={() => {
                   localStorage.setItem('editUserData', JSON.stringify(userData));
@@ -282,253 +368,303 @@ const UserProfile = () => {
                     } 
                   });
                 }}
-                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center"
+                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors flex items-center"
               >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                एडिट
+                Edit Profile
+              </button>
+              <button 
+                onClick={() => navigate('/')}
+                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Home
               </button>
               <button 
                 onClick={handleLogout}
-                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center"
+                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors"
               >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                लॉग आउट
+                Logout
               </button>
-                </div>
-                </div>
-                </div>
-                </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-          <div className="flex flex-col md:flex-row">
+          <div className="flex">
             {/* Sidebar */}
-            <div className="w-full md:w-64 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200">
-              <nav className="py-4 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible">
+            <div className="w-64 bg-gray-50 border-r border-gray-200">
+              <nav className="py-4">
                 {SECTIONS.map((section) => (
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`flex-shrink-0 md:flex-shrink flex items-center px-4 py-3 text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center px-4 py-3 text-sm font-medium transition-colors ${
                       activeSection === section.id
-                        ? 'bg-red-50 text-red-700 border-b-4 md:border-b-0 md:border-l-4 border-red-700'
+                        ? 'bg-red-50 text-red-700 border-l-4 border-red-700'
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
                     {renderIcon(section.icon)}
-                    <span className="ml-3 whitespace-nowrap">{section.title}</span>
+                    <span className="ml-3">{section.title}</span>
                   </button>
                 ))}
               </nav>
-                </div>
+            </div>
 
-            {/* Content Area */}
-            <div className="flex-1 p-4 md:p-8">
+            {/* Main Content */}
+            <div className="flex-1 p-8">
               <div className="max-w-3xl mx-auto">
                 {activeSection === 'personal' && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Personal Information</h2>
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                      <dl className="divide-y divide-gray-200">
-                        {Object.entries(userData.personal_information || {}).map(([key, value]) => (
-                          key !== 'display_picture' && (
-                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                              <dt className="text-sm font-medium text-gray-500">
-                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                              </dt>
-                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {value || 'N/A'}
-                              </dd>
-                </div>
-                          )
-                        ))}
-                      </dl>
-                    </div>
-                  </section>
+                  <ErrorBoundary>
+                    <Suspense fallback={<LoadingSkeleton />}>
+                      <section>
+                        <div className="flex justify-between items-center mb-6">
+                          <h2 className="text-2xl font-bold text-gray-800">Personal Information</h2>
+                          <button
+                            onClick={() => {
+                              localStorage.setItem('editUserData', JSON.stringify(userData));
+                              navigate('/registration', { 
+                                state: { 
+                                  mobileNumber: userData.personal_information?.mobile_number,
+                                  isEdit: true,
+                                  activeSection: 'personal',
+                                  userData: {
+                                    id: userData.documentId,
+                                    attributes: userData
+                                  }
+                                } 
+                              });
+                            }}
+                            className="px-3 py-1 text-sm bg-red-700 text-white rounded hover:bg-red-800 transition-colors flex items-center"
+                          >
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit Section
+                          </button>
+                        </div>
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          <dl className="divide-y divide-gray-200">
+                            {Object.entries(userData.personal_information || {}).map(([key, value]) => (
+                              key !== 'display_picture' && (
+                                <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                                  <dt className="text-sm font-medium text-gray-500">
+                                    {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                  </dt>
+                                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                    {value || 'N/A'}
+                                  </dd>
+                                </div>
+                              )
+                            ))}
+                          </dl>
+                        </div>
+                      </section>
+                    </Suspense>
+                  </ErrorBoundary>
                 )}
 
                 {activeSection === 'family' && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Family Details</h2>
-                    <div className="space-y-6">
-                      {/* Basic Family Info */}
-                      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                        <dl className="divide-y divide-gray-200">
-                          {Object.entries(userData.family_details || {}).map(([key, value]) => (
-                            !Array.isArray(value) && (
-                              <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">
-                                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                                </dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                  {value || 'N/A'}
-                                </dd>
-                </div>
-                            )
-                          ))}
-                        </dl>
-              </div>
-
-                      {/* Siblings */}
-              {userData.family_details?.siblingDetails?.length > 0 && (
-                        <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Siblings</h3>
-                  <div className="space-y-4">
-                    {userData.family_details.siblingDetails.map((sibling, index) => (
-                              <div key={index} className="bg-white rounded-lg border border-gray-200 p-4">
-                                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  {Object.entries(sibling).map(([key, value]) => (
-                                    <div key={key} className="sm:col-span-1">
-                                      <dt className="text-sm font-medium text-gray-500">
-                                        {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                                      </dt>
-                                      <dd className="mt-1 text-sm text-gray-900">
-                                        {value || 'N/A'}
-                                      </dd>
+                  <ErrorBoundary>
+                    <Suspense fallback={<LoadingSkeleton />}>
+                      <section>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Family Details</h2>
+                        <div className="space-y-6">
+                          {/* Basic Family Info */}
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <dl className="divide-y divide-gray-200">
+                              {Object.entries(userData.family_details || {}).map(([key, value]) => (
+                                !Array.isArray(value) && (
+                                  <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt className="text-sm font-medium text-gray-500">
+                                      {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                    </dt>
+                                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                      {value || 'N/A'}
+                                    </dd>
+                                  </div>
+                                )
+                              ))}
+                            </dl>
                           </div>
-                                  ))}
-                                </dl>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-                      </div>
-                  </section>
+
+                          {/* Siblings */}
+                          {userData.family_details?.siblingDetails?.length > 0 && (
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-800 mb-3">Siblings</h3>
+                              <div className="space-y-4">
+                                {userData.family_details.siblingDetails.map((sibling, index) => (
+                                  <div key={index} className="bg-white rounded-lg border border-gray-200 p-4">
+                                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                      {Object.entries(sibling).map(([key, value]) => (
+                                        <div key={key} className="sm:col-span-1">
+                                          <dt className="text-sm font-medium text-gray-500">
+                                            {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                          </dt>
+                                          <dd className="mt-1 text-sm text-gray-900">
+                                            {value || 'N/A'}
+                                          </dd>
+                                        </div>
+                                      ))}
+                                    </dl>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </section>
+                    </Suspense>
+                  </ErrorBoundary>
                 )}
 
                 {activeSection === 'biographical' && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Biographical Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Manglik Status</label>
-                  <p className="mt-1 text-gray-800">{userData.biographical_details?.manglik_status || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Grah</label>
-                  <p className="mt-1 text-gray-800">{userData.biographical_details?.Grah || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Handicap</label>
-                  <p className="mt-1 text-gray-800">{userData.biographical_details?.Handicap || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Marital Status</label>
-                  <p className="mt-1 text-gray-800">{userData.biographical_details?.is_married || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Marriage Status</label>
-                  <p className="mt-1 text-gray-800">{userData.biographical_details?.marriage_to_another_caste || 'N/A'}</p>
-                </div>
-              </div>
-            </section>
+                  <ErrorBoundary>
+                    <Suspense fallback={<LoadingSkeleton />}>
+                      <section>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Biographical Details</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Manglik Status</label>
+                            <p className="mt-1 text-gray-800">{userData.biographical_details?.manglik_status || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Grah</label>
+                            <p className="mt-1 text-gray-800">{userData.biographical_details?.Grah || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Handicap</label>
+                            <p className="mt-1 text-gray-800">{userData.biographical_details?.Handicap || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Marital Status</label>
+                            <p className="mt-1 text-gray-800">{userData.biographical_details?.is_married || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Marriage Status</label>
+                            <p className="mt-1 text-gray-800">{userData.biographical_details?.marriage_to_another_caste || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </section>
+                    </Suspense>
+                  </ErrorBoundary>
                 )}
 
                 {activeSection === 'work' && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Work Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Occupation</label>
-                  <p className="mt-1 text-gray-800">{userData.work_information?.occupation || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Company Name</label>
-                  <p className="mt-1 text-gray-800">{userData.work_information?.company_name || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Work Area</label>
-                  <p className="mt-1 text-gray-800">{userData.work_information?.work_area || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Industry Sector</label>
-                  <p className="mt-1 text-gray-800">{userData.work_information?.industrySector || 'N/A'}</p>
-                </div>
-              </div>
-            </section>
+                  <ErrorBoundary>
+                    <Suspense fallback={<LoadingSkeleton />}>
+                      <section>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Work Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Occupation</label>
+                            <p className="mt-1 text-gray-800">{userData.work_information?.occupation || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Company Name</label>
+                            <p className="mt-1 text-gray-800">{userData.work_information?.company_name || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Work Area</label>
+                            <p className="mt-1 text-gray-800">{userData.work_information?.work_area || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Industry Sector</label>
+                            <p className="mt-1 text-gray-800">{userData.work_information?.industrySector || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </section>
+                    </Suspense>
+                  </ErrorBoundary>
                 )}
 
                 {activeSection === 'additional' && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Additional Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Blood Group</label>
-                  <p className="mt-1 text-gray-800">{userData.additional_details?.blood_group || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Date of Birth</label>
-                  <p className="mt-1 text-gray-800">{userData.additional_details?.date_of_birth || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Higher Education</label>
-                  <p className="mt-1 text-gray-800">{userData.additional_details?.higher_education || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Current Address</label>
-                  <p className="mt-1 text-gray-800">{userData.additional_details?.current_address || 'N/A'}</p>
-                </div>
-              </div>
-            </section>
+                  <ErrorBoundary>
+                    <Suspense fallback={<LoadingSkeleton />}>
+                      <section>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Additional Details</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Blood Group</label>
+                            <p className="mt-1 text-gray-800">{userData.additional_details?.blood_group || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Date of Birth</label>
+                            <p className="mt-1 text-gray-800">{userData.additional_details?.date_of_birth || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Higher Education</label>
+                            <p className="mt-1 text-gray-800">{userData.additional_details?.higher_education || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Current Address</label>
+                            <p className="mt-1 text-gray-800">{userData.additional_details?.current_address || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </section>
+                    </Suspense>
+                  </ErrorBoundary>
                 )}
 
                 {activeSection === 'regional' && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Regional Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">State</label>
-                  <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.State || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">District</label>
-                  <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.district || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">City</label>
-                  <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.city || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Regional Assembly</label>
-                  <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.RegionalAssembly || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Local Panchayat Name</label>
-                  <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.LocalPanchayatName || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Local Panchayat</label>
-                  <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.LocalPanchayat || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-600">Sub Local Panchayat</label>
-                  <p className="mt-1 text-gray-800">
-                    {userData.additional_details?.regional_information?.SubLocalPanchayat || 'N/A'}
-                  </p>
-                </div>
-              </div>
-            </section>
+                  <ErrorBoundary>
+                    <Suspense fallback={<LoadingSkeleton />}>
+                      <section>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Regional Information</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">State</label>
+                            <p className="mt-1 text-gray-800">
+                              {userData.additional_details?.regional_information?.State || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">District</label>
+                            <p className="mt-1 text-gray-800">
+                              {userData.additional_details?.regional_information?.district || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">City</label>
+                            <p className="mt-1 text-gray-800">
+                              {userData.additional_details?.regional_information?.city || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Regional Assembly</label>
+                            <p className="mt-1 text-gray-800">
+                              {userData.additional_details?.regional_information?.RegionalAssembly || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Local Panchayat Name</label>
+                            <p className="mt-1 text-gray-800">
+                              {userData.additional_details?.regional_information?.LocalPanchayatName || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Local Panchayat</label>
+                            <p className="mt-1 text-gray-800">
+                              {userData.additional_details?.regional_information?.LocalPanchayat || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-600">Sub Local Panchayat</label>
+                            <p className="mt-1 text-gray-800">
+                              {userData.additional_details?.regional_information?.SubLocalPanchayat || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </section>
+                    </Suspense>
+                  </ErrorBoundary>
                 )}
               </div>
-          </div>
+            </div>
           </div>
         </div>
       </div>
@@ -536,4 +672,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default UserProfile; 
