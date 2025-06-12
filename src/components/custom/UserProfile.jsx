@@ -59,7 +59,7 @@ const UserProfile = () => {
           {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${API_TOKEN}`,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
               'Accept': 'application/json'
             }
