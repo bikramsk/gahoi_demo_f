@@ -365,7 +365,36 @@ const Login = () => {
     }
   };
 
-  // Add countdown timer effect
+  const verifyMPIN = async (mpin) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/verify-mpin`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_TOKEN}`
+        },
+        body: JSON.stringify({
+          mobileNumber: formData.mobileNumber,
+          mpin: mpin
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Invalid MPIN');
+      }
+
+      const data = await response.json();
+      console.log('MPIN verification response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error verifying MPIN:', error);
+      throw error;
+    }
+  };
+
+  
   useEffect(() => {
     let timer;
     if (countdown > 0) {
@@ -376,7 +405,6 @@ const Login = () => {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // Modified handleSubmit to include MPIN creation
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
@@ -384,7 +412,7 @@ const Login = () => {
 
     if (!validateForm()) return;
 
-    // Existing User Flow - MPIN Login
+
     if (userExists && hasMpin) {
       setLoading(true);
       try {
