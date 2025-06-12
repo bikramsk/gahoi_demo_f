@@ -45,4 +45,29 @@ export const getAuthHeaders = (token) => {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
   };
+};
+
+export const storeAuthData = (token, mobileNumber) => {
+  try {
+    // Clean and validate the token before storing
+    const cleanToken = cleanAndValidateToken(token);
+    if (!cleanToken) {
+      throw new Error('Invalid token');
+    }
+
+    // Store both token and mobile number
+    localStorage.setItem('jwt', cleanToken);
+    localStorage.setItem('verifiedMobile', mobileNumber);
+
+    // Debug log
+    console.log('Auth data stored:', {
+      tokenPreview: `${cleanToken.substring(0, 20)}...`,
+      mobile: mobileNumber
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error storing auth data:', error);
+    return false;
+  }
 }; 
