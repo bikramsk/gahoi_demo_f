@@ -51,32 +51,7 @@ const UserProfile = () => {
           return;
         }
 
-        // First try to verify if the token is still valid
-        try {
-          const verifyResponse = await fetch(`${API_BASE}/api/auth/verify`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (!verifyResponse.ok) {
-            console.log('Token verification failed - redirecting to login');
-            localStorage.removeItem('token');
-            localStorage.removeItem('verifiedMobile');
-            navigate('/login');
-            return;
-          }
-        } catch (error) {
-          console.error('Token verification error:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('verifiedMobile');
-          navigate('/login');
-          return;
-        }
-
-        // Fetch complete user profile in one call using mobile number
+        // Fetch complete user 
         const userResponse = await fetch(
           `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`,
           {
