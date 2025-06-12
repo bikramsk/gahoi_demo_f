@@ -15,6 +15,14 @@ export const cleanAndValidateToken = (token) => {
     // Try to decode the payload
     const payload = JSON.parse(atob(parts[1]));
     
+    // Log token details for debugging
+    console.log('Token payload:', {
+      id: payload.id,
+      mobileNumber: payload.mobileNumber,
+      iat: new Date(payload.iat * 1000).toLocaleString(),
+      exp: new Date(payload.exp * 1000).toLocaleString()
+    });
+    
     // Check expiration
     if (payload.exp && Date.now() >= payload.exp * 1000) {
       console.error('Token expired');
