@@ -14,7 +14,7 @@ const API_BASE = import.meta.env.MODE === 'production'
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
-console.log('Using API BASE:', API_BASE);
+
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
@@ -31,7 +31,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       throw new Error(data.message || 'Failed to send OTP');
     }
 
-    // Store OTP in sessionStorage if we're in development and OTP is returned
+    // Store OTP
     if (import.meta.env.MODE === 'development' && data.otp) {
       console.log('Development OTP:', data.otp);
       sessionStorage.setItem('currentOTP', data.otp);
