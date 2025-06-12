@@ -366,9 +366,9 @@ const Login = () => {
     }
   };
 
+  // Update the verifyMPIN function
   const verifyMPIN = async (mpin) => {
     try {
-      // verify-mpin endpoint
       const response = await fetch(`${API_BASE}/api/verify-mpin`, {
         method: 'POST',
         headers: {
@@ -382,23 +382,31 @@ const Login = () => {
       });
 
       const data = await response.json();
+      console.log('MPIN verification response:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Invalid MPIN');
       }
 
-      console.log('MPIN verification response:', data);
-      
-      //  { jwt, isRegistered }
       if (data.jwt) {
-        localStorage.setItem('jwt', data.jwt);
+        // Store clean token without quotes
+        const cleanToken = data.jwt.replace(/^["'](.+)["']$/, '$1').trim();
+        
+        // Store both token and mobile number
+        localStorage.setItem('jwt', cleanToken);
         localStorage.setItem('verifiedMobile', formData.mobileNumber);
+        
+        // Debug log
+        console.log('Credentials stored:', {
+          tokenPreview: `${cleanToken.substring(0, 20)}...`,
+          mobile: formData.mobileNumber
+        });
+        
         return data;
-      } else {
-        throw new Error('No token received from server');
       }
+      throw new Error('No token received from server');
     } catch (error) {
-      console.error('Error verifying MPIN:', error);
+      console.error('MPIN verification error:', error);
       throw error;
     }
   };
@@ -427,18 +435,19 @@ const Login = () => {
       try {
         const response = await verifyMPIN(formData.mpin);
         if (response.jwt) {
-          // Use the imported storeAuthData function instead of direct localStorage calls
-          storeAuthData(response.jwt, formData.mobileNumber);
+          // Debug log before navigation
+          console.log('Authentication successful, navigating to profile...');
           
-          // Debug log
-          console.log('Login successful:', {
-            mobile: formData.mobileNumber,
-            timestamp: new Date().toISOString()
+          // Navigate to profile with the mobile number
+          navigate('/profile', { 
+            state: { 
+              mobileNumber: formData.mobileNumber,
+              isAuthenticated: true
+            }
           });
-          
-          navigate('/profile');
         }
       } catch (error) {
+        console.error('Login error:', error);
         setErrors({
           mpin: error.message || 'Invalid MPIN'
         });

@@ -59,10 +59,11 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { jwt, mobile } = checkAuthState();
-        
+        const jwt = localStorage.getItem('jwt');
+        const mobile = localStorage.getItem('verifiedMobile');
+
         if (!jwt || !mobile) {
-          console.error('No auth data found');
+          console.error('Missing credentials');
           navigate('/login');
           return;
         }
@@ -73,75 +74,32 @@ const UserProfile = () => {
           'Content-Type': 'application/json'
         };
 
-        console.log('Request Headers:', {
-          authHeader: headers.Authorization.substring(0, 30) + '...',
-          allHeaders: headers
-        });
+        // Fetch user profile data
+        const response = await fetch(
+          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobile}&populate=personal_information`, 
+          {
+            method: 'GET',
+            headers,
+            credentials: 'include'
+          }
+        );
 
-        const url = `${API_BASE}/api/registration-pages`;
-        const params = new URLSearchParams({
-          'filters[personal_information][mobile_number][$eq]': mobile,
-          'populate': 'personal_information'
-        });
-
-        // Log full request details
-        console.log('Making API Request:', {
-          url: `${url}?${params.toString()}`,
-          method: 'GET',
-          headers: headers,
-          credentials: 'include'
-        });
-
-        const response = await fetch(`${url}?${params.toString()}`, {
-          method: 'GET',
-          headers: headers,
-          credentials: 'include'
-        });
-
-        // Log response details
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error('API Response Error:', {
-            status: response.status,
-            statusText: response.statusText,
-            headers: Object.fromEntries(response.headers.entries()),
-            error: errorData
-          });
-
           if (response.status === 401) {
-            console.error('Authentication failed - clearing credentials');
             localStorage.clear();
-            setAuthError('Session expired. Please login again.');
             navigate('/login');
             return;
           }
-          
-          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          throw new Error('Failed to fetch profile data');
         }
 
         const data = await response.json();
-        console.log('API Response Success:', {
-          hasData: !!data?.data,
-          dataLength: data?.data?.length,
-          firstRecord: data?.data?.[0]?.id
-        });
-
-        if (!data.data || data.data.length === 0) {
-          console.log('No profile data found, redirecting to registration');
-          navigate('/registration', { 
-            state: { 
-              mobileNumber: mobile,
-              fromLogin: true 
-            } 
-          });
-          return;
-        }
-
-        setUserData(data.data[0].attributes);
+        setUserData(data.data);
         setLoading(false);
-      } catch (err) {
-        console.error('Error details:', err);
-        setError(`Failed to load profile data: ${err.message}`);
+
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setError(error.message);
         setLoading(false);
       }
     };
