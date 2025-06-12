@@ -53,13 +53,16 @@ const UserProfile = () => {
 
         // Fetch complete user 
         const userResponse = await fetch(
-          `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`,
+          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
           {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              ...(import.meta.env.VITE_API_TOKEN && {
+                'x-api-token': import.meta.env.VITE_API_TOKEN
+              })
             }
           }
         );
@@ -96,20 +99,19 @@ const UserProfile = () => {
           return;
         }
 
-        const profileData = userData.data[0];
+        const profileData = userData.data[0].attributes;
         console.log('Profile data:', profileData);
 
-        // Transform data
+        // Transform data 
         let transformedData = {
           personal_information: {
-            full_name: profileData?.name || '',
-            mobile_number: profileData?.mobile_number || '',
-            email_address: profileData?.email || '',
-            village: profileData?.village || '',
-            Gender: profileData?.gender || '',
-            nationality: profileData?.nationality || '',
-            is_gahoi: profileData?.is_gahoi || false,
-            display_picture: profileData?.display_picture?.url || null
+            full_name: profileData?.personal_information?.full_name || '',
+            mobile_number: profileData?.personal_information?.mobile_number || '',
+            email_address: profileData?.personal_information?.email_address || '',
+            village: profileData?.personal_information?.village || '',
+            Gender: profileData?.personal_information?.Gender || '',
+            nationality: profileData?.personal_information?.nationality || '',
+            is_gahoi: profileData?.personal_information?.is_gahoi || false
           },
           family_details: {
             father_name: profileData?.family_details?.father_name || '',
@@ -118,44 +120,41 @@ const UserProfile = () => {
             mother_mobile: profileData?.family_details?.mother_mobile || '',
             spouse_name: profileData?.family_details?.spouse_name || '',
             spouse_mobile: profileData?.family_details?.spouse_mobile || '',
-            gotra: profileData?.gotra || '',
-            aakna: profileData?.aakna || '',
-            siblingDetails: profileData?.family_details?.siblings || []
+            gotra: profileData?.family_details?.gotra || '',
+            aakna: profileData?.family_details?.aakna || '',
+            child_name: profileData?.child_name || []
           },
           biographical_details: {
             manglik_status: profileData?.biographical_details?.manglik_status || '',
-            Grah: profileData?.biographical_details?.grah || '',
-            Handicap: profileData?.biographical_details?.handicap || '',
-            is_married: profileData?.biographical_details?.is_married ? 'Married' : 'Unmarried',
+            Grah: profileData?.biographical_details?.Grah || '',
+            Handicap: profileData?.biographical_details?.Handicap || '',
+            is_married: profileData?.biographical_details?.is_married || '',
             marriage_to_another_caste: profileData?.biographical_details?.marriage_to_another_caste || ''
           },
           work_information: {
             occupation: profileData?.work_information?.occupation || '',
             company_name: profileData?.work_information?.company_name || '',
             work_area: profileData?.work_information?.work_area || '',
-            industrySector: profileData?.work_information?.industry_sector || ''
+            industrySector: profileData?.work_information?.industrySector || ''
           },
           additional_details: {
             blood_group: profileData?.additional_details?.blood_group || '',
             date_of_birth: profileData?.additional_details?.date_of_birth || '',
-            higher_education: profileData?.additional_details?.education || '',
+            higher_education: profileData?.additional_details?.higher_education || '',
             current_address: profileData?.additional_details?.current_address || '',
             regional_information: {
-              State: profileData?.additional_details?.regional_information?.state || '',
+              State: profileData?.additional_details?.regional_information?.State || '',
               district: profileData?.additional_details?.regional_information?.district || '',
               city: profileData?.additional_details?.regional_information?.city || '',
-              RegionalAssembly: profileData?.additional_details?.regional_information?.regional_assembly || '',
-              LocalPanchayatName: profileData?.additional_details?.regional_information?.local_panchayat_name || '',
-              LocalPanchayat: profileData?.additional_details?.regional_information?.local_panchayat || '',
-              SubLocalPanchayat: profileData?.additional_details?.regional_information?.sub_local_panchayat || ''
+              RegionalAssembly: profileData?.additional_details?.regional_information?.RegionalAssembly || '',
+              LocalPanchayatName: profileData?.additional_details?.regional_information?.LocalPanchayatName || '',
+              LocalPanchayat: profileData?.additional_details?.regional_information?.LocalPanchayat || '',
+              SubLocalPanchayat: profileData?.additional_details?.regional_information?.SubLocalPanchayat || ''
             }
           },
-          child_name: profileData?.child_name || [],
-          your_suggestions: {
-            suggestions: profileData?.your_suggestions || ''
-          },
+          your_suggestions: profileData?.your_suggestions || '',
           gahoi_code: profileData?.gahoi_code || '',
-          documentId: profileData?.id
+          documentId: userData.data[0].id
         };
 
         console.log('Transformed user data:', transformedData);
