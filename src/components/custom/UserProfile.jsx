@@ -28,22 +28,31 @@ const UserProfile = () => {
         const jwt = localStorage.getItem('jwt');
         
         if (!jwt || !mobileNumber) {
+          console.error('Missing credentials:', { hasJwt: !!jwt, hasMobile: !!mobileNumber });
           navigate('/login');
           return;
         }
 
+        // Clean the token of any whitespace or special characters
+        const cleanToken = jwt.replace(/\s+/g, '').trim();
+        
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=personal_information`;
+        
+        console.log('Making request with token:', cleanToken.substring(0, 20) + '...');
         
         const response = await fetch(url, { 
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${jwt.trim()}`,
+            'Authorization': `Bearer ${cleanToken}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           }
         });
 
+        console.log('Response status:', response.status);
+        
         if (response.status === 401) {
+          console.error('Authentication failed. Token might be invalid or expired.');
           localStorage.removeItem('jwt');
           localStorage.removeItem('verifiedMobile');
           navigate('/login');
@@ -51,12 +60,16 @@ const UserProfile = () => {
         }
 
         if (!response.ok) {
-          throw new Error('Failed to fetch profile data');
+          const errorText = await response.text();
+          console.error('API Error:', errorText);
+          throw new Error(`Failed to fetch profile data: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log('Data received:', data);
 
         if (!data.data || data.data.length === 0) {
+          console.log('No profile data found, redirecting to registration');
           navigate('/registration', { 
             state: { 
               mobileNumber,
@@ -69,7 +82,8 @@ const UserProfile = () => {
         setUserData(data.data[0].attributes);
         setLoading(false);
       } catch (err) {
-        setError('Failed to load profile data');
+        console.error('Error details:', err);
+        setError(`Failed to load profile data: ${err.message}`);
         setLoading(false);
       }
     };
