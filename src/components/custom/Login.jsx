@@ -371,8 +371,7 @@ const Login = () => {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_TOKEN}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           mobileNumber: formData.mobileNumber,
@@ -387,6 +386,16 @@ const Login = () => {
 
       const data = await response.json();
       console.log('MPIN verification response:', data);
+      
+      // Make sure we're storing the correct token format
+      if (data.jwt) {
+        localStorage.setItem('jwt', data.jwt);
+      } else if (data.token) {
+        localStorage.setItem('jwt', data.token);
+      } else {
+        throw new Error('No token received from server');
+      }
+      
       return data;
     } catch (error) {
       console.error('Error verifying MPIN:', error);

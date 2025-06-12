@@ -30,28 +30,31 @@ const UserProfile = () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('jwt');
-        console.log('Fetching user data with token:', token);
+        
         console.log('Mobile number:', mobileNumber);
-
+        
         if (!token) {
           console.error('No JWT token found');
           navigate('/login');
           return;
         }
 
+       
+        const cleanToken = token.replace(/^["'](.+)["']$/, '$1');
+        console.log('Using cleaned token:', cleanToken);
+
         const response = await fetch(
           `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${cleanToken}`,
               'Accept': 'application/json'
             }
           }
         );
 
         if (response.status === 401) {
-          console.error('Unauthorized - Token:', token);
-          // Redirect to login if unauthorized
+          console.error('Unauthorized - Token:', cleanToken);
           navigate('/login');
           return;
         }
@@ -71,9 +74,11 @@ const UserProfile = () => {
         }
 
         setUserData(data.data[0].attributes);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching user data:', error);
-        console.log('Current token:', localStorage.getItem('jwt'));
+        setError('Failed to fetch user data');
+        setLoading(false);
         navigate('/login');
       }
     };
