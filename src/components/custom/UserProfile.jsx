@@ -5,24 +5,6 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
-// Add JWT debugging helper
-const decodeJWT = (token) => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const decoded = JSON.parse(window.atob(base64));
-    console.log('Decoded JWT:', {
-      id: decoded.id,
-      exp: new Date(decoded.exp * 1000).toLocaleString(),
-      iat: new Date(decoded.iat * 1000).toLocaleString()
-    });
-    return decoded;
-  } catch (e) {
-    console.error('Error decoding JWT:', e);
-    return null;
-  }
-};
-
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
   { id: 'family', title: 'Family Details', icon: 'users' },
@@ -45,11 +27,13 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const jwt = localStorage.getItem('jwt');
         
-        // Enhanced debug logging
+        // Enhanced debug logging with JWT format check
         console.log('Auth Debug:', {
           mobileNumber,
           hasJWT: !!jwt,
-          jwtFirstChars: jwt ? jwt.substring(0, 20) + '...' : 'No JWT'
+          jwtFirstChars: jwt ? jwt.substring(0, 20) + '...' : 'No JWT',
+          jwtParts: jwt ? jwt.split('.').length : 0,
+          isValidJWTFormat: jwt ? jwt.split('.').length === 3 : false
         });
         
         if (!jwt || !mobileNumber) {
@@ -58,20 +42,41 @@ const UserProfile = () => {
           return;
         }
 
+        // Validate JWT format
+        if (jwt.split('.').length !== 3) {
+          console.error('Invalid JWT format');
+          localStorage.removeItem('jwt');
+          localStorage.removeItem('verifiedMobile');
+          navigate('/login');
+          return;
+        }
+
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         console.log('Fetching profile from:', url);
 
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-            'Authorization': `Bearer ${jwt}`,
-            'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
+        // Log full request details
+        const headers = {
+          'Authorization': `Bearer ${jwt}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        };
+        
+        console.log('Request Details:', {
+          url,
+          method: 'GET',
+          headers: {
+            ...headers,
+            'Authorization': `Bearer ${jwt}` 
+          }
+        });
 
-        // Log response details for debugging
-        console.log('Profile Response:', {
+        const response = await fetch(url, { 
+          method: 'GET',
+          headers 
+        });
+
+        // Detailed response logging
+        console.log('Response Details:', {
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries())
@@ -79,6 +84,12 @@ const UserProfile = () => {
 
         if (response.status === 401) {
           console.error('JWT authentication failed');
+          const errorText = await response.text();
+          console.error('Auth Error Details:', {
+            error: errorText,
+            jwt: jwt,
+            mobileNumber
+          });
           localStorage.removeItem('jwt');
           localStorage.removeItem('verifiedMobile');
           navigate('/login');
