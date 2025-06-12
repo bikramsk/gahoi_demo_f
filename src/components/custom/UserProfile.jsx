@@ -5,12 +5,6 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
-const API_TOKEN = import.meta.env.VITE_API_TOKEN;
-
-if (!API_TOKEN) {
-  console.warn('API Token is not configured. Please check your environment variables.');
-}
-
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
   { id: 'family', title: 'Family Details', icon: 'users' },
@@ -31,29 +25,28 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
+        const jwt = localStorage.getItem('jwt');
         
-        // Debug token
-        console.log('API Base:', API_BASE);
-        console.log('Token exists:', !!API_TOKEN);
-        console.log('Token length:', API_TOKEN?.length);
-        console.log('Token preview:', API_TOKEN ? `${API_TOKEN.substring(0, 10)}...` : 'No token');
+        if (!jwt) {
+          console.error('No JWT token found');
+          navigate('/login');
+          return;
+        }
+
+        console.log('Using JWT token for authentication');
 
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         console.log('Request URL:', url);
 
         const headers = {
-          'Authorization': `Bearer ${API_TOKEN}`,
+          'Authorization': `Bearer ${jwt}`,
           'Accept': 'application/json'
         };
-        console.log('Request headers:', headers);
 
         const response = await fetch(url, { headers });
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
         if (response.status === 401) {
-          console.error('Unauthorized - Check API token configuration');
+          console.error('Unauthorized - Invalid JWT token');
           const errorText = await response.text();
           console.error('Error details:', errorText);
           navigate('/login');
