@@ -29,32 +29,22 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
-        const token = localStorage.getItem('jwt');
         
         console.log('Mobile number:', mobileNumber);
-        
-        if (!token) {
-          console.error('No JWT token found');
-          navigate('/login');
-          return;
-        }
-
-       
-        const cleanToken = token.replace(/^["'](.+)["']$/, '$1');
-        console.log('Using cleaned token:', cleanToken);
+        console.log('Using API token for fetch');
 
         const response = await fetch(
           `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
           {
             headers: {
-              'Authorization': `Bearer ${cleanToken}`,
+              'Authorization': `Bearer ${API_TOKEN}`,
               'Accept': 'application/json'
             }
           }
         );
 
         if (response.status === 401) {
-          console.error('Unauthorized - Token:', cleanToken);
+          console.error('Unauthorized - Check API token configuration');
           navigate('/login');
           return;
         }
