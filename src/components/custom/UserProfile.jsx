@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.MODE === 'production'
-  ? 'https://api.gahoishakti.in'  // Production 
-  : 'http://localhost:1337';       // Development 
+  ? 'https://api.gahoishakti.in'  
+  : 'http://localhost:1337';       
 
-console.log('API Base URL:', API_BASE);
+
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
