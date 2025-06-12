@@ -34,55 +34,51 @@ const UserProfile = () => {
         }
 
        
-        const cleanToken = jwt.trim().replace(/^Bearer\s+/i, '');
-        const authHeader = `Bearer ${cleanToken}`;
+        const cleanToken = jwt.replace(/^"(.*)"$/, '$1').trim();
         
-        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=personal_information`;
-        
-   
-        console.log('Request details:', {
-          url,
-          authHeader: authHeader.substring(0, 20) + '...',
-          mobileNumber
-        });
-
         const headers = {
-          'Authorization': authHeader,
+          'Authorization': `Bearer ${cleanToken}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         };
 
-        console.log('Full headers:', headers);
-        
-        const response = await fetch(url, { 
-          method: 'GET',
+        const url = `${API_BASE}/api/registration-pages`;
+        const params = new URLSearchParams({
+          'filters[personal_information][mobile_number][$eq]': mobileNumber,
+          'populate': 'personal_information'
+        });
+
+        // Log the exact request being made
+        console.log('Making request:', {
+          url: `${url}?${params.toString()}`,
+          token: cleanToken.substring(0, 15) + '...',
           headers
         });
 
-        // Log complete response details
-        console.log('Response details:', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers)
+        const response = await fetch(`${url}?${params.toString()}`, { 
+          method: 'GET',
+          headers,
+          credentials: 'include' 
         });
-        
-        if (response.status === 401) {
-          const errorText = await response.text();
-          console.error('Authentication failed:', {
-            status: response.status,
-            error: errorText,
-            token: cleanToken.substring(0, 20) + '...'
-          });
-          localStorage.removeItem('jwt');
-          localStorage.removeItem('verifiedMobile');
-          navigate('/login');
-          return;
-        }
 
+        // Detailed error logging
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('API Error:', errorText);
-          throw new Error(`Failed to fetch profile data: ${response.status}`);
+          const errorData = await response.json();
+          console.error('API Error:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData,
+            headers: Object.fromEntries(response.headers)
+          });
+          
+          if (response.status === 401) {
+            localStorage.removeItem('jwt');
+            localStorage.removeItem('verifiedMobile');
+            navigate('/login');
+            return;
+          }
+          
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
@@ -536,4 +532,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile; 
+export default UserProfile;
