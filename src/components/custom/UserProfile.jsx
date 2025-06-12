@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { checkAuthState } from '../../utils/auth';
+import { getAuthHeaders } from '../../utils/auth';
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
@@ -23,7 +23,6 @@ const UserProfile = () => {
   const [activeSection, setActiveSection] = useState('personal');
   const [authError, setAuthError] = useState(null);
 
- 
   // Update the isValidToken function with better validation
   const isValidToken = (token) => {
     if (!token) return false;
@@ -55,7 +54,6 @@ const UserProfile = () => {
     }
   };
 
-  // Update the fetchUserData function within useEffect
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -63,20 +61,20 @@ const UserProfile = () => {
         const mobile = localStorage.getItem('verifiedMobile');
 
         if (!jwt || !mobile) {
-          console.error('Missing credentials');
+          setAuthError('Please log in to continue.');
           navigate('/login');
           return;
         }
 
-        const headers = {
-          'Authorization': `Bearer ${jwt}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        };
+        const headers = getAuthHeaders(jwt);
+        if (!headers) {
+          setAuthError('Invalid session. Please log in again.');
+          navigate('/login');
+          return;
+        }
 
-        // Fetch user profile data
         const response = await fetch(
-          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobile}&populate=personal_information`, 
+          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobile}&populate=personal_information`,
           {
             method: 'GET',
             headers,
@@ -85,20 +83,37 @@ const UserProfile = () => {
         );
 
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error:', {
+            status: response.status,
+            error: errorText
+          });
+
           if (response.status === 401) {
-            localStorage.clear();
+            localStorage.removeItem('jwt');
+            localStorage.removeItem('verifiedMobile');
+            setAuthError('Your session has expired. Please log in again.');
             navigate('/login');
             return;
           }
-          throw new Error('Failed to fetch profile data');
+          throw new Error(`Failed to fetch profile data: ${response.status}`);
         }
 
         const data = await response.json();
-        setUserData(data.data);
-        setLoading(false);
+        if (!data.data || data.data.length === 0) {
+          navigate('/registration', {
+            state: {
+              mobileNumber: mobile,
+              fromLogin: true
+            }
+          });
+          return;
+        }
 
+        setUserData(data.data[0].attributes);
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Profile fetch error:', error);
         setError(error.message);
         setLoading(false);
       }
