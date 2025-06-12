@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.MODE === 'production'
-  ? 'https://api.gahoishakti.in'  // Production URL
-  : 'http://localhost:1337';       // Development URL
+  ? 'https://api.gahoishakti.in'  // Production 
+  : 'http://localhost:1337';       // Development 
 
 console.log('API Base URL:', API_BASE);
-
-const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
@@ -31,18 +29,55 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('token');
         
-      
+        console.log('Checking credentials:', {
+          mobileNumber: mobileNumber || 'Not found',
+          hasToken: !!token,
+          tokenLength: token?.length || 0
+        });
+
         if (!token || token === 'undefined' || token === 'null') {
           console.log('Invalid or missing token - redirecting to login');
+          localStorage.removeItem('token');
+          localStorage.removeItem('verifiedMobile');
           navigate('/login');
           return;
         }
 
         if (!mobileNumber || mobileNumber === 'undefined' || mobileNumber === 'null') {
           console.log('Invalid or missing mobile number - redirecting to login');
+          localStorage.removeItem('token');
+          localStorage.removeItem('verifiedMobile');
           navigate('/login');
           return;
         }
+
+        // First try to verify if the token is still valid
+        try {
+          const verifyResponse = await fetch(`${API_BASE}/api/auth/verify`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!verifyResponse.ok) {
+            console.log('Token verification failed - redirecting to login');
+            localStorage.removeItem('token');
+            localStorage.removeItem('verifiedMobile');
+            navigate('/login');
+            return;
+          }
+        } catch (error) {
+          console.error('Token verification error:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('verifiedMobile');
+          navigate('/login');
+          return;
+        }
+
+        // If token is valid, proceed with user data fetch
+        console.log('Token verified, fetching user data...');
 
         console.log('Attempting to fetch user data with:', {
           mobileNumber,
@@ -185,10 +220,10 @@ const UserProfile = () => {
       } catch (error) {
         console.error('Error in fetchUserData:', error);
         setError(error.message || 'Failed to fetch user data');
-        // Show error for 3 seconds before redirecting
+        // Show error for 9 sec
         setTimeout(() => {
           navigate('/login');
-        }, 3000);
+        }, 9000);
       } finally {
         setLoading(false);
       }
@@ -276,13 +311,19 @@ const UserProfile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
-          <p className="text-gray-600">Please complete your registration first.</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Profile Incomplete</h2>
+          <p className="text-gray-600 mb-2">Your profile information is incomplete.</p>
+          <p className="text-gray-600 mb-4">Please complete your registration to continue.</p>
           <button
-            onClick={() => navigate('/registration')}
+            onClick={() => navigate('/registration', {
+              state: {
+                mobileNumber: localStorage.getItem('verifiedMobile'),
+                fromLogin: true
+              }
+            })}
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
-            Go to Registration
+            Complete Registration
           </button>
         </div>
       </div>
