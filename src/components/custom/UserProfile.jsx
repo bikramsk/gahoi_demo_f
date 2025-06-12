@@ -7,6 +7,8 @@ const API_BASE = import.meta.env.MODE === 'production'
 
 console.log('API Base URL:', API_BASE);
 
+const API_TOKEN = import.meta.env.VITE_API_TOKEN;
+
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
   { id: 'family', title: 'Family Details', icon: 'users' },
@@ -57,12 +59,9 @@ const UserProfile = () => {
           {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${API_TOKEN}`,
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              ...(import.meta.env.VITE_API_TOKEN && {
-                'x-api-token': import.meta.env.VITE_API_TOKEN
-              })
+              'Accept': 'application/json'
             }
           }
         );
