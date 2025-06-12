@@ -29,67 +29,45 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
-        
-        if (!mobileNumber) {
-          console.log('No mobile number found - redirecting to login');
-          navigate('/login');
-          return;
-        }
+        const token = localStorage.getItem('jwt'); // Get JWT token
+        console.log('Fetching user data with token:', token);
+        console.log('Mobile number:', mobileNumber);
 
-        // Fetch user data 
-        const userResponse = await fetch(
-          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=deep`,
+        const response = await fetch(
+          `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
           {
-            method: 'GET',
             headers: {
-              'Authorization': `Bearer ${API_TOKEN}`,
-              'Content-Type': 'application/json'
+              'Authorization': `Bearer ${token}`,
             }
           }
         );
 
-        if (!userResponse.ok) {
-          console.error('Failed to fetch user data:', userResponse.status);
-          throw new Error('Failed to fetch user data');
-        }
-
-        const userData = await userResponse.json();
-        console.log('Raw user data from Strapi:', userData);
-
-        if (!userData.data || userData.data.length === 0) {
-          console.log('No registration data found - redirecting to registration');
-          navigate('/registration', { 
-            state: { 
-              mobileNumber,
-              fromLogin: true 
-            } 
-          });
+        if (response.status === 401) {
+          console.error('Unauthorized - Token:', token);
+          // Redirect to login if unauthorized
+          navigate('/login');
           return;
         }
 
-    
-        const profileData = userData.data[0].attributes;
-        console.log('Profile data to display:', profileData);
+        if (!response.ok) {
+          console.error('Failed to fetch user data:', response.status, response.statusText);
+          throw new Error('Failed to fetch user data');
+        }
 
-  
-        setUserData({
-          personal_information: profileData.personal_information || {},
-          family_details: profileData.family_details || {},
-          biographical_details: profileData.biographical_details || {},
-          work_information: profileData.work_information || {},
-          additional_details: profileData.additional_details || {},
-          your_suggestions: profileData.your_suggestions || '',
-          gahoi_code: profileData.gahoi_code || '',
-          documentId: userData.data[0].id
-        });
-        setLoading(false);
-
-      } catch (error) {
-        console.error('Error:', error);
-        setError('Failed to load profile data. Please try logging in again.');
-        setTimeout(() => {
+        const data = await response.json();
+        console.log('User data response:', data);
+        
+        if (!data.data || data.data.length === 0) {
+          console.log('No user data found for mobile:', mobileNumber);
           navigate('/login');
-        }, 3000);
+          return;
+        }
+
+        setUserData(data.data[0].attributes);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        console.log('Current token:', localStorage.getItem('jwt'));
+        navigate('/login');
       }
     };
 

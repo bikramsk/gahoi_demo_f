@@ -76,42 +76,6 @@ const verifyOTP = async (mobileNumber, otp) => {
   }
 };
 
-// Add MPIN verification function
-const verifyMPIN = async (mobileNumber, mpin) => {
-  try {
-    const response = await fetch(`${API_BASE}/api/verify-mpin`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
-      },
-      credentials: 'include',
-      body: JSON.stringify({
-        mobileNumber: mobileNumber,
-        mpin: mpin
-      })
-    });
-
-    const responseText = await response.text();
-    if (!response.ok) {
-      let errorMessage = 'MPIN verification failed';
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.message || errorData.error?.message || errorMessage;
-      } catch {
-        errorMessage = responseText || errorMessage;
-      }
-      throw new Error(errorMessage);
-    }
-
-    return JSON.parse(responseText);
-  } catch (error) {
-    console.error('Error verifying MPIN:', error);
-    throw error;
-  }
-};
-
 const Login = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -123,7 +87,8 @@ const Login = () => {
   const [formData, setFormData] = useState({
     mobileNumber: '',
     otp: '',
-    mpin: ''
+    mpin: '',
+    confirmMpin: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -169,6 +134,7 @@ const Login = () => {
     mpin: '',
     confirmMpin: ''
   });
+  const [error, setError] = useState('');
 
   React.useEffect(() => {
     const loadPageData = async () => {
@@ -422,7 +388,7 @@ const Login = () => {
     if (userExists && hasMpin) {
       setLoading(true);
       try {
-        const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
+        const response = await verifyMPIN(formData.mpin);
         if (response.jwt) {
           localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
@@ -557,6 +523,14 @@ const Login = () => {
     setShowOtpInput(false);
     setFormData(prev => ({ ...prev, mpin: '', otp: '' }));
     setErrors({});
+  };
+
+  // Display error message in the UI
+  const renderError = () => {
+    if (error) {
+      return <div className="text-red-500 text-sm mt-2">{error}</div>;
+    }
+    return null;
   };
 
   return (
