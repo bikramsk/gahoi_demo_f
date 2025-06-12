@@ -27,34 +27,52 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const jwt = localStorage.getItem('jwt');
         
+        // Debug logging
+        console.log('Mobile Number:', mobileNumber);
+        console.log('JWT exists:', !!jwt);
+        console.log('JWT first 20 chars:', jwt ? jwt.substring(0, 20) : 'No JWT');
+        
         if (!jwt) {
           console.error('No JWT token found');
           navigate('/login');
           return;
         }
 
-        console.log('Using JWT token for authentication');
-
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         console.log('Request URL:', url);
 
         const headers = {
           'Authorization': `Bearer ${jwt}`,
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
         };
+        
+        // Debug logging
+        console.log('Request headers:', {
+          ...headers,
+          'Authorization': headers.Authorization.substring(0, 20) + '...'
+        });
 
         const response = await fetch(url, { headers });
+        
+        // Debug logging
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
         if (response.status === 401) {
           console.error('Unauthorized - Invalid JWT token');
           const errorText = await response.text();
           console.error('Error details:', errorText);
+          // Debug logging
+          console.log('Full error response:', errorText);
           navigate('/login');
           return;
         }
 
         if (!response.ok) {
           console.error('Failed to fetch user data:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('Error response body:', errorText);
           throw new Error('Failed to fetch user data');
         }
 
