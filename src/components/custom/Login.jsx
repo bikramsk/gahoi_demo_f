@@ -870,9 +870,9 @@ const Login = () => {
                 <div className="flex items-center justify-between pt-1">
                   <button 
                     type="submit" 
-                    disabled={loading || (!showOtpInput && !showMpinCreation && !showMpinInput)}
+                    disabled={loading || (formData.mobileNumber.length !== 10 && !showOtpInput && !showMpinCreation && !showMpinInput)}
                     className={`w-full bg-red-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 font-medium text-xs sm:text-sm flex items-center justify-center ${
-                      loading || (!showOtpInput && !showMpinCreation && !showMpinInput) ? 'opacity-75 cursor-not-allowed' : ''
+                      loading || (formData.mobileNumber.length !== 10 && !showOtpInput && !showMpinCreation && !showMpinInput) ? 'opacity-75 cursor-not-allowed' : ''
                     }`}
                   >
                     {loading && (
