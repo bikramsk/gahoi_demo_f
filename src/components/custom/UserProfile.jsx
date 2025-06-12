@@ -30,21 +30,30 @@ const UserProfile = () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         
-        console.log('Mobile number:', mobileNumber);
-        console.log('Using API token for fetch');
+        // Debug token
+        console.log('API Base:', API_BASE);
+        console.log('Token exists:', !!API_TOKEN);
+        console.log('Token length:', API_TOKEN?.length);
+        console.log('Token preview:', API_TOKEN ? `${API_TOKEN.substring(0, 10)}...` : 'No token');
 
-        const response = await fetch(
-          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
-          {
-            headers: {
-              'Authorization': `Bearer ${API_TOKEN}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
+        const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
+        console.log('Request URL:', url);
+
+        const headers = {
+          'Authorization': `Bearer ${API_TOKEN}`,
+          'Accept': 'application/json'
+        };
+        console.log('Request headers:', headers);
+
+        const response = await fetch(url, { headers });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
         if (response.status === 401) {
           console.error('Unauthorized - Check API token configuration');
+          const errorText = await response.text();
+          console.error('Error details:', errorText);
           navigate('/login');
           return;
         }
