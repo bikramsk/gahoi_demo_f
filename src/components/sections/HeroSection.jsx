@@ -17,7 +17,7 @@ const HeroSection = () => {
         let response;
         let apiUrl;
         
-        // Try multiple API patterns 
+        // Try multiple API patterns for Strapi v5
         const apiEndpoints = [
           `${API_URL}/api/banner-images?populate=*&filters[isActive][$eq]=true&sort=order:asc`,
           `${API_URL}/api/banner-images?populate=*&filters[isActive]=true`,
@@ -61,13 +61,14 @@ const HeroSection = () => {
 
         const activeBanners = data
           .filter(item => {
-            
+            // Filter for active banners with required images
+            // In Strapi v5, fields are directly on the item, not nested under attributes
             return item.isActive === true && 
                    item.desktopImage && 
                    item.mobileImage;
           })
           .map(item => {
-            
+            // In Strapi v5, image objects are directly available (not nested under data.attributes)
             const desktopUrl = item.desktopImage.url;
             const mobileUrl = item.mobileImage.url;
             

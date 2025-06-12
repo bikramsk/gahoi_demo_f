@@ -335,11 +335,11 @@ const AboutUs = () => {
             <Link to="/login" className="w-full sm:w-auto">
               <button className="w-full sm:w-auto relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-red-600 to-amber-500 rounded-full opacity-60 blur-sm group-hover:opacity-100 transition duration-300"></div>
-                {/* <div
+                <div
                   className={`relative w-full bg-[#FD7D01] text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-semibold shadow-lg group-hover:shadow-xl transition-all text-base md:text-lg ${languageFontClass}`}
                 >
                   {t("aboutUs.cta.memberButton")}
-                </div> */}
+                </div>
               </button>
             </Link>
             <Link to="/contact-us" className="w-full sm:w-auto">
