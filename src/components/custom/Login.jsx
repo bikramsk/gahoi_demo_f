@@ -79,13 +79,13 @@ const verifyOTP = async (mobileNumber, otp) => {
 // Add MPIN verification function
 const verifyMPIN = async (mobileNumber, mpin) => {
   try {
-    const response = await fetch(`${API_BASE}/api/verify-mpin`, {
+    console.log('Verifying MPIN for:', mobileNumber);
+    const response = await fetch(`${API_BASE}/api/auth/verify-mpin`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      credentials: 'include',
       body: JSON.stringify({
         mobileNumber: mobileNumber,
         mpin: mpin
@@ -93,6 +93,8 @@ const verifyMPIN = async (mobileNumber, mpin) => {
     });
 
     const responseText = await response.text();
+    console.log('Raw MPIN verification response:', responseText);
+
     if (!response.ok) {
       let errorMessage = 'MPIN verification failed';
       try {
@@ -104,7 +106,16 @@ const verifyMPIN = async (mobileNumber, mpin) => {
       throw new Error(errorMessage);
     }
 
-    return JSON.parse(responseText);
+    try {
+      const data = JSON.parse(responseText);
+      if (!data.jwt) {
+        throw new Error('No JWT token in response');
+      }
+      return data;
+    } catch (e) {
+      console.error('Error parsing MPIN verification response:', e);
+      throw new Error('Invalid response format from server');
+    }
   } catch (error) {
     console.error('Error verifying MPIN:', error);
     throw error;
@@ -426,12 +437,17 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
+        console.log('MPIN verification response:', response);
         if (response.jwt) {
+          console.log('Received JWT token:', response.jwt);
           localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           navigate('/profile');
+        } else {
+          throw new Error('No JWT token received from server');
         }
       } catch (error) {
+        console.error('MPIN verification error:', error);
         setErrors({
           mpin: error.message || 'Invalid MPIN'
         });

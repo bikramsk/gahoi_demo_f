@@ -66,7 +66,17 @@ const UserProfile = () => {
           }
         );
 
+        console.log('API Request:', {
+          url: `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
         if (userResponse.status === 401) {
+          console.error('401 Unauthorized - Token:', token);
           console.log('Token expired or invalid - redirecting to login');
           localStorage.removeItem('token');
           localStorage.removeItem('verifiedMobile');
@@ -79,7 +89,8 @@ const UserProfile = () => {
           console.error('Failed to fetch user:', {
             status: userResponse.status,
             statusText: userResponse.statusText,
-            error: errorText
+            error: errorText,
+            token: token
           });
           throw new Error(`Failed to fetch user data: ${userResponse.status} ${userResponse.statusText}`);
         }
