@@ -23,53 +23,72 @@ const UserProfile = () => {
   const [authError, setAuthError] = useState(null);
 
  
+  // Update the isValidToken function with better validation
   const isValidToken = (token) => {
     if (!token) return false;
     
-
-    const cleanToken = token.replace(/^["'](.+)["']$/, '$1').trim();
-    
-   
-    const parts = cleanToken.split('.');
-    if (parts.length !== 3) return false;
-    
-  
-    return parts.every(part => /^[A-Za-z0-9-_]*$/.test(part));
+    try {
+      // Remove quotes and whitespace
+      const cleanToken = token.replace(/^["'](.+)["']$/, '$1').trim();
+      
+      // Check basic JWT structure
+      const parts = cleanToken.split('.');
+      if (parts.length !== 3) return false;
+      
+      // Verify each part is base64url encoded
+      if (!parts.every(part => /^[A-Za-z0-9-_]*$/.test(part))) return false;
+      
+      // Try to decode the payload
+      const payload = JSON.parse(atob(parts[1]));
+      
+      // Check if token is expired
+      if (payload.exp && Date.now() >= payload.exp * 1000) {
+        console.error('Token expired');
+        return false;
+      }
+      
+      return true;
+    } catch (err) {
+      console.error('Token validation error:', err);
+      return false;
+    }
   };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Add detailed debug logging
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const jwt = localStorage.getItem('jwt');
         
-        console.log('Auth State:', {
-          jwt: jwt ? `${jwt.substring(0, 20)}...` : null,
+        // Detailed debug logging
+        console.log('Auth Debug:', {
+          hasToken: !!jwt,
           tokenLength: jwt?.length,
           mobileNumber,
           timestamp: new Date().toISOString()
         });
 
         if (!jwt || !mobileNumber) {
-          console.error('Missing auth credentials');
+          console.error('Missing credentials');
+          localStorage.clear(); // Clear all auth data
           navigate('/login');
           return;
         }
 
         if (!isValidToken(jwt)) {
-          console.error('Invalid token format detected');
-          localStorage.removeItem('jwt');
-          localStorage.removeItem('verifiedMobile');
+          console.error('Invalid or expired token');
+          localStorage.clear();
           navigate('/login');
           return;
         }
 
-        const headers = {
-          'Authorization': `Bearer ${jwt}`,
+        // Clean token and set headers
+        const cleanToken = jwt.replace(/^["'](.+)["']$/, '$1').trim();
+        const headers = new Headers({
+          'Authorization': `Bearer ${cleanToken}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-        };
+        });
 
         const url = `${API_BASE}/api/registration-pages`;
         const params = new URLSearchParams({
@@ -77,11 +96,11 @@ const UserProfile = () => {
           'populate': 'personal_information'
         });
 
-        // Log the exact request being made
+        // Log request details
         console.log('Making request:', {
           url: `${url}?${params.toString()}`,
-          token: jwt.substring(0, 15) + '...',
-          headers
+          tokenFirstPart: cleanToken.split('.')[0],
+          headerKeys: Array.from(headers.keys())
         });
 
         const response = await fetch(`${url}?${params.toString()}`, { 
@@ -90,19 +109,17 @@ const UserProfile = () => {
           credentials: 'include' 
         });
 
-        // Detailed error logging
         if (!response.ok) {
           const errorData = await response.json();
           console.error('API Error:', {
             status: response.status,
             statusText: response.statusText,
-            error: errorData,
-            headers: Object.fromEntries(response.headers)
+            error: errorData
           });
           
           if (response.status === 401) {
-            localStorage.removeItem('jwt');
-            localStorage.removeItem('verifiedMobile');
+            localStorage.clear();
+            setAuthError('Session expired. Please login again.');
             navigate('/login');
             return;
           }
