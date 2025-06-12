@@ -23,37 +23,6 @@ const UserProfile = () => {
   const [activeSection, setActiveSection] = useState('personal');
   const [authError, setAuthError] = useState(null);
 
-  // Update the isValidToken function with better validation
-  const isValidToken = (token) => {
-    if (!token) return false;
-    
-    try {
-      // Remove quotes and whitespace
-      const cleanToken = token.replace(/^["'](.+)["']$/, '$1').trim();
-      
-      // Check basic JWT structure
-      const parts = cleanToken.split('.');
-      if (parts.length !== 3) return false;
-      
-      // Verify each part is base64url encoded
-      if (!parts.every(part => /^[A-Za-z0-9-_]*$/.test(part))) return false;
-      
-      // Try to decode the payload
-      const payload = JSON.parse(atob(parts[1]));
-      
-      // Check if token is expired
-      if (payload.exp && Date.now() >= payload.exp * 1000) {
-        console.error('Token expired');
-        return false;
-      }
-      
-      return true;
-    } catch (err) {
-      console.error('Token validation error:', err);
-      return false;
-    }
-  };
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -73,8 +42,9 @@ const UserProfile = () => {
           return;
         }
 
+        // Updated URL structure for Strapi v5
         const response = await fetch(
-          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobile}&populate=personal_information`,
+          `${API_BASE}/api/registration-pages?populate=deep&filters[personal_information][mobile_number]=${mobile}`,
           {
             method: 'GET',
             headers,
@@ -100,6 +70,8 @@ const UserProfile = () => {
         }
 
         const data = await response.json();
+        console.log('API Response:', data); // Debug log
+        
         if (!data.data || data.data.length === 0) {
           navigate('/registration', {
             state: {

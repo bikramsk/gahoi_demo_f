@@ -37,14 +37,29 @@ export const cleanAndValidateToken = (token) => {
 };
 
 export const getAuthHeaders = (token) => {
+  console.log('getAuthHeaders called with token:', token ? `${token.substring(0, 20)}...` : 'null');
+  
   const cleanToken = cleanAndValidateToken(token);
-  if (!cleanToken) return null;
+  console.log('Clean token result:', cleanToken ? `${cleanToken.substring(0, 20)}...` : 'null');
+  
+  if (!cleanToken) {
+    console.error('Failed to generate headers - invalid token');
+    return null;
+  }
 
-  return {
+  const headers = {
     'Authorization': `Bearer ${cleanToken}`,
     'Accept': 'application/json',
     'Content-Type': 'application/json'
   };
+  
+  console.log('Generated headers:', {
+    Authorization: `Bearer ${cleanToken.substring(0, 20)}...`,
+    Accept: headers.Accept,
+    'Content-Type': headers['Content-Type']
+  });
+
+  return headers;
 };
 
 export const storeAuthData = (token, mobileNumber) => {
