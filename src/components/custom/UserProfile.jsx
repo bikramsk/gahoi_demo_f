@@ -27,29 +27,14 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const jwt = localStorage.getItem('jwt');
         
-<<<<<<< HEAD
         if (!jwt || !mobileNumber) {
-=======
-        console.log('Attempting to fetch user data:', {
-          mobileNumber,
-          token: token ? 'Present' : 'Missing'
-        });
-
-        if (!mobileNumber || !token) {
-          console.log('Missing credentials - redirecting to login');
->>>>>>> a8d15ea775c33febb468e351a0c5bca329bfcad1
           navigate('/login');
           return;
         }
 
-<<<<<<< HEAD
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         
         const response = await fetch(url, { 
-=======
-        // First, get the user data using mobile number
-        const userResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`, {
->>>>>>> a8d15ea775c33febb468e351a0c5bca329bfcad1
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${jwt}`,
@@ -65,14 +50,9 @@ const UserProfile = () => {
           return;
         }
 
-<<<<<<< HEAD
         if (!response.ok) {
           throw new Error('Failed to fetch profile data');
         }
-=======
-        const userData = await userResponse.json();
-        console.log('Initial user data response:', userData);
->>>>>>> a8d15ea775c33febb468e351a0c5bca329bfcad1
 
         const data = await response.json();
 
@@ -86,94 +66,7 @@ const UserProfile = () => {
           return;
         }
 
-<<<<<<< HEAD
         setUserData(data.data[0].attributes);
-=======
-        const userId = userData.data[0].id;
-
-        // Then fetch the complete profile with all relations
-        const profileResponse = await fetch(
-          `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`, 
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        if (!profileResponse.ok) {
-          const errorText = await profileResponse.text();
-          console.error('Failed to fetch profile:', errorText);
-          throw new Error('Failed to fetch profile data');
-        }
-
-        const profileData = await profileResponse.json();
-        console.log('Complete profile data:', profileData);
-
-        // Transform the data
-        const transformedData = {
-          personal_information: {
-            full_name: profileData.data.attributes?.name || '',
-            mobile_number: profileData.data.attributes?.mobile_number || '',
-            email_address: profileData.data.attributes?.email || '',
-            village: profileData.data.attributes?.village || '',
-            Gender: profileData.data.attributes?.gender || '',
-            nationality: profileData.data.attributes?.nationality || '',
-            is_gahoi: profileData.data.attributes?.is_gahoi || false,
-            display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
-          },
-          family_details: {
-            father_name: profileData.data.attributes?.family_details?.father_name || '',
-            father_mobile: profileData.data.attributes?.family_details?.father_mobile || '',
-            mother_name: profileData.data.attributes?.family_details?.mother_name || '',
-            mother_mobile: profileData.data.attributes?.family_details?.mother_mobile || '',
-            spouse_name: profileData.data.attributes?.family_details?.spouse_name || '',
-            spouse_mobile: profileData.data.attributes?.family_details?.spouse_mobile || '',
-            gotra: profileData.data.attributes?.gotra || '',
-            aakna: profileData.data.attributes?.aakna || '',
-            siblingDetails: profileData.data.attributes?.family_details?.siblings || []
-          },
-          biographical_details: {
-            manglik_status: profileData.data.attributes?.biographical_details?.manglik_status || '',
-            Grah: profileData.data.attributes?.biographical_details?.grah || '',
-            Handicap: profileData.data.attributes?.biographical_details?.handicap || '',
-            is_married: profileData.data.attributes?.biographical_details?.is_married ? 'Married' : 'Unmarried',
-            marriage_to_another_caste: profileData.data.attributes?.biographical_details?.marriage_to_another_caste || ''
-          },
-          work_information: {
-            occupation: profileData.data.attributes?.work_information?.occupation || '',
-            company_name: profileData.data.attributes?.work_information?.company_name || '',
-            work_area: profileData.data.attributes?.work_information?.work_area || '',
-            industrySector: profileData.data.attributes?.work_information?.industry_sector || ''
-          },
-          additional_details: {
-            blood_group: profileData.data.attributes?.additional_details?.blood_group || '',
-            date_of_birth: profileData.data.attributes?.additional_details?.date_of_birth || '',
-            higher_education: profileData.data.attributes?.additional_details?.education || '',
-            current_address: profileData.data.attributes?.additional_details?.current_address || '',
-            regional_information: {
-              State: profileData.data.attributes?.additional_details?.regional_information?.state || '',
-              district: profileData.data.attributes?.additional_details?.regional_information?.district || '',
-              city: profileData.data.attributes?.additional_details?.regional_information?.city || '',
-              RegionalAssembly: profileData.data.attributes?.additional_details?.regional_information?.regional_assembly || '',
-              LocalPanchayatName: profileData.data.attributes?.additional_details?.regional_information?.local_panchayat_name || '',
-              LocalPanchayat: profileData.data.attributes?.additional_details?.regional_information?.local_panchayat || '',
-              SubLocalPanchayat: profileData.data.attributes?.additional_details?.regional_information?.sub_local_panchayat || ''
-            }
-          },
-          child_name: profileData.data.attributes?.child_name || [],
-          your_suggestions: {
-            suggestions: profileData.data.attributes?.your_suggestions || ''
-          },
-          gahoi_code: profileData.data.attributes?.gahoi_code || '',
-          documentId: profileData.data.id
-        };
-
-        console.log('Transformed user data:', transformedData);
-        setUserData(transformedData);
->>>>>>> a8d15ea775c33febb468e351a0c5bca329bfcad1
         setLoading(false);
       } catch (error) {
         setError('Failed to load profile data');
