@@ -79,34 +79,35 @@ const verifyOTP = async (mobileNumber, otp) => {
 // Add MPIN verification function
 const verifyMPIN = async (mobileNumber, mpin) => {
   try {
-    console.log('Verifying MPIN for:', mobileNumber);
-    const response = await fetch(`${API_BASE}/api/auth/local`, {
+    const response = await fetch(`${API_BASE}/api/verify-mpin`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_TOKEN}`
       },
+      credentials: 'include',
       body: JSON.stringify({
-        identifier: mobileNumber,
-        password: mpin,
-        provider: 'local'
+        mobileNumber: mobileNumber,
+        mpin: mpin
       })
     });
 
-    const data = await response.json();
-    console.log('Login response:', data);
-
+    const responseText = await response.text();
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Login failed');
+      let errorMessage = 'MPIN verification failed';
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorData.error?.message || errorMessage;
+      } catch {
+        errorMessage = responseText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
-    if (!data.jwt) {
-      throw new Error('No JWT token received');
-    }
-
-    return data;
+    return JSON.parse(responseText);
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Error verifying MPIN:', error);
     throw error;
   }
 };
@@ -124,7 +125,7 @@ const Login = () => {
     otp: '',
     mpin: ''
   });
-  
+
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [authMode, setAuthMode] = useState('otp');
@@ -202,7 +203,8 @@ const Login = () => {
           const response = await fetch(`${API_BASE}/api/check-user-mpin/${formData.mobileNumber}`, {
             method: 'GET',
             headers: {
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${API_TOKEN}`
             }
           });
 
@@ -213,7 +215,7 @@ const Login = () => {
             // Existing user - must have MPIN
             setUserExists(true);
             setHasMpin(true);
-            setAuthMode('mpin'); 
+            setAuthMode('mpin');
             setShowMpinInput(true);
             setShowOtpInput(false);
           } else {
@@ -372,17 +374,12 @@ const Login = () => {
 
   const createMpin = async (mpin) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const response = await fetch(`${API_BASE}/api/create-mpin`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -426,17 +423,12 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
-        console.log('MPIN verification response:', response);
         if (response.jwt) {
-          console.log('Received JWT token:', response.jwt);
           localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           navigate('/profile');
-        } else {
-          throw new Error('No JWT token received from server');
         }
       } catch (error) {
-        console.error('MPIN verification error:', error);
         setErrors({
           mpin: error.message || 'Invalid MPIN'
         });
@@ -460,7 +452,7 @@ const Login = () => {
           setErrors({});
         }
       } catch (error) {
-        setErrors({ 
+        setErrors({
           mobileNumber: error.message || 'Failed to send OTP'
         });
       } finally {
@@ -475,8 +467,8 @@ const Login = () => {
           localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           // New user must create MPIN
-            setShowMpinCreation(true);
-            setCurrentStep(3);
+          setShowMpinCreation(true);
+          setCurrentStep(3);
         }
       } catch (error) {
         setErrors({
@@ -491,19 +483,19 @@ const Login = () => {
         setLoading(true);
         try {
           await createMpin(mpinData.mpin);
-            navigate('/registration', { 
-              state: { 
-                mobileNumber: formData.mobileNumber,
-                fromLogin: true,
-                processSteps: processSteps 
-              } 
-            });
-      } catch (error) {
-        setErrors({ 
+          navigate('/registration', { 
+            state: { 
+              mobileNumber: formData.mobileNumber,
+              fromLogin: true,
+              processSteps: processSteps 
+            } 
+          });
+        } catch (error) {
+          setErrors({
             mpin: error.message || 'Failed to create MPIN'
-        });
-      } finally {
-        setLoading(false);
+          });
+        } finally {
+          setLoading(false);
         }
       }
     }

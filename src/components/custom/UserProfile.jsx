@@ -29,44 +29,35 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
-        const token = localStorage.getItem('token');
         
-        if (!token || !mobileNumber) {
-          console.log('Missing credentials - redirecting to login');
-          localStorage.removeItem('token');
-          localStorage.removeItem('verifiedMobile');
+        if (!mobileNumber) {
+          console.log('No mobile number found - redirecting to login');
           navigate('/login');
           return;
         }
 
-        // Fetch user data
+        // Fetch user data 
         const userResponse = await fetch(
-          `${API_BASE}/api/registration-page?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
+          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=deep`,
           {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${API_TOKEN}`,
               'Content-Type': 'application/json'
             }
           }
         );
 
         if (!userResponse.ok) {
-          if (userResponse.status === 401) {
-            console.log('Token expired - redirecting to login');
-            localStorage.removeItem('token');
-            localStorage.removeItem('verifiedMobile');
-            navigate('/login');
-            return;
-          }
-          throw new Error(`Failed to fetch user data: ${userResponse.status}`);
+          console.error('Failed to fetch user data:', userResponse.status);
+          throw new Error('Failed to fetch user data');
         }
 
         const userData = await userResponse.json();
-        console.log('User data:', userData);
+        console.log('Raw user data from Strapi:', userData);
 
         if (!userData.data || userData.data.length === 0) {
-          console.log('No user data found - redirecting to registration');
+          console.log('No registration data found - redirecting to registration');
           navigate('/registration', { 
             state: { 
               mobileNumber,
@@ -76,10 +67,11 @@ const UserProfile = () => {
           return;
         }
 
+    
         const profileData = userData.data[0].attributes;
-        console.log('Profile data:', profileData);
+        console.log('Profile data to display:', profileData);
 
-        // Transform data to match component structure
+  
         setUserData({
           personal_information: profileData.personal_information || {},
           family_details: profileData.family_details || {},
@@ -90,12 +82,14 @@ const UserProfile = () => {
           gahoi_code: profileData.gahoi_code || '',
           documentId: userData.data[0].id
         });
+        setLoading(false);
 
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
+        console.error('Error:', error);
+        setError('Failed to load profile data. Please try logging in again.');
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       }
     };
 
