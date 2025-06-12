@@ -41,52 +41,58 @@ const UserProfile = () => {
         const url = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`;
         console.log('Request URL:', url);
 
-        const headers = {
-          'Authorization': `Bearer ${jwt}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        };
-        
-        // Debug logging
-        console.log('Request headers:', {
-          ...headers,
-          'Authorization': headers.Authorization.substring(0, 20) + '...'
-        });
+        try {
+          // First try with JWT
+          const response = await fetch(url, { 
+            headers: {
+              'Authorization': `Bearer ${jwt}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
 
-        const response = await fetch(url, { headers });
-        
-        // Debug logging
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+          // If JWT fails, try public access
+          if (response.status === 401) {
+            console.log('JWT auth failed, trying public access...');
+            const publicResponse = await fetch(url, {
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (publicResponse.ok) {
+              const data = await publicResponse.json();
+              if (!data.data || data.data.length === 0) {
+                console.log('No user data found for mobile:', mobileNumber);
+                navigate('/login');
+                return;
+              }
+              setUserData(data.data[0].attributes);
+              setLoading(false);
+              return;
+            }
+          }
 
-        if (response.status === 401) {
-          console.error('Unauthorized - Invalid JWT token');
-          const errorText = await response.text();
-          console.error('Error details:', errorText);
-          // Debug logging
-          console.log('Full error response:', errorText);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch user data: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (!data.data || data.data.length === 0) {
+            console.log('No user data found for mobile:', mobileNumber);
+            navigate('/login');
+            return;
+          }
+
+          setUserData(data.data[0].attributes);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setError('Failed to fetch user data');
+          setLoading(false);
           navigate('/login');
-          return;
         }
-
-        if (!response.ok) {
-          console.error('Failed to fetch user data:', response.status, response.statusText);
-          const errorText = await response.text();
-          console.error('Error response body:', errorText);
-          throw new Error('Failed to fetch user data');
-        }
-
-        const data = await response.json();
-        console.log('User data response:', data);
-        
-        if (!data.data || data.data.length === 0) {
-          console.log('No user data found for mobile:', mobileNumber);
-          navigate('/login');
-          return;
-        }
-
-        setUserData(data.data[0].attributes);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching user data:', error);
         setError('Failed to fetch user data');
