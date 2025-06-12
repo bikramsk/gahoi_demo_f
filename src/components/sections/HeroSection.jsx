@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
-const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
 const HeroSection = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -16,12 +15,9 @@ const HeroSection = () => {
       try {
         // Try different API endpoints based on what works
         let response;
+        let apiUrl;
         
-        // Get authentication token - try JWT first, fallback to API token
-        const jwt = localStorage.getItem('jwt');
-        const authToken = jwt || API_TOKEN;
-        
-        // Try multiple API patterns for Strapi v5
+        // Try multiple API patterns 
         const apiEndpoints = [
           `${API_URL}/api/banner-images?populate=*&filters[isActive][$eq]=true&sort=order:asc`,
           `${API_URL}/api/banner-images?populate=*&filters[isActive]=true`,
@@ -35,19 +31,24 @@ const HeroSection = () => {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
+                // Only include Authorization if token exists
+                ...(import.meta.env.VITE_API_TOKEN && {
+                  'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`
+                })
               }
             });
 
             if (response.ok) {
+              apiUrl = endpoint;
               break;
             }
           } catch (err) {
-            console.log('Trying next endpoint:', err);
+            // Continue to next endpoint
           }
         }
 
         if (!response || !response.ok) {
+          const errorText = await response?.text() || 'No response received';
           throw new Error(`All API endpoints failed. Status: ${response?.status || 'Unknown'}`);
         }
 
@@ -60,11 +61,13 @@ const HeroSection = () => {
 
         const activeBanners = data
           .filter(item => {
+            
             return item.isActive === true && 
                    item.desktopImage && 
                    item.mobileImage;
           })
           .map(item => {
+            
             const desktopUrl = item.desktopImage.url;
             const mobileUrl = item.mobileImage.url;
             
@@ -76,7 +79,7 @@ const HeroSection = () => {
               order: item.order
             };
           })
-          .sort((a, b) => a.order - b.order);
+          .sort((a, b) => a.order - b.order); // Sort by order field
         
         if (activeBanners.length === 0) {
           throw new Error('No active banners found. Check that banners are published and isActive=true');
