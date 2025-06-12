@@ -31,75 +31,42 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('token');
         
-        console.log('Checking credentials:', {
-          mobileNumber: mobileNumber || 'Not found',
-          hasToken: !!token,
-          tokenLength: token?.length || 0
-        });
-
-        if (!token || token === 'undefined' || token === 'null') {
-          console.log('Invalid or missing token - redirecting to login');
+        if (!token || !mobileNumber) {
+          console.log('Missing credentials - redirecting to login');
           localStorage.removeItem('token');
           localStorage.removeItem('verifiedMobile');
           navigate('/login');
           return;
         }
 
-        if (!mobileNumber || mobileNumber === 'undefined' || mobileNumber === 'null') {
-          console.log('Invalid or missing mobile number - redirecting to login');
-          localStorage.removeItem('token');
-          localStorage.removeItem('verifiedMobile');
-          navigate('/login');
-          return;
-        }
-
-        // Fetch complete user 
+        // Fetch user data
         const userResponse = await fetch(
-          `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
+          `${API_BASE}/api/registration-page?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
           {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Content-Type': 'application/json'
             }
           }
         );
 
-        console.log('API Request:', {
-          url: `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number]=${mobileNumber}&populate=*`,
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (userResponse.status === 401) {
-          console.error('401 Unauthorized - Token:', token);
-          console.log('Token expired or invalid - redirecting to login');
-          localStorage.removeItem('token');
-          localStorage.removeItem('verifiedMobile');
-          navigate('/login');
-          return;
-        }
-
         if (!userResponse.ok) {
-          const errorText = await userResponse.text();
-          console.error('Failed to fetch user:', {
-            status: userResponse.status,
-            statusText: userResponse.statusText,
-            error: errorText,
-            token: token
-          });
-          throw new Error(`Failed to fetch user data: ${userResponse.status} ${userResponse.statusText}`);
+          if (userResponse.status === 401) {
+            console.log('Token expired - redirecting to login');
+            localStorage.removeItem('token');
+            localStorage.removeItem('verifiedMobile');
+            navigate('/login');
+            return;
+          }
+          throw new Error(`Failed to fetch user data: ${userResponse.status}`);
         }
 
         const userData = await userResponse.json();
-        console.log('User data response:', userData);
+        console.log('User data:', userData);
 
         if (!userData.data || userData.data.length === 0) {
-          console.log('No user found - redirecting to registration');
+          console.log('No user data found - redirecting to registration');
           navigate('/registration', { 
             state: { 
               mobileNumber,
@@ -112,71 +79,21 @@ const UserProfile = () => {
         const profileData = userData.data[0].attributes;
         console.log('Profile data:', profileData);
 
-        // Transform data 
-        let transformedData = {
-          personal_information: {
-            full_name: profileData?.personal_information?.full_name || '',
-            mobile_number: profileData?.personal_information?.mobile_number || '',
-            email_address: profileData?.personal_information?.email_address || '',
-            village: profileData?.personal_information?.village || '',
-            Gender: profileData?.personal_information?.Gender || '',
-            nationality: profileData?.personal_information?.nationality || '',
-            is_gahoi: profileData?.personal_information?.is_gahoi || false
-          },
-          family_details: {
-            father_name: profileData?.family_details?.father_name || '',
-            father_mobile: profileData?.family_details?.father_mobile || '',
-            mother_name: profileData?.family_details?.mother_name || '',
-            mother_mobile: profileData?.family_details?.mother_mobile || '',
-            spouse_name: profileData?.family_details?.spouse_name || '',
-            spouse_mobile: profileData?.family_details?.spouse_mobile || '',
-            gotra: profileData?.family_details?.gotra || '',
-            aakna: profileData?.family_details?.aakna || '',
-            child_name: profileData?.child_name || []
-          },
-          biographical_details: {
-            manglik_status: profileData?.biographical_details?.manglik_status || '',
-            Grah: profileData?.biographical_details?.Grah || '',
-            Handicap: profileData?.biographical_details?.Handicap || '',
-            is_married: profileData?.biographical_details?.is_married || '',
-            marriage_to_another_caste: profileData?.biographical_details?.marriage_to_another_caste || ''
-          },
-          work_information: {
-            occupation: profileData?.work_information?.occupation || '',
-            company_name: profileData?.work_information?.company_name || '',
-            work_area: profileData?.work_information?.work_area || '',
-            industrySector: profileData?.work_information?.industrySector || ''
-          },
-          additional_details: {
-            blood_group: profileData?.additional_details?.blood_group || '',
-            date_of_birth: profileData?.additional_details?.date_of_birth || '',
-            higher_education: profileData?.additional_details?.higher_education || '',
-            current_address: profileData?.additional_details?.current_address || '',
-            regional_information: {
-              State: profileData?.additional_details?.regional_information?.State || '',
-              district: profileData?.additional_details?.regional_information?.district || '',
-              city: profileData?.additional_details?.regional_information?.city || '',
-              RegionalAssembly: profileData?.additional_details?.regional_information?.RegionalAssembly || '',
-              LocalPanchayatName: profileData?.additional_details?.regional_information?.LocalPanchayatName || '',
-              LocalPanchayat: profileData?.additional_details?.regional_information?.LocalPanchayat || '',
-              SubLocalPanchayat: profileData?.additional_details?.regional_information?.SubLocalPanchayat || ''
-            }
-          },
-          your_suggestions: profileData?.your_suggestions || '',
-          gahoi_code: profileData?.gahoi_code || '',
+        // Transform data to match component structure
+        setUserData({
+          personal_information: profileData.personal_information || {},
+          family_details: profileData.family_details || {},
+          biographical_details: profileData.biographical_details || {},
+          work_information: profileData.work_information || {},
+          additional_details: profileData.additional_details || {},
+          your_suggestions: profileData.your_suggestions || '',
+          gahoi_code: profileData.gahoi_code || '',
           documentId: userData.data[0].id
-        };
+        });
 
-        console.log('Transformed user data:', transformedData);
-        setUserData(transformedData);
-        setLoading(false);
       } catch (error) {
-        console.error('Error in fetchUserData:', error);
-        setError(error.message || 'Failed to fetch user data');
-        // Show error for 9 sec
-        setTimeout(() => {
-          navigate('/login');
-        }, 9000);
+        console.error('Error fetching user data:', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }

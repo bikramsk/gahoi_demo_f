@@ -80,44 +80,33 @@ const verifyOTP = async (mobileNumber, otp) => {
 const verifyMPIN = async (mobileNumber, mpin) => {
   try {
     console.log('Verifying MPIN for:', mobileNumber);
-    const response = await fetch(`${API_BASE}/api/auth/verify-mpin`, {
+    const response = await fetch(`${API_BASE}/api/auth/local`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        mobileNumber: mobileNumber,
-        mpin: mpin
+        identifier: mobileNumber,
+        password: mpin,
+        provider: 'local'
       })
     });
 
-    const responseText = await response.text();
-    console.log('Raw MPIN verification response:', responseText);
+    const data = await response.json();
+    console.log('Login response:', data);
 
     if (!response.ok) {
-      let errorMessage = 'MPIN verification failed';
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.message || errorData.error?.message || errorMessage;
-      } catch {
-        errorMessage = responseText || errorMessage;
-      }
-      throw new Error(errorMessage);
+      throw new Error(data.error?.message || 'Login failed');
     }
 
-    try {
-      const data = JSON.parse(responseText);
-      if (!data.jwt) {
-        throw new Error('No JWT token in response');
-      }
-      return data;
-    } catch (e) {
-      console.error('Error parsing MPIN verification response:', e);
-      throw new Error('Invalid response format from server');
+    if (!data.jwt) {
+      throw new Error('No JWT token received');
     }
+
+    return data;
   } catch (error) {
-    console.error('Error verifying MPIN:', error);
+    console.error('Login error:', error);
     throw error;
   }
 };
