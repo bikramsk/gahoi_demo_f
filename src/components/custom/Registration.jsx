@@ -1347,11 +1347,22 @@ const RegistrationForm = () => {
         })
       });
 
-      const data = await response.json();
-      console.log('SMS API Response:', data);
+      let data;
+      try {
+        const text = await response.text();
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error('Response is not JSON:', text);
+          throw new Error(`Server error: ${text}`);
+        }
+      } catch (error) {
+        console.error('Error parsing response:', error);
+        throw error;
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to send SMS');
+        throw new Error(data?.message || data?.error || 'Failed to send SMS');
       }
 
       console.log('SMS sent successfully to:', numberWithCountryCode);
