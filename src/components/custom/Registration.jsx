@@ -1297,21 +1297,28 @@ const RegistrationForm = () => {
 
   const sendRegistrationSMS = async (mobileNumber, gahoiCode) => {
     try {
-      const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}. Please keep this code for future reference.`;
+      const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}.`;
       
+      
+      const formData = new URLSearchParams();
+      formData.append('api_key', import.meta.env.VITE_SMS_API_KEY);
+      formData.append('message', message);
+      formData.append('number', mobileNumber);
+      formData.append('route', '1');
+
       const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify({
-          phone: mobileNumber,
-          message: message
-        })
+        body: formData
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send SMS');
+      const data = await response.json();
+      console.log('SMS API Response:', data);
+
+      if (!data.status) {
+        throw new Error(data.message || 'Failed to send SMS');
       }
 
       console.log('SMS sent successfully');
