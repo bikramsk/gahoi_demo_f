@@ -204,7 +204,7 @@ const UserProfile = () => {
       {/* Header */}
       <header className="bg-red-800 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
               <div className="relative w-10 h-10">
                 <div className="absolute inset-0 bg-gray-200 rounded-full animate-pulse"></div>
@@ -220,12 +220,12 @@ const UserProfile = () => {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold">{displayData.personal_information?.full_name || 'Guest User'}</h1>
+                <h1 className="text-xl font-bold">{displayData.personal_information?.full_name || 'Username'}</h1>
                 <p className="text-sm opacity-90">Gahoi Code: {displayData.gahoi_code || 'Not Available'}</p>
                 {error && <p className="text-sm text-red-300 mt-1">{error}</p>}
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
               <button 
                 onClick={() => navigate('/registration', { 
                   state: { 
@@ -237,7 +237,7 @@ const UserProfile = () => {
                     }
                   } 
                 })}
-                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors flex items-center"
+                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors flex items-center whitespace-nowrap"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -246,13 +246,13 @@ const UserProfile = () => {
               </button>
               <button 
                 onClick={() => navigate('/')}
-                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors"
+                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors whitespace-nowrap"
               >
                 Home
               </button>
               <button 
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors"
+                className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors whitespace-nowrap"
               >
                 Logout
               </button>
@@ -263,19 +263,19 @@ const UserProfile = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-          <div className="flex">
+          <div className="flex flex-col lg:flex-row">
             {/* Sidebar */}
-            <div className="w-64 bg-gray-50 border-r border-gray-200">
-              <nav className="py-4">
+            <div className="w-full lg:w-64 bg-gray-50 border-b lg:border-b-0 lg:border-r border-gray-200">
+              <nav className="flex lg:flex-col overflow-x-auto lg:overflow-x-visible py-2 lg:py-4">
                 {SECTIONS.map((section) => (
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`w-full flex items-center px-4 py-3 text-sm font-medium transition-colors ${
-                      activeSection === section.id
-                        ? 'bg-red-50 text-red-700 border-l-4 border-red-700'
+                    className={`flex-shrink-0 flex items-center px-4 py-3 text-sm font-medium transition-colors
+                      ${activeSection === section.id
+                        ? 'bg-red-50 text-red-700 border-b-4 lg:border-b-0 lg:border-l-4 border-red-700'
                         : 'text-gray-600 hover:bg-gray-100'
-                    }`}
+                      } w-auto lg:w-full whitespace-nowrap`}
                   >
                     {renderIcon(section.icon)}
                     <span className="ml-3">{section.title}</span>
@@ -285,22 +285,22 @@ const UserProfile = () => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-8">
+            <div className="flex-1 p-4 sm:p-6 lg:p-8">
               <div className="max-w-3xl mx-auto">
                 {activeSection === 'personal' && (
                   <section>
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800">Personal Information</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Personal Information</h2>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.personal_information || {}).map(([key, value]) => (
                           key !== 'display_picture' && (
                             <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                              <dt className="text-sm font-medium text-gray-500">
+                              <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                                 {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                               </dt>
-                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
                             </div>
@@ -314,17 +314,17 @@ const UserProfile = () => {
                 {activeSection === 'family' && (
                   <section>
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800">Family Details</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Family Details</h2>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.family_details || {}).length > 0 ? (
                           Object.entries(displayData.family_details || {}).map(([key, value]) => (
                             <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                              <dt className="text-sm font-medium text-gray-500">
+                              <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                                 {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                               </dt>
-                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
                             </div>
@@ -342,17 +342,17 @@ const UserProfile = () => {
                 {activeSection === 'biographical' && (
                   <section>
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800">Biographical Details</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Biographical Details</h2>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.biographical_details || {}).length > 0 ? (
                           Object.entries(displayData.biographical_details || {}).map(([key, value]) => (
                             <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                              <dt className="text-sm font-medium text-gray-500">
+                              <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                                 {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                               </dt>
-                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
                             </div>
@@ -370,17 +370,17 @@ const UserProfile = () => {
                 {activeSection === 'work' && (
                   <section>
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800">Work Information</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Work Information</h2>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.work_information || {}).length > 0 ? (
                           Object.entries(displayData.work_information || {}).map(([key, value]) => (
                             <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                              <dt className="text-sm font-medium text-gray-500">
+                              <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                                 {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                               </dt>
-                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
                             </div>
@@ -398,7 +398,7 @@ const UserProfile = () => {
                 {activeSection === 'additional' && (
                   <section>
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800">Additional Details</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Additional Details</h2>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
@@ -406,10 +406,10 @@ const UserProfile = () => {
                           Object.entries(displayData.additional_details || {}).map(([key, value]) => (
                             key !== 'regional_information' && (
                               <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                                <dt className="text-sm font-medium text-gray-500">
+                                <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                                   {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                                 </dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                   {value?.toString() || 'N/A'}
                                 </dd>
                               </div>
@@ -428,17 +428,17 @@ const UserProfile = () => {
                 {activeSection === 'regional' && (
                   <section>
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800">Regional Information</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Regional Information</h2>
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.additional_details?.regional_information || {}).length > 0 ? (
                           Object.entries(displayData.additional_details?.regional_information || {}).map(([key, value]) => (
                             <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                              <dt className="text-sm font-medium text-gray-500">
+                              <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                                 {key.split(/(?=[A-Z])/).join(' ')}
                               </dt>
-                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
                             </div>
