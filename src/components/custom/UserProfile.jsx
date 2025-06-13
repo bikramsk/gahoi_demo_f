@@ -135,9 +135,8 @@ const UserProfile = () => {
           return;
         }
 
-        // Get user ID first using mobile number
-        const encodedMobile = encodeURIComponent(mobileNumber);
-        const userIdResponse = await fetch(`${API_BASE}/api/users?populate=*&filters[mobile_number]=${encodedMobile}`, {
+        // Get user by mobile number using Strapi v5 format
+        const userResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number]=${mobileNumber}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -146,28 +145,29 @@ const UserProfile = () => {
           }
         });
 
-        console.log('User ID API Response:', {
-          status: userIdResponse.status,
-          ok: userIdResponse.ok,
-          url: userIdResponse.url
+        console.log('User API Response:', {
+          status: userResponse.status,
+          ok: userResponse.ok,
+          url: userResponse.url
         });
 
-        if (!userIdResponse.ok) {
-          throw new Error(`Failed to fetch user ID: ${userIdResponse.status}`);
+        if (!userResponse.ok) {
+          throw new Error(`Failed to fetch user: ${userResponse.status}`);
         }
 
-        const userIdData = await userIdResponse.json();
-        console.log('User ID Data:', userIdData);
+        const userData = await userResponse.json();
+        console.log('User Data:', userData);
 
-        if (!userIdData.data || userIdData.data.length === 0) {
+        if (!userData.data || userData.data.length === 0) {
           throw new Error('User not found');
         }
 
-        const userId = userIdData.data[0].id;
-        console.log('Found User ID:', userId);
+        // In Strapi v5, we use documentId instead of id
+        const documentId = userData.data[0].documentId;
+        console.log('Found User Document ID:', documentId);
 
-        // Now get full profile with all relations
-        const profileUrl = `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
+        // Now get full profile with all relations using documentId
+        const profileUrl = `${API_BASE}/api/users/${documentId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
         console.log('Making profile API call to:', profileUrl);
 
         const profileResponse = await fetch(profileUrl, {

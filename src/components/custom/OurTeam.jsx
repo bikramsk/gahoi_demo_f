@@ -27,105 +27,67 @@ const OurTeam = () => {
   // Team member data
   const founderMembers = [
     {
-      name: "Shri Ram Gahoi",
-      position: "Founding President",
-      period: "1990-1995",
-      image: "/dummy-profile.webp",
-      contribution: "Established the foundation of our organization"
+      name: "Pradeep Pahariya",
+      location: "Gwalior",
+     image: "/our-team/pradeep_pahariya.jpg",
+      
     },
     {
-      name: "Shri Mohan Gahoi",
-      position: "Founding Secretary",
-      period: "1990-1995",
-    image: "/dummy-profile.webp",
-      contribution: "Structured the initial organizational framework"
+      name: "Sudhir Rawat",
+      location: "Gwalior",      
+    image: "/our-team/sudhir_rawat.jpg",
+     
     },
     {
-        name: "Shri Ram Kumar Gahoi",
-        position: "Founding President",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Established the foundation of our organization"
+        name: "Bhanu Capra",
+        location: "Gwalior",        
+       image: "/our-team/bhanu_capra.jpg",
+       
       },
       {
-        name: "Shri Mohan",
-        position: "Founding Secretary",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Structured the initial organizational framework"
+        name: "Bhai Siyasaran Kastwar",
+        location: "Gwalior",        
+      image: "/our-team/Siyasaran_kastwar.jpg",
+        
       },
       {
-        name: "Shri Ram Kumar Gahoi",
-        position: "Founding President",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Established the foundation of our organization"
+        name: "Nitesh Seth",
+        location: "Noida",       
+      image: "/our-team/nitesh_seth.jpg",
+        
       },
-      {
-        name: "Shri Mohan Gahoi",
-        position: "Founding Secretary",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Structured the initial organizational framework"
-      },
-      {
-        name: "Shri Ram Kumar Gahoi",
-        position: "Founding President",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Established the foundation of our organization"
-      },
-      {
-        name: "Shri Mohan Gahoi",
-        position: "Founding Secretary",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Structured the initial organizational framework"
-      },
-      {
-        name: "Shri Ram Kumar Gahoi",
-        position: "Founding President",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Established the foundation of our organization"
-      },
-      {
-        name: "Shri Mohan Gahoi",
-        position: "Founding Secretary",
-        period: "1990-1995",
-      image: "/dummy-profile.webp",
-        contribution: "Structured the initial organizational framework"
-      }
+      
   ];
 
   const executiveMembers = [
     {
-      name: "Shri Rajesh Kumar Gahoi",
-      position: "President",
-      period: "2023-Present",
-    image: "/dummy-profile.webp",
-      contact: "+91 98XXXXXXXX",
-      email: "president@gahoishakti.in"
+      name: "Chetna Nikhra",
+      location: "Murar",     
+    image: "/our-team/chetna_nikhra.jpg",
+     
+    },
+    
+    {
+      name: "Neelam Reza",
+      location: "Thatipur",     
+    image: "/our-team/neelam_reza.jpg",
+      
     },
     {
-      name: "Shri Suresh Kumar Gahoi",
-      position: "Secretary",
-      period: "2023-Present",
-    image: "/dummy-profile.webp",
-      contact: "+91 98XXXXXXXX",
-      email: "secretary@gahoishakti.in"
-    },
-    {
-      name: "Shri Mahesh Kumar Gahoi",
-      position: "Treasurer",
-      period: "2023-Present",
-    image: "/dummy-profile.webp",
-      contact: "+91 98XXXXXXXX",
-      email: "treasurer@gahoishakti.in"
-    },
-    {
+        name: "Baby Bihari Reza",
+        location: "New City Center",        
+      image: "/our-team/bihari_riza.jpg",
+        
+      },
+      {
+        name: "Shrimati Sarika Reza",
+        location: "Deen Dayal Nagar",
+        period: "2023-Present",
+      image: "/our-team/Sarika_Riza.jpg",
+      },
+      {
         name: "Shri Rajesh Kumar Gahoi",
-        position: "President",
+        location: "President",
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
@@ -133,7 +95,7 @@ const OurTeam = () => {
       },
       {
         name: "Shri Suresh Kumar Gahoi",
-        position: "Secretary",
+        location: "Secretary",
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
@@ -141,7 +103,7 @@ const OurTeam = () => {
       },
       {
         name: "Shri Rajesh Kumar Gahoi",
-        position: "President",
+        location: "President",
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
@@ -149,23 +111,7 @@ const OurTeam = () => {
       },
       {
         name: "Shri Suresh Kumar Gahoi",
-        position: "Secretary",
-        period: "2023-Present",
-      image: "/dummy-profile.webp",
-        contact: "+91 98XXXXXXXX",
-        email: "secretary@gahoishakti.in"
-      },
-      {
-        name: "Shri Rajesh Kumar Gahoi",
-        position: "President",
-        period: "2023-Present",
-      image: "/dummy-profile.webp",
-        contact: "+91 98XXXXXXXX",
-        email: "president@gahoishakti.in"
-      },
-      {
-        name: "Shri Suresh Kumar Gahoi",
-        position: "Secretary",
+        location: "Secretary",
         period: "2023-Present",
       image: "/dummy-profile.webp",
         contact: "+91 98XXXXXXXX",
@@ -191,7 +137,7 @@ const OurTeam = () => {
           {member.name}
         </h3>
         <p className={`text-[#FD7D01] font-medium mb-2 ${languageFontClass}`}>
-          {member.position}
+          {member.location}
         </p>
         <p className={`text-sm text-gray-600 mb-3 ${languageFontClass}`}>
           {member.period}
@@ -256,7 +202,7 @@ const OurTeam = () => {
           <div className="absolute inset-0" style={{
             backgroundImage: "url('/ourteam-bg.webp')",
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundlocation: 'center',
             mixBlendMode: 'overlay',
             opacity: 0.1
           }}></div>
