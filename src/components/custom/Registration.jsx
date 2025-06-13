@@ -1058,7 +1058,7 @@ const RegistrationForm = () => {
 
   const sendWhatsAppInvite = useCallback(async (mobileNumber) => {
     try {
-      const res = await fetch('http://api.gahoishakti.in/api/whatsapp/send', {
+      const res = await fetch('https://api.gahoishakti.in/api/whatsapp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
