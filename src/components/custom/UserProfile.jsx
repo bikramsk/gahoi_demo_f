@@ -68,7 +68,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log('=== Starting Profile Load ===');
+        console.log('Starting Profile Load...');
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('token');
         
@@ -117,7 +117,7 @@ const UserProfile = () => {
         });
 
         const verifyData = await verifyResponse.json();
-        console.log('User status check:', verifyData);
+        console.log('User verification:', verifyData);
 
         if (!verifyResponse.ok || !verifyData.exists) {
           console.log('User verification failed');
@@ -135,9 +135,8 @@ const UserProfile = () => {
           return;
         }
 
-       
-        console.log('Attempting to access users API with API token...');
-        const userResponse = await fetch(`${API_BASE}/api/users/me`, {
+        // Get user profile directly from registration data
+        const profileResponse = await fetch(`${API_BASE}/api/registrations?filters[mobile_number]=${mobileNumber}&populate=*`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -146,144 +145,49 @@ const UserProfile = () => {
           }
         });
 
-        console.log('Basic API Response:', {
-          status: userResponse.status,
-          ok: userResponse.ok,
-          url: userResponse.url,
-          token: API_TOKEN
-        });
-
-        if (!userResponse.ok) {
-         
-          console.log('Trying to filter users by mobile number...');
-          const apiResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number]=${mobileNumber}`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${API_TOKEN}`,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (!apiResponse.ok) {
-            throw new Error(`Failed to fetch user data: ${apiResponse.status}`);
-          }
-
-          const userData = await apiResponse.json();
-          console.log('User Data from filter:', userData);
-
-          if (!userData.data || userData.data.length === 0) {
-            throw new Error('User not found');
-          }
-
-      
-          const user = userData.data[0];
-          console.log('Found User:', user);
-
-         
-          const profileUrl = `${API_BASE}/api/users/${user.id}?populate=*`;
-          console.log('Making profile API call to:', profileUrl);
-
-          const profileResponse = await fetch(profileUrl, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${API_TOKEN}`,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (!profileResponse.ok) {
-            throw new Error('Failed to fetch complete profile');
-          }
-
-          const profileData = await profileResponse.json();
-          console.log('Profile Data:', profileData);
-
-          const transformedData = {
-            personal_information: {
-              full_name: profileData.data?.name || '',
-              mobile_number: profileData.data?.mobile_number || '',
-              email_address: profileData.data?.email || '',
-              village: profileData.data?.village || '',
-              Gender: profileData.data?.gender || '',
-              nationality: profileData.data?.nationality || '',
-              is_gahoi: profileData.data?.is_gahoi || false,
-              display_picture: profileData.data?.display_picture?.url || null
-            },
-            family_details: profileData.data?.family_details || {},
-            biographical_details: profileData.data?.biographical_details || {},
-            work_information: profileData.data?.work_information || {},
-            additional_details: profileData.data?.additional_details || {},
-            child_name: profileData.data?.child_name || [],
-            your_suggestions: profileData.data?.your_suggestions || {},
-            gahoi_code: profileData.data?.gahoi_code || '',
-            documentId: profileData.data?.id
-          };
-
-          setUserData(transformedData);
-          setLoading(false);
-          setError(null);
-
-          return transformedData;
-        } else {
-          
-          const userData = await userResponse.json();
-          console.log('User Data from /me:', userData);
-
-          // Now get full profile with all relations
-          const profileUrl = `${API_BASE}/api/users/${userData.id}?populate=*`;
-          console.log('Making profile API call to:', profileUrl);
-
-          const profileResponse = await fetch(profileUrl, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${API_TOKEN}`,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (!profileResponse.ok) {
-            throw new Error('Failed to fetch complete profile');
-          }
-
-          const profileData = await profileResponse.json();
-          console.log('Profile Data:', profileData);
-
-          const transformedData = {
-            personal_information: {
-              full_name: profileData.data?.name || '',
-              mobile_number: profileData.data?.mobile_number || '',
-              email_address: profileData.data?.email || '',
-              village: profileData.data?.village || '',
-              Gender: profileData.data?.gender || '',
-              nationality: profileData.data?.nationality || '',
-              is_gahoi: profileData.data?.is_gahoi || false,
-              display_picture: profileData.data?.display_picture?.url || null
-            },
-            family_details: profileData.data?.family_details || {},
-            biographical_details: profileData.data?.biographical_details || {},
-            work_information: profileData.data?.work_information || {},
-            additional_details: profileData.data?.additional_details || {},
-            child_name: profileData.data?.child_name || [],
-            your_suggestions: profileData.data?.your_suggestions || {},
-            gahoi_code: profileData.data?.gahoi_code || '',
-            documentId: profileData.data?.id
-          };
-
-          setUserData(transformedData);
-          setLoading(false);
-          setError(null);
-
-          return transformedData;
+        if (!profileResponse.ok) {
+          throw new Error('Failed to fetch profile data');
         }
 
+        const profileData = await profileResponse.json();
+        console.log('Profile Data:', profileData);
+
+        if (!profileData.data || profileData.data.length === 0) {
+          throw new Error('Profile not found');
+        }
+
+        const profile = profileData.data[0];
+        console.log('Found Profile:', profile);
+
+        const transformedData = {
+          personal_information: {
+            full_name: profile.name || '',
+            mobile_number: profile.mobile_number || '',
+            email_address: profile.email || '',
+            village: profile.village || '',
+            Gender: profile.gender || '',
+            nationality: profile.nationality || '',
+            is_gahoi: profile.is_gahoi || false,
+            display_picture: profile.display_picture?.url || null
+          },
+          family_details: profile.family_details || {},
+          biographical_details: profile.biographical_details || {},
+          work_information: profile.work_information || {},
+          additional_details: profile.additional_details || {},
+          child_name: profile.child_name || [],
+          your_suggestions: profile.your_suggestions || {},
+          gahoi_code: profile.gahoi_code || '',
+          documentId: profile.id
+        };
+
+        setUserData(transformedData);
+        setLoading(false);
+        setError(null);
+
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        localStorage.removeItem('token');
-        localStorage.removeItem('verifiedMobile');
-        setError('Failed to load profile. Please login again.');
+        console.error('Error fetching profile data:', error);
+        setError('Failed to load profile. Please try again.');
+        setLoading(false);
         setTimeout(() => {
           navigate('/login');
         }, 2000);
