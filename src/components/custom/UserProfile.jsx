@@ -78,7 +78,13 @@ const UserProfile = () => {
         //   return;
         // }
 
+        const profile = profileData.data?.[0];
 
+        if (!profile || !profile.attributes) {
+          setError('Profile not found or incomplete.');
+          setLoading(false);
+          return;
+}
 
         const attrs = profile.attributes;
         const personalInfo = attrs.personal_information || {};
