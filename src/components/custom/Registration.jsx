@@ -1054,35 +1054,65 @@ const RegistrationForm = () => {
     [errors]
   );
 
-  // Optimize family detail handler
+
+
+  const openWhatsAppShare = useCallback(async (mobileNumber) => {
+    try {
+      const res = await fetch('http://api.gahoishakti.in/api/whatsapp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          number: mobileNumber,
+          message: 'Hi, you are invited to join via WhatsApp.',
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (!data.status) {
+        console.error('Failed to send:', data.message || 'Unknown error');
+      } else {
+        console.log('WhatsApp invite sent successfully');
+      }
+    } catch (err) {
+      console.error('Error sending WhatsApp message:', err);
+    }
+  }, []);
+  
   const handleFamilyDetailChange = useCallback(
     (index, field, value) => {
+      // Allow only digits for the mobile number
       if (field === "mobileNumber" && !/^\d*$/.test(value)) {
         return;
       }
-
+  
       setFormData((prev) => ({
         ...prev,
         familyDetails: prev.familyDetails.map((member, i) =>
           i === index ? { ...member, [field]: value } : member
         ),
       }));
-
-      // Clear field error
+  
+      // Clear any existing error on this field if present
       if (errors[`familyDetails.${index}.${field}`]) {
         setErrors((prev) => ({
           ...prev,
           [`familyDetails.${index}.${field}`]: "",
         }));
       }
-
-      // Auto-trigger WhatsApp invite for valid family member mobile numbers
+  
+      // Trigger WhatsApp invite only when mobile number reaches 10 digits exactly
       if (field === "mobileNumber" && value.length === 10) {
         openWhatsAppShare(value);
       }
     },
-    [errors]
+    [errors, openWhatsAppShare]
   );
+  
+  
+  
+  
+  
 
   // Optimize add child function
   const addChild = useCallback(() => {
@@ -2054,6 +2084,7 @@ const RegistrationForm = () => {
                               e.target.value
                             )
                           }
+                       
                           className={`block w-full px-4 py-2.5 text-gray-700 border focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
                             hasFamilyError(index, "name")
                               ? "border-red-300 bg-red-50"
@@ -2072,8 +2103,10 @@ const RegistrationForm = () => {
                                 e.target.value
                               )
                             }
-                            className="block flex-1 px-4 py-2.5 text-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+                            pattern="[0-9]*"    
+                            inputMode="numeric"  
                             maxLength={10}
+                            className="block flex-1 px-4 py-2.5 text-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"                            
                             placeholder={`${member.relation}'s mobile number`}
                           />
                           {member.mobileNumber?.length === 10 && (
@@ -2200,6 +2233,8 @@ const RegistrationForm = () => {
                             e.target.value
                           )
                         }
+                        pattern="[0-9]*"    
+                            inputMode="numeric" 
                         className="block flex-1 px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                         maxLength={10}
                         placeholder="Spouse's mobile number"
@@ -2311,6 +2346,8 @@ const RegistrationForm = () => {
                                     e.target.value
                                   )
                                 }
+                                pattern="[0-9]*"    
+                            inputMode="numeric" 
                                 className={`block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
                                   hasFamilyError(index, "name")
                                     ? "border-red-500 bg-red-50"
@@ -2551,6 +2588,7 @@ const RegistrationForm = () => {
                                       e.target.value
                                     )
                                   }
+                             
                                   className="block flex-1 px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                                   pattern="[0-9]*"
                                   inputMode="numeric"
