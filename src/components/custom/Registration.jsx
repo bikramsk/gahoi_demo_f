@@ -1411,9 +1411,8 @@ const RegistrationForm = () => {
     const sendWhatsAppMessage = async () => {
       try {
         const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
-        const numberWithCountryCode = mobileNumber.startsWith('91') 
-          ? mobileNumber 
-          : `91${mobileNumber}`;
+        const numberWithCountryCode = mobileNumber.startsWith('91') ? mobileNumber : `91${mobileNumber}`;
+        
         
         const response = await fetch('https://api.gahoishakti.in/api/send-sms', {
           method: 'POST',
@@ -1422,7 +1421,7 @@ const RegistrationForm = () => {
           },
           body: JSON.stringify({
             number: numberWithCountryCode,
-            message: `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}`,
+            message: `Thank you for registering with Gahoi Shakti! Your Gahoi code is: ${gahoiCode}`,
           }),
         });
 
