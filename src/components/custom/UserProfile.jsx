@@ -89,9 +89,8 @@ const UserProfile = () => {
           return;
         }
 
-        // Encode the mobile number properly
-        const encodedMobile = encodeURIComponent(mobileNumber);
-        const apiUrl = `${API_BASE}/api/registrations?populate=*&filters[mobile_number][$eq]=${encodedMobile}`;
+       
+        const apiUrl = `${API_BASE}/api/registrations?populate=deep&filters[mobile_number][$eq]=${mobileNumber}`;
         
         console.log('Fetching profile from:', apiUrl);
         
