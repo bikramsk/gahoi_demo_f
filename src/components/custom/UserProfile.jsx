@@ -5,11 +5,15 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
+// Get API token from environment variables
 const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
-if (!API_TOKEN) {
-  console.error('API Token is not configured. Please check your environment variables.');
-}
+// Log environment info for debugging (remove in production)
+console.log('Environment:', {
+  mode: import.meta.env.MODE,
+  hasToken: !!API_TOKEN,
+  apiBase: API_BASE
+});
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
@@ -84,15 +88,19 @@ const UserProfile = () => {
           return;
         }
 
+        // Make sure we have the API token
         if (!API_TOKEN) {
-          setError('System configuration error. Please contact support.');
+          console.error('API Token is missing. Please check environment variables.');
+          setError('Configuration error. Please try again later.');
           return;
         }
-
-       
+        
         const apiUrl = `${API_BASE}/api/registrations?populate=deep&filters[mobile_number][$eq]=${mobileNumber}`;
         
-        console.log('Fetching profile from:', apiUrl);
+        console.log('Making API request:', {
+          url: apiUrl,
+          hasToken: !!API_TOKEN
+        });
         
         const profileResponse = await fetch(apiUrl, {
           method: 'GET',
@@ -107,8 +115,7 @@ const UserProfile = () => {
           console.error('Profile Response Error:', {
             status: profileResponse.status,
             statusText: profileResponse.statusText,
-            url: apiUrl,
-            token: API_TOKEN ? 'Present' : 'Missing'
+            url: apiUrl
           });
           throw new Error(`Failed to fetch profile data: ${profileResponse.status}`);
         }
