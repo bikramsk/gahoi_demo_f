@@ -82,12 +82,9 @@ if (!profile || !profile.attributes) {
   return;
 }
 
-        const attrs = profile.attributes;
-        console.log("Attributes:", attrs);
+        const attrs = profile.attributes;  
+        const personalInfo = attrs.personal_information || {};     
 
-        const personalInfo = attrs.personal_information || {};
-        console.log("Personal Info:", personalInfo);
-        
         const bioDetails = attrs.biographical_details || {};
         const workInfo = attrs.work_information || {};
         const additional = attrs.additional_details || {};
@@ -239,24 +236,24 @@ if (!profile || !profile.attributes) {
     );
   }
 
-  // if (!userData || !userData.personal_information) {
-    if (!userData || typeof userData.personal_information !== 'object') {
+  
+  //   if (!userData || typeof userData.personal_information !== 'object') {
 
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
-          <p className="text-gray-600">Please complete your registration first.</p>
-          <button
-            onClick={() => navigate('/registration')}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Go to Registration
-          </button>
-        </div>
-      </div>
-    );
-  }
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+  //       <div className="bg-white p-8 rounded-lg shadow-md">
+  //         <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
+  //         <p className="text-gray-600">Please complete your registration first.</p>
+  //         <button
+  //           onClick={() => navigate('/registration')}
+  //           className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+  //         >
+  //           Go to Registration
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-100">
