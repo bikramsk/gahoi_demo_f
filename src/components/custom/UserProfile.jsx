@@ -80,8 +80,8 @@ const UserProfile = () => {
           apiBase: API_BASE
         });
 
-        if (!mobileNumber || !token) {
-          console.log('Missing credentials - redirecting to login');
+        if (!mobileNumber) {
+          console.log('Missing mobile number - redirecting to login');
           setError('Please login again to continue');
           setTimeout(() => {
             navigate('/login');
@@ -89,12 +89,31 @@ const UserProfile = () => {
           return;
         }
 
-        // Get user by mobile
-        const headers = {
+        // Try with JWT token first
+        let headers = token ? {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
-        };
+        } : null;
+
+        // If no JWT token, try with API token
+        if (!headers && API_TOKEN) {
+          console.log('No JWT token, using API token instead');
+          headers = {
+            'Authorization': `Bearer ${API_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          };
+        }
+
+        if (!headers) {
+          console.log('No authentication tokens available');
+          setError('Authentication failed. Please login again.');
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+          return;
+        }
 
         // First verify token
         try {
@@ -111,30 +130,37 @@ const UserProfile = () => {
           });
 
           if (!verifyResponse.ok) {
-            console.log('Token verification failed - redirecting to login');
+            // If JWT token failed and we haven't tried API token yet
+            if (token && API_TOKEN) {
+              console.log('JWT verification failed, trying API token');
+              headers = {
+                'Authorization': `Bearer ${API_TOKEN}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              };
+              // Don't throw error yet, continue with API token
+            } else {
+              throw new Error('Token verification failed');
+            }
+          } else {
+            const verifyData = await verifyResponse.json();
+            console.log('Token verification successful:', verifyData);
+          }
+        } catch (error) {
+          console.error('Token verification error:', error);
+          if (!API_TOKEN || headers['Authorization'].includes(API_TOKEN)) {
+            // If we're already using API token or no API token available
             localStorage.removeItem('token');
             localStorage.removeItem('verifiedMobile');
-            setError('Your session has expired. Please login again.');
+            setError('Authentication failed. Please login again.');
             setTimeout(() => {
               navigate('/login');
             }, 2000);
             return;
           }
-
-          const verifyData = await verifyResponse.json();
-          console.log('Token verification successful:', verifyData);
-
-        } catch (error) {
-          console.error('Token verification error:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('verifiedMobile');
-          setError('Authentication failed. Please login again.');
-          setTimeout(() => {
-            navigate('/login');
-          }, 2000);
-          return;
         }
 
+        // Proceed with user data fetch using current headers
         const firstApiUrl = `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`;
         console.log('Making first API call to:', firstApiUrl);
         console.log('Using headers:', headers);
@@ -156,7 +182,7 @@ const UserProfile = () => {
 
         if (!userResponse.ok) {
           if (userResponse.status === 401) {
-            console.log('Token expired or invalid - clearing credentials');
+            console.log('API call failed - clearing credentials');
             localStorage.removeItem('token');
             localStorage.removeItem('verifiedMobile');
             setError('Your session has expired. Please login again.');
