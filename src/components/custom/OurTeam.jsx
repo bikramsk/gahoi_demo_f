@@ -169,16 +169,7 @@ const OurTeam = () => {
           {member.period}
         </p>
       
-          <div className="space-y-1">
-            <p className={`text-sm text-gray-700 ${languageFontClass}`}>
-              <span className="font-medium">{t("team.memberCard.contact")}: </span>
-              {member.contact}
-            </p>
-            <p className={`text-sm text-gray-700 ${languageFontClass}`}>
-              <span className="font-medium">{t("team.memberCard.email")}: </span>
-              {member.email}
-            </p>
-          </div>
+        
        
       </div>
     </div>
