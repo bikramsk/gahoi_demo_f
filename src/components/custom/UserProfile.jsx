@@ -89,14 +89,14 @@ const UserProfile = () => {
           return;
         }
 
-        // Try with JWT token first
+        //  with JWT token first
         let headers = token ? {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         } : null;
 
-        // If no JWT token, try with API token
+        //  with API token
         if (!headers && API_TOKEN) {
           console.log('No JWT token, using API token instead');
           headers = {
@@ -115,71 +115,9 @@ const UserProfile = () => {
           return;
         }
 
-        // First verify token
-        try {
-          console.log('Verifying token with headers:', headers);
-          const verifyResponse = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
-            method: 'GET',
-            headers,
-            credentials: 'include'
-          });
-
-          console.log('Token verification response:', {
-            status: verifyResponse.status,
-            ok: verifyResponse.ok
-          });
-
-          if (!verifyResponse.ok) {
-            // If JWT token failed and we haven't tried API token yet
-            if (token && API_TOKEN) {
-              console.log('JWT verification failed, trying API token');
-              headers = {
-                'Authorization': `Bearer ${API_TOKEN}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              };
-              // Don't throw error yet, continue with API token
-            } else {
-              throw new Error('Token verification failed');
-            }
-          } else {
-            const verifyData = await verifyResponse.json();
-            console.log('Token verification successful:', verifyData);
-            
-            // Check if user exists and has MPIN
-            if (!verifyData.exists) {
-              console.log('User not found or MPIN not set');
-              localStorage.removeItem('token');
-              localStorage.removeItem('verifiedMobile');
-              setError('Please complete your registration first.');
-              setTimeout(() => {
-                navigate('/registration', { 
-                  state: { 
-                    mobileNumber,
-                    fromLogin: true 
-                  } 
-                });
-              }, 2000);
-              return;
-            }
-          }
-        } catch (error) {
-          console.error('Token verification error:', error);
-          if (!API_TOKEN || headers['Authorization'].includes(API_TOKEN)) {
-            // If we're already using API token or no API token available
-            localStorage.removeItem('token');
-            localStorage.removeItem('verifiedMobile');
-            setError('Authentication failed. Please login again.');
-            setTimeout(() => {
-              navigate('/login');
-            }, 2000);
-            return;
-          }
-        }
-
-        // Proceed with user data fetch using current headers
+        
         const firstApiUrl = `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`;
-        console.log('Making first API call to:', firstApiUrl);
+        console.log('Making API call to:', firstApiUrl);
         console.log('Using headers:', headers);
 
         const userResponse = await fetch(firstApiUrl, {
@@ -188,104 +126,115 @@ const UserProfile = () => {
           credentials: 'include'
         });
 
-        console.log('First API Response:', {
+        console.log('API Response:', {
           status: userResponse.status,
           ok: userResponse.ok,
           statusText: userResponse.statusText
         });
 
-        const responseData = await userResponse.text();
-        console.log('First API Raw Response:', responseData);
-
         if (!userResponse.ok) {
-          if (userResponse.status === 401) {
-            console.log('API call failed - clearing credentials');
-            localStorage.removeItem('token');
-            localStorage.removeItem('verifiedMobile');
-            setError('Your session has expired. Please login again.');
-            setTimeout(() => {
-              navigate('/login');
-            }, 2000);
-            return;
+          // If JWT token failed and we haven't tried API token yet
+          if (userResponse.status === 401 && token && API_TOKEN && !headers.Authorization.includes(API_TOKEN)) {
+            console.log('JWT token failed, trying with API token');
+            headers = {
+              'Authorization': `Bearer ${API_TOKEN}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            };
+            
+            // Retry with API token
+            const retryResponse = await fetch(firstApiUrl, {
+              method: 'GET',
+              headers,
+              credentials: 'include'
+            });
+
+            if (!retryResponse.ok) {
+              throw new Error('Failed to fetch user data with API token');
+            }
+
+            const responseData = await retryResponse.text();
+            console.log('Retry API Response:', responseData);
+            return await handleUserData(JSON.parse(responseData), headers);
           }
+
           throw new Error(`API Error: ${userResponse.status} ${userResponse.statusText}`);
         }
 
-        const parsedData = JSON.parse(responseData);
-        console.log('First API Parsed Data:', parsedData);
-
-        if (!parsedData.data || parsedData.data.length === 0) {
-          console.log('No user found - redirecting to registration');
-          setError('User profile not found. Please complete registration.');
-          setTimeout(() => {
-            navigate('/registration', { 
-              state: { 
-                mobileNumber,
-                fromLogin: true 
-              } 
-            });
-          }, 2000);
-          return;
-        }
-
-        const userId = parsedData.data[0].id;
-        console.log('Found User ID:', userId);
-
-        // Get full profile
-        const secondApiUrl = `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
-        console.log('Making second API call to:', secondApiUrl);
-
-        const profileResponse = await fetch(secondApiUrl, {
-          method: 'GET',
-          headers,
-          credentials: 'include'
-        });
-
-        console.log('Second API Response:', {
-          status: profileResponse.status,
-          ok: profileResponse.ok,
-          statusText: profileResponse.statusText
-        });
-
-        const profileData = await profileResponse.json();
-        console.log('Second API Response Data:', profileData);
-
-        if (!profileResponse.ok) {
-          throw new Error('Failed to fetch complete profile');
-        }
-
-        // Transform data
-        const transformedData = {
-          personal_information: {
-            full_name: profileData.data.attributes?.name || '',
-            mobile_number: profileData.data.attributes?.mobile_number || '',
-            email_address: profileData.data.attributes?.email || '',
-            village: profileData.data.attributes?.village || '',
-            Gender: profileData.data.attributes?.gender || '',
-            nationality: profileData.data.attributes?.nationality || '',
-            is_gahoi: profileData.data.attributes?.is_gahoi || false,
-            display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
-          },
-          family_details: profileData.data.attributes?.family_details || {},
-          biographical_details: profileData.data.attributes?.biographical_details || {},
-          work_information: profileData.data.attributes?.work_information || {},
-          additional_details: profileData.data.attributes?.additional_details || {},
-          child_name: profileData.data.attributes?.child_name || [],
-          your_suggestions: profileData.data.attributes?.your_suggestions || {},
-          gahoi_code: profileData.data.attributes?.gahoi_code || '',
-          documentId: profileData.data.id
-        };
-
-        console.log('Setting transformed data:', transformedData);
-        setUserData(transformedData);
-        setLoading(false);
-        setError(null);
+        const responseData = await userResponse.text();
+        console.log('API Raw Response:', responseData);
+        return await handleUserData(JSON.parse(responseData), headers);
 
       } catch (error) {
-        console.error('Profile fetch error:', error);
-        setError(error.message || 'Failed to fetch user data');
-        setLoading(false);
+        console.error('Error fetching user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('verifiedMobile');
+        setError('Failed to load profile. Please login again.');
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       }
+    };
+
+    const handleUserData = async (parsedData, headers) => {
+      if (!parsedData.data || parsedData.data.length === 0) {
+        console.log('No user found - redirecting to registration');
+        setError('User profile not found. Please complete registration.');
+        setTimeout(() => {
+          navigate('/registration', { 
+            state: { 
+              mobileNumber: localStorage.getItem('verifiedMobile'),
+              fromLogin: true 
+            } 
+          });
+        }, 2000);
+        return;
+      }
+
+      const userId = parsedData.data[0].id;
+      console.log('Found User ID:', userId);
+
+      // Get full profile
+      const secondApiUrl = `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
+      console.log('Making second API call to:', secondApiUrl);
+
+      const profileResponse = await fetch(secondApiUrl, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+      });
+
+      if (!profileResponse.ok) {
+        throw new Error('Failed to fetch complete profile');
+      }
+
+      const profileData = await profileResponse.json();
+      console.log('Profile Data:', profileData);
+
+      const transformedData = {
+        personal_information: {
+          full_name: profileData.data.attributes?.name || '',
+          mobile_number: profileData.data.attributes?.mobile_number || '',
+          email_address: profileData.data.attributes?.email || '',
+          village: profileData.data.attributes?.village || '',
+          Gender: profileData.data.attributes?.gender || '',
+          nationality: profileData.data.attributes?.nationality || '',
+          is_gahoi: profileData.data.attributes?.is_gahoi || false,
+          display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
+        },
+        family_details: profileData.data.attributes?.family_details || {},
+        biographical_details: profileData.data.attributes?.biographical_details || {},
+        work_information: profileData.data.attributes?.work_information || {},
+        additional_details: profileData.data.attributes?.additional_details || {},
+        child_name: profileData.data.attributes?.child_name || [],
+        your_suggestions: profileData.data.attributes?.your_suggestions || {},
+        gahoi_code: profileData.data.attributes?.gahoi_code || '',
+        documentId: profileData.data.id
+      };
+
+      setUserData(transformedData);
+      setLoading(false);
+      setError(null);
     };
 
     fetchUserData();
