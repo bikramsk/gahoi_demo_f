@@ -90,7 +90,7 @@ const UserProfile = () => {
           return;
         }
         
-        // Updated API URL format
+        // API URL
         const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=*`;
 
    
