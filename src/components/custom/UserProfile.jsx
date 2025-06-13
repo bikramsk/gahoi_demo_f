@@ -5,10 +5,10 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
-// Get API token from environment variables
+
 const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
-// Log environment info for debugging (remove in production)
+
 console.log('Environment:', {
   mode: import.meta.env.MODE,
   hasToken: !!API_TOKEN,
@@ -88,7 +88,7 @@ const UserProfile = () => {
           return;
         }
 
-        // Make sure we have the API token
+        
         if (!API_TOKEN) {
           console.error('API Token is missing. Please check environment variables.');
           setError('Configuration error. Please try again later.');
