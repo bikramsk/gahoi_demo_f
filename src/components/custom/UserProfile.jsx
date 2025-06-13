@@ -57,9 +57,6 @@ const UserProfile = () => {
         console.log('PROFILE DATA:', profileData);
 
 
-console.log('PROFILE:', profile);
-console.log('ATTRIBUTES:', profile?.attributes);
-console.log('PERSONAL INFO:', profile?.attributes?.personal_information);
 
         if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
