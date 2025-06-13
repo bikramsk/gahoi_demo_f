@@ -180,39 +180,24 @@ const UserProfile = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-600">{error}</p>
-          <button
-            onClick={() => navigate('/login')}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Back to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Initialize empty data structure if no data is available
+  const emptyData = {
+    personal_information: {},
+    family_details: {},
+    biographical_details: {},
+    work_information: {},
+    additional_details: {},
+    child_name: [],
+    your_suggestions: {},
+    gahoi_code: '',
+    documentId: '',
+    createdAt: '',
+    updatedAt: '',
+    publishedAt: ''
+  };
 
-  if (!userData || !userData.personal_information) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
-          <p className="text-gray-600">Please complete your registration first.</p>
-          <button
-            onClick={() => navigate('/registration')}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Go to Registration
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Use empty data if userData is not available
+  const displayData = userData || emptyData;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -224,8 +209,8 @@ const UserProfile = () => {
               <div className="relative w-10 h-10">
                 <div className="absolute inset-0 bg-gray-200 rounded-full animate-pulse"></div>
                 <img 
-                  src={userData.personal_information?.display_picture ? 
-                    `${API_BASE}${userData.personal_information.display_picture}` : 
+                  src={displayData.personal_information?.display_picture ? 
+                    `${API_BASE}${displayData.personal_information.display_picture}` : 
                     '/default-avatar.png'} 
                   alt="Profile" 
                   className="w-10 h-10 rounded-full border-2 border-white object-cover relative z-10"
@@ -235,19 +220,20 @@ const UserProfile = () => {
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold">{userData.personal_information?.full_name}</h1>
-                <p className="text-sm opacity-90">Gahoi Code: {userData.gahoi_code}</p>
+                <h1 className="text-xl font-bold">{displayData.personal_information?.full_name || 'Guest User'}</h1>
+                <p className="text-sm opacity-90">Gahoi Code: {displayData.gahoi_code || 'Not Available'}</p>
+                {error && <p className="text-sm text-red-300 mt-1">{error}</p>}
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <button 
                 onClick={() => navigate('/registration', { 
                   state: { 
-                    mobileNumber: userData.personal_information?.mobile_number,
+                    mobileNumber: displayData.personal_information?.mobile_number,
                     isEdit: true,
                     userData: {
-                      id: userData.documentId,
-                      attributes: userData
+                      id: displayData.documentId,
+                      attributes: displayData
                     }
                   } 
                 })}
@@ -308,7 +294,7 @@ const UserProfile = () => {
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
-                        {Object.entries(userData.personal_information || {}).map(([key, value]) => (
+                        {Object.entries(displayData.personal_information || {}).map(([key, value]) => (
                           key !== 'display_picture' && (
                             <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
                               <dt className="text-sm font-medium text-gray-500">
@@ -332,16 +318,22 @@ const UserProfile = () => {
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
-                        {Object.entries(userData.family_details || {}).map(([key, value]) => (
-                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                            <dt className="text-sm font-medium text-gray-500">
-                              {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                              {value?.toString() || 'N/A'}
-                            </dd>
+                        {Object.entries(displayData.family_details || {}).length > 0 ? (
+                          Object.entries(displayData.family_details || {}).map(([key, value]) => (
+                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                              <dt className="text-sm font-medium text-gray-500">
+                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                              </dt>
+                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {value?.toString() || 'N/A'}
+                              </dd>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-center text-gray-500">
+                            No family details available
                           </div>
-                        ))}
+                        )}
                       </dl>
                     </div>
                   </section>
@@ -354,16 +346,22 @@ const UserProfile = () => {
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
-                        {Object.entries(userData.biographical_details || {}).map(([key, value]) => (
-                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                            <dt className="text-sm font-medium text-gray-500">
-                              {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                              {value?.toString() || 'N/A'}
-                            </dd>
+                        {Object.entries(displayData.biographical_details || {}).length > 0 ? (
+                          Object.entries(displayData.biographical_details || {}).map(([key, value]) => (
+                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                              <dt className="text-sm font-medium text-gray-500">
+                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                              </dt>
+                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {value?.toString() || 'N/A'}
+                              </dd>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-center text-gray-500">
+                            No biographical details available
                           </div>
-                        ))}
+                        )}
                       </dl>
                     </div>
                   </section>
@@ -376,16 +374,22 @@ const UserProfile = () => {
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
-                        {Object.entries(userData.work_information || {}).map(([key, value]) => (
-                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                            <dt className="text-sm font-medium text-gray-500">
-                              {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                              {value?.toString() || 'N/A'}
-                            </dd>
+                        {Object.entries(displayData.work_information || {}).length > 0 ? (
+                          Object.entries(displayData.work_information || {}).map(([key, value]) => (
+                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                              <dt className="text-sm font-medium text-gray-500">
+                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                              </dt>
+                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {value?.toString() || 'N/A'}
+                              </dd>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-center text-gray-500">
+                            No work information available
                           </div>
-                        ))}
+                        )}
                       </dl>
                     </div>
                   </section>
@@ -398,18 +402,24 @@ const UserProfile = () => {
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
-                        {Object.entries(userData.additional_details || {}).map(([key, value]) => (
-                          key !== 'regional_information' && (
-                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                              <dt className="text-sm font-medium text-gray-500">
-                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                              </dt>
-                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {value?.toString() || 'N/A'}
-                              </dd>
-                            </div>
-                          )
-                        ))}
+                        {Object.entries(displayData.additional_details || {}).filter(([key]) => key !== 'regional_information').length > 0 ? (
+                          Object.entries(displayData.additional_details || {}).map(([key, value]) => (
+                            key !== 'regional_information' && (
+                              <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                                <dt className="text-sm font-medium text-gray-500">
+                                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                </dt>
+                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                  {value?.toString() || 'N/A'}
+                                </dd>
+                              </div>
+                            )
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-center text-gray-500">
+                            No additional details available
+                          </div>
+                        )}
                       </dl>
                     </div>
                   </section>
@@ -422,16 +432,22 @@ const UserProfile = () => {
                     </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
-                        {Object.entries(userData.additional_details?.regional_information || {}).map(([key, value]) => (
-                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                            <dt className="text-sm font-medium text-gray-500">
-                              {key.split(/(?=[A-Z])/).join(' ')}
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                              {value?.toString() || 'N/A'}
-                            </dd>
+                        {Object.entries(displayData.additional_details?.regional_information || {}).length > 0 ? (
+                          Object.entries(displayData.additional_details?.regional_information || {}).map(([key, value]) => (
+                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                              <dt className="text-sm font-medium text-gray-500">
+                                {key.split(/(?=[A-Z])/).join(' ')}
+                              </dt>
+                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {value?.toString() || 'N/A'}
+                              </dd>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-center text-gray-500">
+                            No regional information available
                           </div>
-                        ))}
+                        )}
                       </dl>
                     </div>
                   </section>
