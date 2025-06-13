@@ -29,31 +29,31 @@ const OurTeam = () => {
     {
       name: "Pradeep Pahariya",
       location: "Gwalior",
-     image: "/our-team/pradeep_pahariya.jpg",
+     image: "/our_team/pradeep_pahariya.jpg",
       
     },
     {
       name: "Sudhir Rawat",
       location: "Gwalior",      
-    image: "/our-team/sudhir_rawat.jpg",
+    image: "/our_team/sudhir_rawat.jpg",
      
     },
     {
         name: "Bhanu Capra",
         location: "Gwalior",        
-       image: "/our-team/bhanu_capra.jpg",
+       image: "/our_team/bhanu_capra.jpg",
        
       },
       {
         name: "Bhai Siyasaran Kastwar",
         location: "Gwalior",        
-      image: "/our-team/Siyasaran_kastwar.jpg",
+      image: "/our_team/Siyasaran_kastwar.jpg",
         
       },
       {
         name: "Nitesh Seth",
         location: "Noida",       
-      image: "/our-team/nitesh_seth.jpg",
+      image: "/our_team/nitesh_seth.jpg",
         
       },
       
@@ -63,51 +63,45 @@ const OurTeam = () => {
     {
       name: "Chetna Nikhra",
       location: "Murar",     
-    image: "/our-team/chetna_nikhra.jpg",
+    image: "/our_team/chetna_nikhra.jpg",
      
     },
     
     {
       name: "Neelam Reza",
       location: "Thatipur",     
-    image: "/our-team/neelam_reza.jpg",
+    image: "/our_team/neelam_reza.jpg",
       
     },
     {
         name: "Baby Bihari Reza",
         location: "New City Center",        
-      image: "/our-team/bihari_riza.jpg",
+      image: "/our_team/bihari_riza.jpg",
         
       },
       {
         name: "Shrimati Sarika Reza",
         location: "Deen Dayal Nagar",
         period: "2023-Present",
-      image: "/our-team/Sarika_Riza.jpg",
+      image: "/our_team/Sarika_Riza.jpg",
       },
       {
-        name: "Shri Rajesh Kumar Gahoi",
-        location: "President",
-        period: "2023-Present",
-      image: "/dummy-profile.webp",
-        contact: "+91 98XXXXXXXX",
-        email: "president@gahoishakti.in"
+        name: "Shrimati Priyanka Kuwiya",
+        location: "Deen Dayal Nagar",     
+      image: "/our_team/Priyanka_kuwiya.jpg",
+        
       },
       {
-        name: "Shri Suresh Kumar Gahoi",
-        location: "Secretary",
-        period: "2023-Present",
-      image: "/dummy-profile.webp",
-        contact: "+91 98XXXXXXXX",
-        email: "secretary@gahoishakti.in"
+        name: "Shrimati Rani Seth",
+        location: "Secretary",     
+      image: "/our_team/Rani_Seth.jpg",
+        
       },
       {
-        name: "Shri Rajesh Kumar Gahoi",
-        location: "President",
-        period: "2023-Present",
-      image: "/dummy-profile.webp",
-        contact: "+91 98XXXXXXXX",
-        email: "president@gahoishakti.in"
+        name: "Shrimati Dipti Lahariya",
+        location: "Deen Dayal Nagar",     
+      image: "/our_team/Dipti_Lahariya.jpg",
+        
       },
       {
         name: "Shri Suresh Kumar Gahoi",
@@ -142,12 +136,7 @@ const OurTeam = () => {
         <p className={`text-sm text-gray-600 mb-3 ${languageFontClass}`}>
           {member.period}
         </p>
-        {isFounder ? (
-          <p className={`text-sm text-gray-700 ${languageFontClass}`}>
-            <span className="font-medium">{t("team.memberCard.contribution")}: </span>
-            {member.contribution}
-          </p>
-        ) : (
+      
           <div className="space-y-1">
             <p className={`text-sm text-gray-700 ${languageFontClass}`}>
               <span className="font-medium">{t("team.memberCard.contact")}: </span>
@@ -158,7 +147,7 @@ const OurTeam = () => {
               {member.email}
             </p>
           </div>
-        )}
+       
       </div>
     </div>
   );
