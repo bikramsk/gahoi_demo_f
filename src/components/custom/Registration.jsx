@@ -1381,40 +1381,6 @@ const RegistrationForm = () => {
 
   // Separate function for showing success message
   const showSuccessMessage = (gahoiCode) => {
-    // Send WhatsApp message
-    const sendWhatsAppMessage = async () => {
-      try {
-        const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
-        const numberWithCountryCode = mobileNumber.startsWith('91')
-          ? mobileNumber
-          : `91${mobileNumber}`;
-    
-        const response = await fetch('https://api.gahoishakti.in/api/send-sms', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            number: numberWithCountryCode,
-            message: `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}`,
-          }),
-        });
-    
-        const data = await response.json();
-        console.log('WhatsApp API Response (via backend):', data);
-    
-        if (!data.status) {
-          console.warn('WhatsApp API reported failure:', data.message);
-        }
-      } catch (error) {
-        console.error('Error sending WhatsApp message via backend:', error);
-      }
-    };
-    
-
-    // Send WhatsApp message immediately
-    sendWhatsAppMessage();
-
     const successPopup = document.createElement("div");
     successPopup.className =
       "fixed inset-0 flex items-center justify-center z-50";
@@ -1431,7 +1397,6 @@ const RegistrationForm = () => {
           <p class="text-gray-600 mb-2">Registration successful!</p>
           <p class="text-gray-600 mb-2">Your Gahoi code is:</p>
           <p class="text-xl font-bold text-[#FD7D01] mb-6">${gahoiCode}</p>
-          <div id="whatsapp-notification-container"></div>
           <div class="w-full bg-gray-200 h-2 rounded-full mt-4">
             <div class="bg-[#FD7D01] h-2 rounded-full" style="width: 0%; transition: width 2s ease-in-out;" id="progress-bar"></div>
           </div>
@@ -1441,21 +1406,45 @@ const RegistrationForm = () => {
 
     document.body.appendChild(successPopup);
     const progressBar = document.getElementById("progress-bar");
-    const whatsappContainer = document.getElementById("whatsapp-notification-container");
 
-    // Render WhatsApp notification component
-    const mobileNumber = location.state?.mobileNumber || formData.mobile_number;
-    ReactDOM.render(
-      <WhatsAppNotification mobileNumber={mobileNumber} gahoiCode={gahoiCode} />,
-      whatsappContainer
-    );
+    // Send WhatsApp message
+    const sendWhatsAppMessage = async () => {
+      try {
+        const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
+        const numberWithCountryCode = mobileNumber.startsWith('91') 
+          ? mobileNumber 
+          : `91${mobileNumber}`;
+        
+        const response = await fetch('https://api.gahoishakti.in/api/send-sms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            number: numberWithCountryCode,
+            message: `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}`,
+          }),
+        });
+
+        const data = await response.json();
+        console.log('WhatsApp API Response (via backend):', data);
+
+        if (!data.status) {
+          console.warn('WhatsApp API reported failure:', data.message);
+        }
+      } catch (error) {
+        console.error('Error sending WhatsApp message via backend:', error);
+      }
+    };
+
+    // Send WhatsApp message immediately
+    sendWhatsAppMessage();
 
     setTimeout(() => {
       progressBar.style.width = "100%";
     }, 100);
 
     setTimeout(() => {
-      ReactDOM.unmountComponentAtNode(whatsappContainer);
       document.body.removeChild(successPopup);
       window.location.href = "/";
     }, 6500);
