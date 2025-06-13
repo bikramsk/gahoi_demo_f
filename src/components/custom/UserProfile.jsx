@@ -89,24 +89,14 @@ const UserProfile = () => {
           return;
         }
 
-        //  with JWT token first
-        let headers = token ? {
-          'Authorization': `Bearer ${token}`,
+        // Try with both JWT and API token
+        let headers = {
+          'Authorization': token ? `Bearer ${token}` : `Bearer ${API_TOKEN}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json'
-        } : null;
+        };
 
-        //  with API token
-        if (!headers && API_TOKEN) {
-          console.log('No JWT token, using API token instead');
-          headers = {
-            'Authorization': `Bearer ${API_TOKEN}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          };
-        }
-
-        if (!headers) {
+        if (!headers.Authorization) {
           console.log('No authentication tokens available');
           setError('Authentication failed. Please login again.');
           setTimeout(() => {
@@ -115,7 +105,38 @@ const UserProfile = () => {
           return;
         }
 
-        
+        // First verify user status
+        console.log('Checking user status...');
+        const verifyResponse = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${API_TOKEN}`, // Always use API token for this endpoint
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+
+        const verifyData = await verifyResponse.json();
+        console.log('User status check:', verifyData);
+
+        if (!verifyResponse.ok || !verifyData.exists) {
+          console.log('User verification failed');
+          localStorage.removeItem('token');
+          localStorage.removeItem('verifiedMobile');
+          setError('Please complete your registration first.');
+          setTimeout(() => {
+            navigate('/registration', { 
+              state: { 
+                mobileNumber,
+                fromLogin: true 
+              } 
+            });
+          }, 2000);
+          return;
+        }
+
+        // Now fetch user data
         const firstApiUrl = `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`;
         console.log('Making API call to:', firstApiUrl);
         console.log('Using headers:', headers);
@@ -133,16 +154,15 @@ const UserProfile = () => {
         });
 
         if (!userResponse.ok) {
-          // If JWT token failed and we haven't tried API token yet
-          if (userResponse.status === 401 && token && API_TOKEN && !headers.Authorization.includes(API_TOKEN)) {
-            console.log('JWT token failed, trying with API token');
+          // If first attempt fails, try with API token only
+          if (userResponse.status === 401) {
+            console.log('First attempt failed, trying with API token only');
             headers = {
               'Authorization': `Bearer ${API_TOKEN}`,
               'Content-Type': 'application/json',
               'Accept': 'application/json'
             };
             
-            // Retry with API token
             const retryResponse = await fetch(firstApiUrl, {
               method: 'GET',
               headers,

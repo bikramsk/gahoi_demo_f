@@ -30,13 +30,13 @@ const Contact = () => {
     email2: ""
   };
 
-  const contact2 = {
-    // name: t('contact.addresses.secondary.name'),
-    address1: t('contact.addresses.secondary.address1'),
-    address2: t('contact.addresses.secondary.address2'),
-    phone: "+91-7049004444",
-    email1: "gahoishakti@gmail.com"
-  };
+  // const contact2 = {
+  //   // name: t('contact.addresses.secondary.name'),
+  //   address1: t('contact.addresses.secondary.address1'),
+  //   address2: t('contact.addresses.secondary.address2'),
+  //   phone: "+91-7049004444",
+  //   email1: "gahoishakti@gmail.com"
+  // };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -311,7 +311,7 @@ const Contact = () => {
             <div
               className={`${cardStyles} transition-all duration-300 hover:shadow-lg`}
             >
-              <div className="flex items-center gap-4 mb-6">
+              {/* <div className="flex items-center gap-4 mb-6">
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-red-50 rounded-full flex items-center justify-center">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -328,21 +328,21 @@ const Contact = () => {
                     />
                   </svg>
                 </div>
-                {/* <h3
+                <h3
                   className={`text-lg md:text-xl font-bold text-gray-800 ${languageFontClass}`}
                 >
                     {t('contact.contactInfo.contact2.name')}
-                </h3> */}
+                </h3> 
               </div>
 
               <ul className="space-y-3">
-                {/* <li className="flex items-start">
+                 <li className="flex items-start">
                   <span
                     className={`text-gray-800 font-medium ${languageFontClass}`}
                   >
                     {contact2.name}
                   </span>
-                </li> */}
+                </li> 
                 <li className="flex items-start">
                   <span className={`text-gray-700 ${languageFontClass}`}>
                     {contact2.address1}
@@ -400,7 +400,7 @@ const Contact = () => {
                     </a>
                   </span>
                 </li>
-              </ul>
+              </ul> */}
             </div>
           </div>
 
