@@ -1316,7 +1316,7 @@ const RegistrationForm = () => {
 
   const sendRegistrationSMS = async (mobileNumber, gahoiCode) => {
     try {
-      console.log('Starting SMS send process:', {
+      console.log('Starting WhatsApp message send process:', {
         mobileNumber,
         gahoiCode,
         apiBase: API_BASE
@@ -1333,62 +1333,63 @@ const RegistrationForm = () => {
 
       const numberWithCountryCode = formattedNumber.startsWith('91') ? formattedNumber : `91${formattedNumber}`;
 
-      // First try sending through our backend
+      // First try sending through WhatsApp
       try {
         const response = await fetch(`${API_BASE}/api/send-sms`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_TOKEN}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: message,
-            number: numberWithCountryCode
+            mobileNumber: numberWithCountryCode,
+            message: message
           })
         });
 
         const text = await response.text();
-        console.log('Raw SMS API Response:', text);
+        console.log('Raw WhatsApp API Response:', text);
 
         let data;
         try {
           data = JSON.parse(text);
         } catch (e) {
-          console.error('Failed to parse API response:', text);
-          // If backend fails, try direct API call
+          console.error('Failed to parse WhatsApp API response:', text);
+          // If WhatsApp fails, try SMS
           return await sendDirectSMS(message, numberWithCountryCode);
         }
 
-        if (!response.ok || !data.status) {
-          console.error('Backend SMS API Error:', data);
-          // If backend fails, try direct API call
+        if (!response.ok || !data.success) {
+          console.error('WhatsApp API Error:', data);
+          // If WhatsApp fails, try SMS
           return await sendDirectSMS(message, numberWithCountryCode);
         }
 
-        console.log('SMS sent successfully through backend to:', numberWithCountryCode);
         return true;
       } catch (error) {
-        console.error('Backend SMS Error:', error);
-        // If backend fails, try direct API call
+        console.error('WhatsApp Error:', error);
+        // If WhatsApp fails, try SMS
         return await sendDirectSMS(message, numberWithCountryCode);
       }
 
     } catch (error) {
-      console.error('Error in main SMS send process:', error);
+      console.error('Error in main message send process:', error);
       return false;
     }
   };
 
   const sendDirectSMS = async (message, number) => {
     try {
-      console.log('Attempting direct SMS API call');
+      console.log('Attempting fallback SMS API call with:', {
+        number,
+        messageLength: message.length
+      });
       
       const formData = new URLSearchParams();
-      formData.append('api_key', '6f8277070f2d67fa9f7b6452');
+      formData.append('api_key', 'S4YKGP5ZB9Q2J8LIDNM6OACTX');
       formData.append('message', message);
       formData.append('number', number);
       formData.append('route', '1');
-
+      
       const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
         method: 'POST',
         headers: {
@@ -1398,25 +1399,26 @@ const RegistrationForm = () => {
       });
 
       const text = await response.text();
-      console.log('Direct SMS API Raw Response:', text);
+      console.log('SMS Fallback API Response:', text);
 
       let data;
       try {
         data = JSON.parse(text);
-      } catch (e) {
-        console.error('Failed to parse direct API response:', text);
+        console.log('Parsed SMS Fallback API Response:', data);
+      } catch (err) {
+        console.error('Failed to parse SMS Fallback API response:', text);
         return false;
       }
 
       if (!data.status) {
-        console.error('Direct SMS API Error:', data);
+        console.error('SMS Fallback API Error:', data);
         return false;
       }
 
-      console.log('SMS sent successfully through direct API to:', number);
+      console.log('SMS sent successfully as fallback to:', number);
       return true;
     } catch (error) {
-      console.error('Error in direct SMS send:', error);
+      console.error('Error in SMS fallback:', error);
       return false;
     }
   };
