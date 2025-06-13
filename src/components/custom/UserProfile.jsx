@@ -56,90 +56,45 @@ const UserProfile = () => {
         const profileData = await profileResponse.json();
         console.log('PROFILE DATA:', profileData);
 
-
-
         if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
           setTimeout(() => {
-            navigate('/registration', {
-              state: {
+            navigate('/registration', { 
+              state: { 
                 mobileNumber,
-                fromLogin: true
-              }
+                fromLogin: true 
+              } 
             });
           }, 2000);
           return;
         }
 
+        const profile = profileData.data[0];
+        if (!profile || !profile.attributes) {
+          setError('Profile not found or incomplete.');
+          setLoading(false);
+          return;
+        }
 
-const profile = profileData.data?.[0];
+        const attrs = profile.attributes;
+        const transformedData = {
+          personal_information: attrs.personal_information || {},
+          family_details: attrs.family_details || {},
+          biographical_details: attrs.biographical_details || {},
+          work_information: attrs.work_information || {},
+          additional_details: attrs.additional_details || {},
+          child_name: attrs.child_name || [],
+          your_suggestions: attrs.your_suggestions || {},
+          gahoi_code: attrs.gahoi_code || '',
+          documentId: profile.id,
+          createdAt: attrs.createdAt,
+          updatedAt: attrs.updatedAt,
+          publishedAt: attrs.publishedAt
+        };
 
-if (!profile || !profile.personal_information) {
-  setError('Profile not found or incomplete.');
-  setLoading(false);
-  return;
-}
-
-const personalInfo = profile.personal_information || {};
-const bioDetails = profile.biographical_details || {};
-const workInfo = profile.work_information || {};
-const additional = profile.additional_details || {};
-const suggestions = profile.your_suggestions || {};
-
-
-const transformedData = {
-  personal_information: {
-    full_name: personalInfo.full_name || '',
-    mobile_number: personalInfo.mobile_number || '',
-    email_address: personalInfo.email_address || '',
-    village: personalInfo.village || '',
-    Gender: personalInfo.Gender || '',
-    nationality: personalInfo.nationality || '',
-    is_gahoi: personalInfo.is_gahoi || false,
-    display_picture: personalInfo.display_picture?.url || null
-  },
-  family_details: profile.family_details || {},
-  biographical_details: {
-    manglik_status: bioDetails.manglik_status || '',
-    Grah: bioDetails.Grah || '',
-    Handicap: bioDetails.Handicap || '',
-    is_married: bioDetails.is_married || 'Unmarried',
-    marriage_to_another_caste: bioDetails.marriage_to_another_caste || 'Same Caste Marriage'
-  },
-  work_information: {
-    occupation: workInfo.occupation || '',
-    company_name: workInfo.company_name || '',
-    work_area: workInfo.work_area || '',
-    industrySector: workInfo.industrySector || '',
-    businessSize: workInfo.businessSize || '',
-    workType: workInfo.workType || '',
-    employmentType: workInfo.employmentType || ''
-  },
-  additional_details: {
-    blood_group: additional.blood_group || '',
-    date_of_birth: additional.date_of_birth || '',
-    date_of_marriage: additional.date_of_marriage || '',
-    higher_education: additional.higher_education || '',
-    current_address: additional.current_address || '',
-    regional_information: additional.regional_information || {
-      State: '',
-      RegionalAssembly: '',
-      LocalPanchayatName: '',
-      LocalPanchayat: '',
-      SubLocalPanchayat: ''
-    }
-  },
-  child_name: profile.child_name || [],
-  your_suggestions: suggestions || { suggestions: '' },
-  gahoi_code: profile.gahoi_code || '',
-  documentId: profile.id
-};
-
-setUserData(transformedData);
-setLoading(false);
-setError(null);
-
-
+        setUserData(transformedData);
+        setLoading(false);
+        setError(null);
       } catch (error) {
         console.error('Error fetching profile data:', error);
         setError('Failed to load profile. Please try again.');
@@ -149,8 +104,6 @@ setError(null);
 
     fetchUserData();
   }, [navigate]);
-
-  
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -227,24 +180,22 @@ setError(null);
     );
   }
 
-  
-  //   if (!userData || typeof userData.personal_information !== 'object') {
-
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-  //       <div className="bg-white p-8 rounded-lg shadow-md">
-  //         <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
-  //         <p className="text-gray-600">Please complete your registration first.</p>
-  //         <button
-  //           onClick={() => navigate('/registration')}
-  //           className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-  //         >
-  //           Go to Registration
-  //         </button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (!userData || !userData.personal_information) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">No Data Found</h2>
+          <p className="text-gray-600">Please complete your registration first.</p>
+          <button
+            onClick={() => navigate('/registration')}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Go to Registration
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -261,16 +212,8 @@ setError(null);
                     '/default-avatar.png'} 
                   alt="Profile" 
                   className="w-10 h-10 rounded-full border-2 border-white object-cover relative z-10"
-                  loading="lazy"
-                  decoding="async"
                   onError={(e) => {
                     e.target.src = '/default-avatar.png';
-                  }}
-                  onLoad={(e) => {
-                    const placeholder = e.target.parentNode.firstChild;
-                    if (placeholder) {
-                      placeholder.style.display = 'none';
-                    }
                   }}
                 />
               </div>
@@ -281,19 +224,16 @@ setError(null);
             </div>
             <div className="flex items-center space-x-4">
               <button 
-                onClick={() => {
-                  localStorage.setItem('editUserData', JSON.stringify(userData));
-                  navigate('/registration', { 
-                    state: { 
-                      mobileNumber: userData.personal_information?.mobile_number,
-                      isEdit: true,
-                      userData: {
-                        id: userData.documentId,
-                        attributes: userData
-                      }
-                    } 
-                  });
-                }}
+                onClick={() => navigate('/registration', { 
+                  state: { 
+                    mobileNumber: userData.personal_information?.mobile_number,
+                    isEdit: true,
+                    userData: {
+                      id: userData.documentId,
+                      attributes: userData
+                    }
+                  } 
+                })}
                 className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors flex items-center"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,249 +285,139 @@ setError(null);
             <div className="flex-1 p-8">
               <div className="max-w-3xl mx-auto">
                 {activeSection === 'personal' && (
-                  <ErrorBoundary>
-                    <Suspense fallback={<LoadingSkeleton />}>
-                      <section>
-                        <div className="flex justify-between items-center mb-6">
-                          <h2 className="text-2xl font-bold text-gray-800">Personal Information</h2>
-                          <button
-                            onClick={() => {
-                              localStorage.setItem('editUserData', JSON.stringify(userData));
-                              navigate('/registration', { 
-                                state: { 
-                                  mobileNumber: userData.personal_information?.mobile_number,
-                                  isEdit: true,
-                                  activeSection: 'personal',
-                                  userData: {
-                                    id: userData.documentId,
-                                    attributes: userData
-                                  }
-                                } 
-                              });
-                            }}
-                            className="px-3 py-1 text-sm bg-red-700 text-white rounded hover:bg-red-800 transition-colors flex items-center"
-                          >
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            Edit Section
-                          </button>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                          <dl className="divide-y divide-gray-200">
-                            {Object.entries(userData.personal_information || {}).map(([key, value]) => (
-                              key !== 'display_picture' && (
-                                <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                                  <dt className="text-sm font-medium text-gray-500">
-                                    {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                                  </dt>
-                                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                    {value || 'N/A'}
-                                  </dd>
-                                </div>
-                              )
-                            ))}
-                          </dl>
-                        </div>
-                      </section>
-                    </Suspense>
-                  </ErrorBoundary>
+                  <section>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800">Personal Information</h2>
+                    </div>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <dl className="divide-y divide-gray-200">
+                        {Object.entries(userData.personal_information || {}).map(([key, value]) => (
+                          key !== 'display_picture' && (
+                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                              <dt className="text-sm font-medium text-gray-500">
+                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                              </dt>
+                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {value?.toString() || 'N/A'}
+                              </dd>
+                            </div>
+                          )
+                        ))}
+                      </dl>
+                    </div>
+                  </section>
                 )}
 
                 {activeSection === 'family' && (
-                  <ErrorBoundary>
-                    <Suspense fallback={<LoadingSkeleton />}>
-                      <section>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Family Details</h2>
-                        <div className="space-y-6">
-                          {/* Basic Family Info */}
-                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            <dl className="divide-y divide-gray-200">
-                              {Object.entries(userData.family_details || {}).map(([key, value]) => (
-                                !Array.isArray(value) && (
-                                  <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                    <dt className="text-sm font-medium text-gray-500">
-                                      {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                                    </dt>
-                                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                      {value || 'N/A'}
-                                    </dd>
-                                  </div>
-                                )
-                              ))}
-                            </dl>
+                  <section>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800">Family Details</h2>
+                    </div>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <dl className="divide-y divide-gray-200">
+                        {Object.entries(userData.family_details || {}).map(([key, value]) => (
+                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                            <dt className="text-sm font-medium text-gray-500">
+                              {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                            </dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              {value?.toString() || 'N/A'}
+                            </dd>
                           </div>
-
-                          {/* Siblings */}
-                          {userData.family_details?.siblingDetails?.length > 0 && (
-                            <div>
-                              <h3 className="text-lg font-semibold text-gray-800 mb-3">Siblings</h3>
-                              <div className="space-y-4">
-                                {userData.family_details.siblingDetails.map((sibling, index) => (
-                                  <div key={index} className="bg-white rounded-lg border border-gray-200 p-4">
-                                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                      {Object.entries(sibling).map(([key, value]) => (
-                                        <div key={key} className="sm:col-span-1">
-                                          <dt className="text-sm font-medium text-gray-500">
-                                            {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                                          </dt>
-                                          <dd className="mt-1 text-sm text-gray-900">
-                                            {value || 'N/A'}
-                                          </dd>
-                                        </div>
-                                      ))}
-                                    </dl>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </section>
-                    </Suspense>
-                  </ErrorBoundary>
+                        ))}
+                      </dl>
+                    </div>
+                  </section>
                 )}
 
                 {activeSection === 'biographical' && (
-                  <ErrorBoundary>
-                    <Suspense fallback={<LoadingSkeleton />}>
-                      <section>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Biographical Details</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Manglik Status</label>
-                            <p className="mt-1 text-gray-800">{userData.biographical_details?.manglik_status || 'N/A'}</p>
+                  <section>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800">Biographical Details</h2>
+                    </div>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <dl className="divide-y divide-gray-200">
+                        {Object.entries(userData.biographical_details || {}).map(([key, value]) => (
+                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                            <dt className="text-sm font-medium text-gray-500">
+                              {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                            </dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              {value?.toString() || 'N/A'}
+                            </dd>
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Grah</label>
-                            <p className="mt-1 text-gray-800">{userData.biographical_details?.Grah || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Handicap</label>
-                            <p className="mt-1 text-gray-800">{userData.biographical_details?.Handicap || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Marital Status</label>
-                            <p className="mt-1 text-gray-800">{userData.biographical_details?.is_married || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Marriage Status</label>
-                            <p className="mt-1 text-gray-800">{userData.biographical_details?.marriage_to_another_caste || 'N/A'}</p>
-                          </div>
-                        </div>
-                      </section>
-                    </Suspense>
-                  </ErrorBoundary>
+                        ))}
+                      </dl>
+                    </div>
+                  </section>
                 )}
 
                 {activeSection === 'work' && (
-                  <ErrorBoundary>
-                    <Suspense fallback={<LoadingSkeleton />}>
-                      <section>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Work Information</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Occupation</label>
-                            <p className="mt-1 text-gray-800">{userData.work_information?.occupation || 'N/A'}</p>
+                  <section>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800">Work Information</h2>
+                    </div>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <dl className="divide-y divide-gray-200">
+                        {Object.entries(userData.work_information || {}).map(([key, value]) => (
+                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                            <dt className="text-sm font-medium text-gray-500">
+                              {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                            </dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              {value?.toString() || 'N/A'}
+                            </dd>
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Company Name</label>
-                            <p className="mt-1 text-gray-800">{userData.work_information?.company_name || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Work Area</label>
-                            <p className="mt-1 text-gray-800">{userData.work_information?.work_area || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Industry Sector</label>
-                            <p className="mt-1 text-gray-800">{userData.work_information?.industrySector || 'N/A'}</p>
-                          </div>
-                        </div>
-                      </section>
-                    </Suspense>
-                  </ErrorBoundary>
+                        ))}
+                      </dl>
+                    </div>
+                  </section>
                 )}
 
                 {activeSection === 'additional' && (
-                  <ErrorBoundary>
-                    <Suspense fallback={<LoadingSkeleton />}>
-                      <section>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Additional Details</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Blood Group</label>
-                            <p className="mt-1 text-gray-800">{userData.additional_details?.blood_group || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Date of Birth</label>
-                            <p className="mt-1 text-gray-800">{userData.additional_details?.date_of_birth || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Higher Education</label>
-                            <p className="mt-1 text-gray-800">{userData.additional_details?.higher_education || 'N/A'}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Current Address</label>
-                            <p className="mt-1 text-gray-800">{userData.additional_details?.current_address || 'N/A'}</p>
-                          </div>
-                        </div>
-                      </section>
-                    </Suspense>
-                  </ErrorBoundary>
+                  <section>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800">Additional Details</h2>
+                    </div>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <dl className="divide-y divide-gray-200">
+                        {Object.entries(userData.additional_details || {}).map(([key, value]) => (
+                          key !== 'regional_information' && (
+                            <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                              <dt className="text-sm font-medium text-gray-500">
+                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                              </dt>
+                              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {value?.toString() || 'N/A'}
+                              </dd>
+                            </div>
+                          )
+                        ))}
+                      </dl>
+                    </div>
+                  </section>
                 )}
 
                 {activeSection === 'regional' && (
-                  <ErrorBoundary>
-                    <Suspense fallback={<LoadingSkeleton />}>
-                      <section>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Regional Information</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">State</label>
-                            <p className="mt-1 text-gray-800">
-                              {userData.additional_details?.regional_information?.State || 'N/A'}
-                            </p>
+                  <section>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800">Regional Information</h2>
+                    </div>
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <dl className="divide-y divide-gray-200">
+                        {Object.entries(userData.additional_details?.regional_information || {}).map(([key, value]) => (
+                          <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                            <dt className="text-sm font-medium text-gray-500">
+                              {key.split(/(?=[A-Z])/).join(' ')}
+                            </dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                              {value?.toString() || 'N/A'}
+                            </dd>
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">District</label>
-                            <p className="mt-1 text-gray-800">
-                              {userData.additional_details?.regional_information?.district || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">City</label>
-                            <p className="mt-1 text-gray-800">
-                              {userData.additional_details?.regional_information?.city || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Regional Assembly</label>
-                            <p className="mt-1 text-gray-800">
-                              {userData.additional_details?.regional_information?.RegionalAssembly || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Local Panchayat Name</label>
-                            <p className="mt-1 text-gray-800">
-                              {userData.additional_details?.regional_information?.LocalPanchayatName || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Local Panchayat</label>
-                            <p className="mt-1 text-gray-800">
-                              {userData.additional_details?.regional_information?.LocalPanchayat || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-600">Sub Local Panchayat</label>
-                            <p className="mt-1 text-gray-800">
-                              {userData.additional_details?.regional_information?.SubLocalPanchayat || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      </section>
-                    </Suspense>
-                  </ErrorBoundary>
+                        ))}
+                      </dl>
+                    </div>
+                  </section>
                 )}
               </div>
             </div>
