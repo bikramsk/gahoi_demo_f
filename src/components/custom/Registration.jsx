@@ -1060,7 +1060,7 @@ const RegistrationForm = () => {
     try {
       const formData = new URLSearchParams();
       formData.append('number', mobileNumber);
-      formData.append('message', 'Hi, you are invited to join via WhatsApp.');
+      formData.append('message', 'Hi! You’re invited to join us at gahoishakti.in. Click the link to get started!');
   
       const res = await fetch('https://api.gahoishakti.in/api/whatsapp/send', {
         method: 'POST',
