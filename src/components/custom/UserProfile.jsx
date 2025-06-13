@@ -98,13 +98,20 @@ const UserProfile = () => {
 
         // First verify token
         try {
+          console.log('Verifying token with headers:', headers);
           const verifyResponse = await fetch(`${API_BASE}/api/users/me`, {
             method: 'GET',
-            headers
+            headers,
+            credentials: 'include'
+          });
+
+          console.log('Token verification response:', {
+            status: verifyResponse.status,
+            ok: verifyResponse.ok
           });
 
           if (!verifyResponse.ok) {
-            console.log('Token verification failed - clearing credentials');
+            console.log('Token verification failed - redirecting to login');
             localStorage.removeItem('token');
             localStorage.removeItem('verifiedMobile');
             setError('Your session has expired. Please login again.');
@@ -113,13 +120,24 @@ const UserProfile = () => {
             }, 2000);
             return;
           }
+
+          const verifyData = await verifyResponse.json();
+          console.log('Token verification successful:', verifyData);
+
         } catch (error) {
           console.error('Token verification error:', error);
-          throw error;
+          localStorage.removeItem('token');
+          localStorage.removeItem('verifiedMobile');
+          setError('Authentication failed. Please login again.');
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+          return;
         }
 
         const firstApiUrl = `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`;
         console.log('Making first API call to:', firstApiUrl);
+        console.log('Using headers:', headers);
 
         const userResponse = await fetch(firstApiUrl, {
           method: 'GET',
