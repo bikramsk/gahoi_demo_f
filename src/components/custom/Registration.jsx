@@ -1385,28 +1385,32 @@ const RegistrationForm = () => {
     const sendWhatsAppMessage = async () => {
       try {
         const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
-        const numberWithCountryCode = mobileNumber.startsWith('91') ? mobileNumber : `91${mobileNumber}`;
-        
-        const msgFormData = new URLSearchParams();
-        msgFormData.append('api_key', 'S4YKGP5ZB9Q2J8LIDNM6OACTX');
-        msgFormData.append('number', numberWithCountryCode);
-        msgFormData.append('message', `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}`);
-        msgFormData.append('route', '1');
-
-        const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
+        const numberWithCountryCode = mobileNumber.startsWith('91')
+          ? mobileNumber
+          : `91${mobileNumber}`;
+    
+        const response = await fetch('https://api.gahoishakti.in/api/send-sms', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
           },
-          body: msgFormData
+          body: JSON.stringify({
+            number: numberWithCountryCode,
+            message: `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}`,
+          }),
         });
-
+    
         const data = await response.json();
-        console.log('WhatsApp message response:', data);
+        console.log('WhatsApp API Response (via backend):', data);
+    
+        if (!data.status) {
+          console.warn('WhatsApp API reported failure:', data.message);
+        }
       } catch (error) {
-        console.error('Error sending WhatsApp message:', error);
+        console.error('Error sending WhatsApp message via backend:', error);
       }
     };
+    
 
     // Send WhatsApp message immediately
     sendWhatsAppMessage();
