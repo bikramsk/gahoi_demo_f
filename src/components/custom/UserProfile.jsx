@@ -89,7 +89,7 @@ const UserProfile = () => {
           return;
         }
 
-        // Try with both JWT and API token
+    
         let headers = {
           'Authorization': token ? `Bearer ${token}` : `Bearer ${API_TOKEN}`,
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ const UserProfile = () => {
           return;
         }
 
-        // First verify user status
+    
         console.log('Checking user status...');
         const verifyResponse = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
           method: 'GET',
@@ -135,9 +135,9 @@ const UserProfile = () => {
           return;
         }
 
-        // First try a simple API call to check access
-        console.log('Attempting to access users API...');
-        const userResponse = await fetch(`${API_BASE}/api/users`, {
+       
+        console.log('Attempting to access users API with API token...');
+        const userResponse = await fetch(`${API_BASE}/api/users/me`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -153,19 +153,34 @@ const UserProfile = () => {
           token: API_TOKEN
         });
 
-        // If we can access the API, then try to find the specific user
-        if (userResponse.ok) {
-          const allUsers = await userResponse.json();
-          console.log('All Users:', allUsers);
+        if (!userResponse.ok) {
+         
+          console.log('Trying to filter users by mobile number...');
+          const apiResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number]=${mobileNumber}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${API_TOKEN}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
 
-          // Find the user with matching mobile number
-          const user = allUsers.data.find(u => u.mobile_number === mobileNumber);
-          
-          if (!user) {
+          if (!apiResponse.ok) {
+            throw new Error(`Failed to fetch user data: ${apiResponse.status}`);
+          }
+
+          const userData = await apiResponse.json();
+          console.log('User Data from filter:', userData);
+
+          if (!userData.data || userData.data.length === 0) {
             throw new Error('User not found');
           }
 
-          // Now get full profile with all relations
+      
+          const user = userData.data[0];
+          console.log('Found User:', user);
+
+         
           const profileUrl = `${API_BASE}/api/users/${user.id}?populate=*`;
           console.log('Making profile API call to:', profileUrl);
 
@@ -187,31 +202,81 @@ const UserProfile = () => {
 
           const transformedData = {
             personal_information: {
-              full_name: profileData.data.attributes?.name || '',
-              mobile_number: profileData.data.attributes?.mobile_number || '',
-              email_address: profileData.data.attributes?.email || '',
-              village: profileData.data.attributes?.village || '',
-              Gender: profileData.data.attributes?.gender || '',
-              nationality: profileData.data.attributes?.nationality || '',
-              is_gahoi: profileData.data.attributes?.is_gahoi || false,
-              display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
+              full_name: profileData.data?.name || '',
+              mobile_number: profileData.data?.mobile_number || '',
+              email_address: profileData.data?.email || '',
+              village: profileData.data?.village || '',
+              Gender: profileData.data?.gender || '',
+              nationality: profileData.data?.nationality || '',
+              is_gahoi: profileData.data?.is_gahoi || false,
+              display_picture: profileData.data?.display_picture?.url || null
             },
-            family_details: profileData.data.attributes?.family_details || {},
-            biographical_details: profileData.data.attributes?.biographical_details || {},
-            work_information: profileData.data.attributes?.work_information || {},
-            additional_details: profileData.data.attributes?.additional_details || {},
-            child_name: profileData.data.attributes?.child_name || [],
-            your_suggestions: profileData.data.attributes?.your_suggestions || {},
-            gahoi_code: profileData.data.attributes?.gahoi_code || '',
-            documentId: profileData.data.id
+            family_details: profileData.data?.family_details || {},
+            biographical_details: profileData.data?.biographical_details || {},
+            work_information: profileData.data?.work_information || {},
+            additional_details: profileData.data?.additional_details || {},
+            child_name: profileData.data?.child_name || [],
+            your_suggestions: profileData.data?.your_suggestions || {},
+            gahoi_code: profileData.data?.gahoi_code || '',
+            documentId: profileData.data?.id
           };
 
           setUserData(transformedData);
           setLoading(false);
           setError(null);
 
+          return transformedData;
         } else {
-          throw new Error('Failed to access users API');
+          
+          const userData = await userResponse.json();
+          console.log('User Data from /me:', userData);
+
+          // Now get full profile with all relations
+          const profileUrl = `${API_BASE}/api/users/${userData.id}?populate=*`;
+          console.log('Making profile API call to:', profileUrl);
+
+          const profileResponse = await fetch(profileUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${API_TOKEN}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!profileResponse.ok) {
+            throw new Error('Failed to fetch complete profile');
+          }
+
+          const profileData = await profileResponse.json();
+          console.log('Profile Data:', profileData);
+
+          const transformedData = {
+            personal_information: {
+              full_name: profileData.data?.name || '',
+              mobile_number: profileData.data?.mobile_number || '',
+              email_address: profileData.data?.email || '',
+              village: profileData.data?.village || '',
+              Gender: profileData.data?.gender || '',
+              nationality: profileData.data?.nationality || '',
+              is_gahoi: profileData.data?.is_gahoi || false,
+              display_picture: profileData.data?.display_picture?.url || null
+            },
+            family_details: profileData.data?.family_details || {},
+            biographical_details: profileData.data?.biographical_details || {},
+            work_information: profileData.data?.work_information || {},
+            additional_details: profileData.data?.additional_details || {},
+            child_name: profileData.data?.child_name || [],
+            your_suggestions: profileData.data?.your_suggestions || {},
+            gahoi_code: profileData.data?.gahoi_code || '',
+            documentId: profileData.data?.id
+          };
+
+          setUserData(transformedData);
+          setLoading(false);
+          setError(null);
+
+          return transformedData;
         }
 
       } catch (error) {
