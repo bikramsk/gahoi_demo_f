@@ -31,7 +31,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       throw new Error(data.message || 'Failed to send OTP');
     }
 
-    // Store OTP in sessionStorage if we're in development and OTP is returned
+   
     if (import.meta.env.MODE === 'development' && data.otp) {
       console.log('Development OTP:', data.otp);
       sessionStorage.setItem('currentOTP', data.otp);
@@ -64,7 +64,7 @@ const verifyOTP = async (mobileNumber, otp) => {
       throw new Error(data.error?.message || data.message || 'Failed to verify OTP');
     }
 
-    // Clear OTP data after successful verification
+    // Clear OTP 
     sessionStorage.removeItem('currentOTP');
     sessionStorage.removeItem('otpTimestamp');
     sessionStorage.removeItem('otpMobile');
@@ -76,7 +76,7 @@ const verifyOTP = async (mobileNumber, otp) => {
   }
 };
 
-// Add MPIN verification function
+// MPIN verification
 const verifyMPIN = async (mobileNumber, mpin) => {
   try {
     const response = await fetch(`${API_BASE}/api/verify-mpin`, {

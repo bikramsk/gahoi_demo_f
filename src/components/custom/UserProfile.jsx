@@ -6,6 +6,7 @@ const API_BASE = import.meta.env.MODE === 'production'
   : 'http://localhost:1337';
 
 
+
 const API_TOKEN = localStorage.getItem('token');
 
 
