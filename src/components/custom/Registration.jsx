@@ -1316,14 +1316,14 @@ const RegistrationForm = () => {
 
   const sendRegistrationSMS = async (mobileNumber, gahoiCode) => {
     try {
-      console.log('Attempting to send SMS with:', {
+      console.log('Starting SMS send process:', {
         mobileNumber,
-        gahoiCode
+        gahoiCode,
+        apiBase: API_BASE
       });
       
       const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}.`;
       
-      // remove any spaces or special characters
       const formattedNumber = mobileNumber.toString().replace(/\D/g, '');
       
       if (!formattedNumber || formattedNumber.length < 10) {
@@ -1331,45 +1331,92 @@ const RegistrationForm = () => {
         return false;
       }
 
-      // Add country code if not present
       const numberWithCountryCode = formattedNumber.startsWith('91') ? formattedNumber : `91${formattedNumber}`;
 
-      // Use our backend API instead of directly calling wpsenders
-      const response = await fetch(`${API_BASE}/api/send-sms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_TOKEN}`
-        },
-        body: JSON.stringify({
-          message: message,
-          number: numberWithCountryCode
-        })
-      });
-
-      let data;
+      // First try sending through our backend
       try {
+        const response = await fetch(`${API_BASE}/api/send-sms`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_TOKEN}`
+          },
+          body: JSON.stringify({
+            message: message,
+            number: numberWithCountryCode
+          })
+        });
+
         const text = await response.text();
+        console.log('Raw SMS API Response:', text);
+
+        let data;
         try {
           data = JSON.parse(text);
         } catch (e) {
-          console.error('Response is not JSON:', text);
-          throw new Error(`Server error: ${text}`);
+          console.error('Failed to parse API response:', text);
+          // If backend fails, try direct API call
+          return await sendDirectSMS(message, numberWithCountryCode);
         }
+
+        if (!response.ok || !data.status) {
+          console.error('Backend SMS API Error:', data);
+          // If backend fails, try direct API call
+          return await sendDirectSMS(message, numberWithCountryCode);
+        }
+
+        console.log('SMS sent successfully through backend to:', numberWithCountryCode);
+        return true;
       } catch (error) {
-        console.error('Error parsing response:', error);
-        throw error;
+        console.error('Backend SMS Error:', error);
+        // If backend fails, try direct API call
+        return await sendDirectSMS(message, numberWithCountryCode);
       }
 
-      if (!response.ok) {
-        throw new Error(data?.message || data?.error || 'Failed to send SMS');
+    } catch (error) {
+      console.error('Error in main SMS send process:', error);
+      return false;
+    }
+  };
+
+  const sendDirectSMS = async (message, number) => {
+    try {
+      console.log('Attempting direct SMS API call');
+      
+      const formData = new URLSearchParams();
+      formData.append('api_key', '6f8277070f2d67fa9f7b6452');
+      formData.append('message', message);
+      formData.append('number', number);
+      formData.append('route', '1');
+
+      const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData
+      });
+
+      const text = await response.text();
+      console.log('Direct SMS API Raw Response:', text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Failed to parse direct API response:', text);
+        return false;
       }
 
-      console.log('SMS sent successfully to:', numberWithCountryCode);
+      if (!data.status) {
+        console.error('Direct SMS API Error:', data);
+        return false;
+      }
+
+      console.log('SMS sent successfully through direct API to:', number);
       return true;
     } catch (error) {
-      console.error('Error sending SMS:', error.message);
-      console.error('Full error:', error);
+      console.error('Error in direct SMS send:', error);
       return false;
     }
   };

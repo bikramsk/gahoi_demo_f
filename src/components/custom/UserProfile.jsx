@@ -95,19 +95,21 @@ const UserProfile = () => {
           return;
         }
         
-        const apiUrl = `${API_BASE}/api/registrations?populate=deep&filters[mobile_number][$eq]=${mobileNumber}`;
+        // Properly encode the mobile number and construct the URL
+        const encodedMobileNumber = encodeURIComponent(mobileNumber);
+        const apiUrl = `${API_BASE}/api/registrations?populate=*&filters[mobile_number]=${encodedMobileNumber}`;
         
         console.log('Making API request:', {
           url: apiUrl,
-          hasToken: !!API_TOKEN
+          hasToken: !!API_TOKEN,
+          mobileNumber: mobileNumber
         });
         
         const profileResponse = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Accept': 'application/json'
           }
         });
 
