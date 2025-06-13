@@ -109,23 +109,43 @@ const OurTeam = () => {
        image: "our_team/naveen_nigoti.jpg",       
       },
       {
-        name: "Naveen Nigoti",
-        location: "New",
-       image: "our_team/naveen_nigoti.jpg",       
+        name: "Pravin Reza",
+        location: "Madhavganj",
+       image: "our_team/Pravin_Reza.jpg",       
       },
       {
-        name: "Naveen Nigoti",
-        location: "New",
-       image: "our_team/naveen_nigoti.jpg",       
+        name: "Satish Soni",
+        location: "Naka Chandbadni",
+       image: "our_team/Satish_Soni.jpg",       
       },
       {
-        name: "Naveen Nigoti",
-        location: "New",
-       image: "our_team/naveen_nigoti.jpg",       
+        name: "Sachin kuchiya",
+        location: "Murar",
+       image: "our_team/Sachin_kuchiya.jpg",       
+      },
+      {
+        name: "Mukesh Soni",
+        location: "Murar",
+       image: "our_team/Mukesh_Soni.jpg",       
+      },
+      {
+        name: "Mukesh Sanwla",
+        location: "LohaMandi",
+       image: "our_team/Mukesh_Sanwla.jpg",       
+      },
+      {
+        name: "Madan Mohan Gandi",
+        location: "Badohapur",
+       image: "our_team/MadanMohan_Gandi.jpg",       
+      },
+       {
+        name: "Himanshu Piparseniya",
+        location: "Thathipur",
+       image: "our_team/Himanshu_piparseniya.jpg",       
       },
   ];
 
-  const TeamMemberCard = ({ member, isFounder }) => (
+  const TeamMemberCard = ({ member }) => (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       <div className="aspect-w-4 aspect-h-3 relative group">
         <img
