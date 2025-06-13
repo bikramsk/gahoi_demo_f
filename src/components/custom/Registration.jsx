@@ -143,26 +143,28 @@ const GUJARAT_CHAURASI_MAPPING = {
 
 const RegistrationForm = () => {
   const location = useLocation();
-  console.log("Location state received:", location.state);
-  
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState(() => {
-    // Get mobile number from location state or localStorage
-    const mobileNumber = location.state?.mobileNumber || localStorage.getItem('verifiedMobile') || "";
-    console.log("Setting initial mobile number:", mobileNumber);
-    
-    return {
-      ...INITIAL_FORM_DATA,
-      mobileNumber: mobileNumber,
-      workCategory: "professional",
-    };
-  });
+  const [formData, setFormData] = useState(() => ({
+    ...INITIAL_FORM_DATA,
+    workCategory: "professional"
+  }));
   const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
   const [progress, setProgress] = useState(50);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+
+  // Handle location state only once 
+  useEffect(() => {
+    if (location.state?.mobileNumber) {
+      console.log("Initializing form with mobile number:", location.state.mobileNumber);
+      setFormData(prevData => ({
+        ...prevData,
+        mobile_number: location.state.mobileNumber
+      }));
+    }
+  }, []); 
 
   const indianCities = [
     "Ahmedabad",
@@ -1297,13 +1299,22 @@ const RegistrationForm = () => {
 
   const sendRegistrationSMS = async (mobileNumber, gahoiCode) => {
     try {
-      console.log('Sending SMS to:', mobileNumber, 'with code:', gahoiCode);
+      console.log('Attempting to send SMS with:', {
+        mobileNumber,
+        gahoiCode,
+        hasApiKey: !!import.meta.env.VITE_SMS_API_KEY
+      });
       
       const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}.`;
       
       // remove any spaces or special characters
-      const formattedNumber = mobileNumber.replace(/\D/g, '');
+      const formattedNumber = mobileNumber.toString().replace(/\D/g, '');
       
+      if (!formattedNumber || formattedNumber.length < 10) {
+        console.error('Invalid mobile number:', formattedNumber);
+        return false;
+      }
+
       const formData = new URLSearchParams();
       formData.append('api_key', import.meta.env.VITE_SMS_API_KEY);
       formData.append('message', message);
@@ -1339,7 +1350,6 @@ const RegistrationForm = () => {
     } catch (error) {
       console.error('Error sending SMS:', error.message);
       console.error('Full error:', error);
-    
       return false;
     }
   };
@@ -1398,8 +1408,12 @@ const RegistrationForm = () => {
         throw new Error("Gahoi code not found in response");
       }
 
+      // Get mobile number from location state or form data
+      const mobileNumber = location.state?.mobileNumber || formData.mobile_number;
+      console.log('Using mobile number for SMS:', mobileNumber);
+
       // Send SMS with registration code
-      await sendRegistrationSMS(formData.mobile_number, gahoiCode);
+      await sendRegistrationSMS(mobileNumber, gahoiCode);
 
       // Pass the gahoi code to showSuccessMessage
       showSuccessMessage(gahoiCode);
