@@ -448,7 +448,7 @@ const Login = () => {
           setShowOtpInput(true);
           setOtpSent(true);
           setCurrentStep(2);
-          setCountdown(60);
+          setCountdown(30);
           setErrors({});
         }
       } catch (error) {
