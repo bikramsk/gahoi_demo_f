@@ -110,11 +110,10 @@ const UserProfile = () => {
         const verifyResponse = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${API_TOKEN}`, // Always use API token for this endpoint
+            'Authorization': `Bearer ${API_TOKEN}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json'
-          },
-          credentials: 'include'
+          }
         });
 
         const verifyData = await verifyResponse.json();
@@ -136,15 +135,17 @@ const UserProfile = () => {
           return;
         }
 
-        // Now fetch user data
-        const firstApiUrl = `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`;
+        // Now fetch user data with a simpler query
+        const firstApiUrl = `${API_BASE}/api/users/${verifyData.userId}`;
         console.log('Making API call to:', firstApiUrl);
-        console.log('Using headers:', headers);
 
         const userResponse = await fetch(firstApiUrl, {
           method: 'GET',
-          headers,
-          credentials: 'include'
+          headers: {
+            'Authorization': `Bearer ${API_TOKEN}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
         });
 
         console.log('API Response:', {
@@ -154,36 +155,56 @@ const UserProfile = () => {
         });
 
         if (!userResponse.ok) {
-          // If first attempt fails, try with API token only
-          if (userResponse.status === 401) {
-            console.log('First attempt failed, trying with API token only');
-            headers = {
-              'Authorization': `Bearer ${API_TOKEN}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            };
-            
-            const retryResponse = await fetch(firstApiUrl, {
-              method: 'GET',
-              headers,
-              credentials: 'include'
-            });
-
-            if (!retryResponse.ok) {
-              throw new Error('Failed to fetch user data with API token');
-            }
-
-            const responseData = await retryResponse.text();
-            console.log('Retry API Response:', responseData);
-            return await handleUserData(JSON.parse(responseData), headers);
-          }
-
-          throw new Error(`API Error: ${userResponse.status} ${userResponse.statusText}`);
+          throw new Error(`Failed to fetch user data: ${userResponse.status}`);
         }
 
-        const responseData = await userResponse.text();
-        console.log('API Raw Response:', responseData);
-        return await handleUserData(JSON.parse(responseData), headers);
+        const userData = await userResponse.json();
+        console.log('User Data:', userData);
+
+        // Get full profile with all relations
+        const secondApiUrl = `${API_BASE}/api/users/${userData.id}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
+        console.log('Making second API call to:', secondApiUrl);
+
+        const profileResponse = await fetch(secondApiUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${API_TOKEN}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!profileResponse.ok) {
+          throw new Error('Failed to fetch complete profile');
+        }
+
+        const profileData = await profileResponse.json();
+        console.log('Profile Data:', profileData);
+
+        const transformedData = {
+          personal_information: {
+            full_name: profileData.data.attributes?.name || '',
+            mobile_number: profileData.data.attributes?.mobile_number || '',
+            email_address: profileData.data.attributes?.email || '',
+            village: profileData.data.attributes?.village || '',
+            Gender: profileData.data.attributes?.gender || '',
+            nationality: profileData.data.attributes?.nationality || '',
+            is_gahoi: profileData.data.attributes?.is_gahoi || false,
+            display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
+          },
+          family_details: profileData.data.attributes?.family_details || {},
+          biographical_details: profileData.data.attributes?.biographical_details || {},
+          work_information: profileData.data.attributes?.work_information || {},
+          additional_details: profileData.data.attributes?.additional_details || {},
+          child_name: profileData.data.attributes?.child_name || [],
+          your_suggestions: profileData.data.attributes?.your_suggestions || {},
+          gahoi_code: profileData.data.attributes?.gahoi_code || '',
+          documentId: profileData.data.id
+        };
+
+        setUserData(transformedData);
+        setLoading(false);
+        setError(null);
 
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -194,67 +215,6 @@ const UserProfile = () => {
           navigate('/login');
         }, 2000);
       }
-    };
-
-    const handleUserData = async (parsedData, headers) => {
-      if (!parsedData.data || parsedData.data.length === 0) {
-        console.log('No user found - redirecting to registration');
-        setError('User profile not found. Please complete registration.');
-        setTimeout(() => {
-          navigate('/registration', { 
-            state: { 
-              mobileNumber: localStorage.getItem('verifiedMobile'),
-              fromLogin: true 
-            } 
-          });
-        }, 2000);
-        return;
-      }
-
-      const userId = parsedData.data[0].id;
-      console.log('Found User ID:', userId);
-
-      // Get full profile
-      const secondApiUrl = `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
-      console.log('Making second API call to:', secondApiUrl);
-
-      const profileResponse = await fetch(secondApiUrl, {
-        method: 'GET',
-        headers,
-        credentials: 'include'
-      });
-
-      if (!profileResponse.ok) {
-        throw new Error('Failed to fetch complete profile');
-      }
-
-      const profileData = await profileResponse.json();
-      console.log('Profile Data:', profileData);
-
-      const transformedData = {
-        personal_information: {
-          full_name: profileData.data.attributes?.name || '',
-          mobile_number: profileData.data.attributes?.mobile_number || '',
-          email_address: profileData.data.attributes?.email || '',
-          village: profileData.data.attributes?.village || '',
-          Gender: profileData.data.attributes?.gender || '',
-          nationality: profileData.data.attributes?.nationality || '',
-          is_gahoi: profileData.data.attributes?.is_gahoi || false,
-          display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
-        },
-        family_details: profileData.data.attributes?.family_details || {},
-        biographical_details: profileData.data.attributes?.biographical_details || {},
-        work_information: profileData.data.attributes?.work_information || {},
-        additional_details: profileData.data.attributes?.additional_details || {},
-        child_name: profileData.data.attributes?.child_name || [],
-        your_suggestions: profileData.data.attributes?.your_suggestions || {},
-        gahoi_code: profileData.data.attributes?.gahoi_code || '',
-        documentId: profileData.data.id
-      };
-
-      setUserData(transformedData);
-      setLoading(false);
-      setError(null);
     };
 
     fetchUserData();
