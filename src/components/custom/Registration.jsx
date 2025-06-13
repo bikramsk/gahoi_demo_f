@@ -1295,6 +1295,32 @@ const RegistrationForm = () => {
     }
   };
 
+  const sendRegistrationSMS = async (mobileNumber, gahoiCode) => {
+    try {
+      const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}. Please keep this code for future reference.`;
+      
+      const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phone: mobileNumber,
+          message: message
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send SMS');
+      }
+
+      console.log('SMS sent successfully');
+    } catch (error) {
+      console.error('Error sending SMS:', error);
+      // Don't throw error here - we don't want to block the registration flow if SMS fails
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -1348,6 +1374,9 @@ const RegistrationForm = () => {
       if (!gahoiCode) {
         throw new Error("Gahoi code not found in response");
       }
+
+      // Send SMS with registration code
+      await sendRegistrationSMS(formData.mobile_number, gahoiCode);
 
       // Pass the gahoi code to showSuccessMessage
       showSuccessMessage(gahoiCode);
