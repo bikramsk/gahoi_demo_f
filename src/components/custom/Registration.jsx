@@ -1297,14 +1297,26 @@ const RegistrationForm = () => {
 
   const sendRegistrationSMS = async (mobileNumber, gahoiCode) => {
     try {
+      console.log('Sending SMS to:', mobileNumber, 'with code:', gahoiCode);
+      
       const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}.`;
       
+      // remove any spaces or special characters
+      const formattedNumber = mobileNumber.replace(/\D/g, '');
       
       const formData = new URLSearchParams();
       formData.append('api_key', import.meta.env.VITE_SMS_API_KEY);
       formData.append('message', message);
-      formData.append('number', mobileNumber);
+      formData.append('number', formattedNumber);
       formData.append('route', '1');
+
+      // Log 
+      console.log('SMS Request Data:', {
+        api_key: import.meta.env.VITE_SMS_API_KEY ? 'Present' : 'Missing',
+        message: message,
+        number: formattedNumber,
+        route: '1'
+      });
 
       const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
         method: 'POST',
@@ -1315,16 +1327,20 @@ const RegistrationForm = () => {
       });
 
       const data = await response.json();
-      console.log('SMS API Response:', data);
+      console.log('SMS API Full Response:', data);
 
       if (!data.status) {
+        console.error('SMS API Error:', data.message);
         throw new Error(data.message || 'Failed to send SMS');
       }
 
-      console.log('SMS sent successfully');
+      console.log('SMS sent successfully to:', formattedNumber);
+      return true;
     } catch (error) {
-      console.error('Error sending SMS:', error);
-      // Don't throw error here - we don't want to block the registration flow if SMS fails
+      console.error('Error sending SMS:', error.message);
+      console.error('Full error:', error);
+    
+      return false;
     }
   };
 
