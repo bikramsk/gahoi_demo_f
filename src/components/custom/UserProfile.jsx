@@ -71,12 +71,12 @@ const UserProfile = () => {
           return;
         }
 
-        const profile = profileData.data?.[0];
-        if (!profile || !profile.attributes || !profile.attributes.personal_information) {
-          setError('Profile not found or incomplete.');
-          setLoading(false);
-          return;
-        }
+        // const profile = profileData.data?.[0];
+        // if (!profile || !profile.attributes || !profile.attributes.personal_information) {
+        //   setError('Profile not found or incomplete.');
+        //   setLoading(false);
+        //   return;
+        // }
 
 
 
