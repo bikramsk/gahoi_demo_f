@@ -96,12 +96,35 @@ const UserProfile = () => {
           'Accept': 'application/json'
         };
 
+        // First verify token
+        try {
+          const verifyResponse = await fetch(`${API_BASE}/api/users/me`, {
+            method: 'GET',
+            headers
+          });
+
+          if (!verifyResponse.ok) {
+            console.log('Token verification failed - clearing credentials');
+            localStorage.removeItem('token');
+            localStorage.removeItem('verifiedMobile');
+            setError('Your session has expired. Please login again.');
+            setTimeout(() => {
+              navigate('/login');
+            }, 2000);
+            return;
+          }
+        } catch (error) {
+          console.error('Token verification error:', error);
+          throw error;
+        }
+
         const firstApiUrl = `${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}&populate=*`;
         console.log('Making first API call to:', firstApiUrl);
 
         const userResponse = await fetch(firstApiUrl, {
           method: 'GET',
-          headers
+          headers,
+          credentials: 'include'
         });
 
         console.log('First API Response:', {
@@ -153,7 +176,8 @@ const UserProfile = () => {
 
         const profileResponse = await fetch(secondApiUrl, {
           method: 'GET',
-          headers
+          headers,
+          credentials: 'include'
         });
 
         console.log('Second API Response:', {
