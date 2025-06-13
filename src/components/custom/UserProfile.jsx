@@ -132,11 +132,11 @@ const UserProfile = () => {
         const profile = profileData.data?.[0];
 
       //  Safety check
-      if (!profile || !profile.attributes) {
-        setError('Profile not found.');
-        setLoading(false);
-        return;
-      }
+      // if (!profile || !profile.attributes) {
+      //   setError('Profile not found.');
+      //   setLoading(false);
+      //   return;
+      // }
 
       const attrs = profile.attributes;
       const personalInfo = attrs.personal_information || {};
