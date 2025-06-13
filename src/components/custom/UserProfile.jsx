@@ -6,7 +6,8 @@ const API_BASE = import.meta.env.MODE === 'production'
   : 'http://localhost:1337';
 
 
-const API_TOKEN = import.meta.env.VITE_API_TOKEN;
+  const API_TOKEN = localStorage.getItem('token');
+
 
 
 console.log('Environment:', {
@@ -97,12 +98,7 @@ const UserProfile = () => {
         
         // Updated API URL format
         const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`;
-        
-        console.log('Making API request:', {
-          url: apiUrl,
-          hasToken: !!API_TOKEN,
-          mobileNumber: mobileNumber
-        });
+   
         
         const profileResponse = await fetch(apiUrl, {
           method: 'GET',
