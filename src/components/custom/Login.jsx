@@ -12,8 +12,6 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337'; 
 
-const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
-
 console.log('Using API BASE:', API_BASE);
 
 const sendWhatsAppOTP = async (mobileNumber) => {
@@ -83,8 +81,7 @@ const verifyMPIN = async (mobileNumber, mpin) => {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_TOKEN}`
+        'Content-Type': 'application/json'
       },
       credentials: 'include',
       body: JSON.stringify({
@@ -200,11 +197,12 @@ const Login = () => {
     const checkUser = async () => {
       if (formData.mobileNumber.length === 10) {
         try {
+          const API_TOKEN = localStorage.getItem('token');
           const response = await fetch(`${API_BASE}/api/check-user-mpin/${formData.mobileNumber}`, {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
-              'Authorization': `Bearer ${API_TOKEN}`
+              'Authorization': API_TOKEN ? `Bearer ${API_TOKEN}` : undefined
             }
           });
 
