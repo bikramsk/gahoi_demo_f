@@ -31,6 +31,11 @@ import {
   DISTRICT_TO_CITIES,
 } from "../../constants/locationData";
 
+const API_BASE = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1337';
+
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
 export const CHAURASI_PANCHAYAT_NAMES = [
   "Gahoi Vaishya Panchayat",
@@ -1313,8 +1318,7 @@ const RegistrationForm = () => {
     try {
       console.log('Attempting to send SMS with:', {
         mobileNumber,
-        gahoiCode,
-        hasApiKey: !!import.meta.env.VITE_SMS_API_KEY
+        gahoiCode
       });
       
       const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}.`;
@@ -1330,42 +1334,23 @@ const RegistrationForm = () => {
       // Add country code if not present
       const numberWithCountryCode = formattedNumber.startsWith('91') ? formattedNumber : `91${formattedNumber}`;
 
-      const formData = new URLSearchParams();
-      formData.append('api_key', import.meta.env.VITE_SMS_API_KEY);
-      formData.append('message', message);
-      formData.append('number', numberWithCountryCode);
-      formData.append('route', '1');
-
-      console.log('SMS Request Data:', {
-        api_key: import.meta.env.VITE_SMS_API_KEY ? 'Present' : 'Missing',
-        message: message,
-        number: numberWithCountryCode,
-        route: '1'
-      });
-
-      const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
+      // Use our backend API instead of directly calling wpsenders
+      const response = await fetch(`${API_BASE}/api/send-sms`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_TOKEN}`
         },
-        body: formData
+        body: JSON.stringify({
+          message: message,
+          number: numberWithCountryCode
+        })
       });
 
-      const responseText = await response.text();
-      console.log('Raw API Response:', responseText);
+      const data = await response.json();
+      console.log('SMS API Response:', data);
 
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('Failed to parse API response:', e);
-        return false;
-      }
-
-      console.log('SMS API Full Response:', data);
-
-      if (!data.status) {
-        console.error('SMS API Error:', data.message);
+      if (!response.ok) {
         throw new Error(data.message || 'Failed to send SMS');
       }
 
