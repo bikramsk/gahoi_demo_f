@@ -6,7 +6,6 @@ const API_BASE = import.meta.env.MODE === 'production'
   : 'http://localhost:1337';
 
 
-
 const API_TOKEN = localStorage.getItem('token');
 
 
@@ -90,7 +89,7 @@ const UserProfile = () => {
           return;
         }
         
-        // API URL
+        // Updated API URL format
         const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=*`;
 
    
@@ -132,11 +131,11 @@ const UserProfile = () => {
         const profile = profileData.data?.[0];
 
       //  Safety check
-      // if (!profile || !profile.attributes) {
-      //   setError('Profile not found.');
-      //   setLoading(false);
-      //   return;
-      // }
+      if (!profile || !profile.attributes) {
+        setError('Profile not found.');
+        setLoading(false);
+        return;
+      }
 
       const attrs = profile.attributes;
       const personalInfo = attrs.personal_information || {};
@@ -214,78 +213,7 @@ const UserProfile = () => {
   fetchUserData();
 }, [navigate]);
 
-  //      const profile = profileData.data[0];
-  //       console.log('Found Profile:', profile);
-
-   
-
-  //       const transformedData = {
-  //         personal_information: {
-  //           full_name: profileData.personal_information?.full_name || profileData.name || '',
-  //           mobile_number: profileData.personal_information?.mobile_number || profileData.mobile_number || '',
-  //           email_address: profileData.personal_information?.email_address || profileData.email || '',
-  //           village: profileData.personal_information?.village || profileData.village || '',
-  //           Gender: profileData.personal_information?.Gender || profileData.gender || '',
-  //           nationality: profileData.personal_information?.nationality || profileData.nationality || '',
-  //           is_gahoi: profileData.personal_information?.is_gahoi || profileData.isGahoi || false,
-  //           display_picture:
-  //             profileData.personal_information?.display_picture?.data?.attributes?.url ||
-  //             profileData.display_picture?.data?.attributes?.url || null
-  //         },
-  //         family_details: profileData.family_details || {},
-  //         biographical_details: {
-  //           manglik_status: profileData.biographical_details?.manglik_status || profileData.manglik || '',
-  //           Grah: profileData.biographical_details?.Grah || profileData.grah || '',
-  //           Handicap: profileData.biographical_details?.Handicap || profileData.handicap || '',
-  //           is_married: profileData.biographical_details?.is_married || profileData.isMarried || 'Unmarried',
-  //           marriage_to_another_caste:
-  //             profileData.biographical_details?.marriage_to_another_caste || profileData.marriageToAnotherCaste || 'Same Caste Marriage'
-  //         },
-  //         work_information: {
-  //           occupation: profileData.work_information?.occupation || profileData.occupation || '',
-  //           company_name: profileData.work_information?.company_name || profileData.companyName || '',
-  //           work_area: profileData.work_information?.work_area || profileData.workArea || '',
-  //           industrySector: profileData.work_information?.industrySector || profileData.industrySector || '',
-  //           businessSize: profileData.work_information?.businessSize || profileData.businessSize || '',
-  //           workType: profileData.work_information?.workType || profileData.workType || '',
-  //           employmentType: profileData.work_information?.employmentType || profileData.employmentType || ''
-  //         },
-  //         additional_details: {
-  //           blood_group: profileData.additional_details?.blood_group || profileData.bloodGroup || '',
-  //           date_of_birth: profileData.additional_details?.date_of_birth || profileData.birthDate || '',
-  //           date_of_marriage: profileData.additional_details?.date_of_marriage || profileData.marriageDate || '',
-  //           higher_education: profileData.additional_details?.higher_education || profileData.education || '',
-  //           current_address: profileData.additional_details?.current_address || profileData.currentAddress || '',
-  //           regional_information: profileData.additional_details?.regional_information || {
-  //             State: profileData.state || '',
-  //             RegionalAssembly: profileData.regionalAssembly || '',
-  //             LocalPanchayatName: profileData.localPanchayatName || '',
-  //             LocalPanchayat: profileData.localPanchayat || '',
-  //             SubLocalPanchayat: profileData.subLocalPanchayat || ''
-  //           }
-  //         },
-  //         child_name: profileData.child_name || [],
-  //         your_suggestions: profileData.your_suggestions || {
-  //           suggestions: profileData.suggestions || ''
-  //         },
-  //         gahoi_code: profileData.gahoi_code || '',
-  //         documentId: profile?.id
-  //       };
-        
-
-  //       setUserData(transformedData);
-  //       setLoading(false);
-  //       setError(null);
-
-  //     } catch (error) {
-  //       console.error('Error fetching profile data:', error);
-  //       setError('Failed to load profile. Please try again.');
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchUserData();
-  // }, [navigate]);
+  
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -362,7 +290,9 @@ const UserProfile = () => {
     );
   }
 
-  if (!userData || !userData.personal_information) {
+  // if (!userData || !userData.personal_information) {
+    if (!userData || typeof userData.personal_information !== 'object') {
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md">
