@@ -73,82 +73,74 @@ const UserProfile = () => {
 
 
 const profile = profileData.data?.[0];
-console.log("Profile Object:", profile);
+if (!profile) {
+  setError("Profile not found or incomplete.");
+  setLoading(false);
+  return;
+}
 
+const attrs = profile; 
 
-// if (!profile || !profile.attributes) {
-//   setError('Profile not found or incomplete.');
-//   setLoading(false);
-//   return;
-// }
+const personalInfo = attrs.personal_information || {};
+const bioDetails = attrs.biographical_details || {};
+const workInfo = attrs.work_information || {};
+const additional = attrs.additional_details || {};
+const suggestions = attrs.your_suggestions || {};
 
-        const attrs = profile.attributes;  
-        const personalInfo = attrs.personal_information || {};     
+const transformedData = {
+  personal_information: {
+    full_name: personalInfo.full_name || '',
+    mobile_number: personalInfo.mobile_number || '',
+    email_address: personalInfo.email_address || '',
+    village: personalInfo.village || '',
+    Gender: personalInfo.Gender || '',
+    nationality: personalInfo.nationality || '',
+    is_gahoi: personalInfo.is_gahoi || false,
+    display_picture: personalInfo.display_picture?.url || null
+  },
+  family_details: attrs.family_details || {},
+  biographical_details: {
+    manglik_status: bioDetails.manglik_status || '',
+    Grah: bioDetails.Grah || '',
+    Handicap: bioDetails.Handicap || '',
+    is_married: bioDetails.is_married || 'Unmarried',
+    marriage_to_another_caste: bioDetails.marriage_to_another_caste || 'Same Caste Marriage'
+  },
+  work_information: {
+    occupation: workInfo.occupation || '',
+    company_name: workInfo.company_name || '',
+    work_area: workInfo.work_area || '',
+    industrySector: workInfo.industrySector || '',
+    businessSize: workInfo.businessSize || '',
+    workType: workInfo.workType || '',
+    employmentType: workInfo.employmentType || ''
+  },
+  additional_details: {
+    blood_group: additional.blood_group || '',
+    date_of_birth: additional.date_of_birth || '',
+    date_of_marriage: additional.date_of_marriage || '',
+    higher_education: additional.higher_education || '',
+    current_address: additional.current_address || '',
+    regional_information: additional.regional_information || {
+      State: '',
+      RegionalAssembly: '',
+      LocalPanchayatName: '',
+      LocalPanchayat: '',
+      SubLocalPanchayat: ''
+    }
+  },
+  child_name: attrs.child_name || [],
+  your_suggestions: suggestions || {
+    suggestions: ''
+  },
+  gahoi_code: attrs.gahoi_code || '',
+  documentId: attrs.id || null
+};
 
-        const bioDetails = attrs.biographical_details || {};
-        const workInfo = attrs.work_information || {};
-        const additional = attrs.additional_details || {};
-        const suggestions = attrs.your_suggestions || {};
+setUserData(transformedData);
+setLoading(false);
+setError(null);
 
-        const transformedData = {
-          personal_information: {
-            full_name: personalInfo.full_name || attrs.name || '',
-            mobile_number: personalInfo.mobile_number || attrs.mobile_number || '',
-            email_address: personalInfo.email_address || attrs.email || '',
-            village: personalInfo.village || attrs.village || '',
-            Gender: personalInfo.Gender || attrs.gender || '',
-            nationality: personalInfo.nationality || attrs.nationality || '',
-            is_gahoi: personalInfo.is_gahoi || attrs.isGahoi || false,
-            display_picture:
-              personalInfo.display_picture?.data?.attributes?.url ||
-              attrs.display_picture?.data?.attributes?.url ||
-              null
-          },
-          family_details: attrs.family_details || {},
-          biographical_details: {
-            manglik_status: bioDetails.manglik_status || attrs.manglik || '',
-            Grah: bioDetails.Grah || attrs.grah || '',
-            Handicap: bioDetails.Handicap || attrs.handicap || '',
-            is_married: bioDetails.is_married || attrs.isMarried || 'Unmarried',
-            marriage_to_another_caste:
-              bioDetails.marriage_to_another_caste ||
-              attrs.marriageToAnotherCaste ||
-              'Same Caste Marriage'
-          },
-          work_information: {
-            occupation: workInfo.occupation || attrs.occupation || '',
-            company_name: workInfo.company_name || attrs.companyName || '',
-            work_area: workInfo.work_area || attrs.workArea || '',
-            industrySector: workInfo.industrySector || attrs.industrySector || '',
-            businessSize: workInfo.businessSize || attrs.businessSize || '',
-            workType: workInfo.workType || attrs.workType || '',
-            employmentType: workInfo.employmentType || attrs.employmentType || ''
-          },
-          additional_details: {
-            blood_group: additional.blood_group || attrs.bloodGroup || '',
-            date_of_birth: additional.date_of_birth || attrs.birthDate || '',
-            date_of_marriage: additional.date_of_marriage || attrs.marriageDate || '',
-            higher_education: additional.higher_education || attrs.education || '',
-            current_address: additional.current_address || attrs.currentAddress || '',
-            regional_information: additional.regional_information || {
-              State: attrs.state || '',
-              RegionalAssembly: attrs.regionalAssembly || '',
-              LocalPanchayatName: attrs.localPanchayatName || '',
-              LocalPanchayat: attrs.localPanchayat || '',
-              SubLocalPanchayat: attrs.subLocalPanchayat || ''
-            }
-          },
-          child_name: attrs.child_name || [],
-          your_suggestions: suggestions || {
-            suggestions: attrs.suggestions || ''
-          },
-          gahoi_code: attrs.gahoi_code || '',
-          documentId: profile.id
-        };
-
-        setUserData(transformedData);
-        setLoading(false);
-        setError(null);
       } catch (error) {
         console.error('Error fetching profile data:', error);
         setError('Failed to load profile. Please try again.');
