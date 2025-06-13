@@ -136,7 +136,8 @@ const UserProfile = () => {
         }
 
         // Get user ID first using mobile number
-        const userIdResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}`, {
+        const encodedMobile = encodeURIComponent(mobileNumber);
+        const userIdResponse = await fetch(`${API_BASE}/api/users?populate=*&filters[mobile_number]=${encodedMobile}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -145,12 +146,18 @@ const UserProfile = () => {
           }
         });
 
+        console.log('User ID API Response:', {
+          status: userIdResponse.status,
+          ok: userIdResponse.ok,
+          url: userIdResponse.url
+        });
+
         if (!userIdResponse.ok) {
           throw new Error(`Failed to fetch user ID: ${userIdResponse.status}`);
         }
 
         const userIdData = await userIdResponse.json();
-        console.log('User ID Response:', userIdData);
+        console.log('User ID Data:', userIdData);
 
         if (!userIdData.data || userIdData.data.length === 0) {
           throw new Error('User not found');
