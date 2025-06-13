@@ -1056,7 +1056,7 @@ const RegistrationForm = () => {
 
 
 
-  const openWhatsAppShare = useCallback(async (mobileNumber) => {
+  const sendWhatsAppInvite = useCallback(async (mobileNumber) => {
     try {
       const res = await fetch('http://api.gahoishakti.in/api/whatsapp/send', {
         method: 'POST',
@@ -1103,10 +1103,10 @@ const RegistrationForm = () => {
   
       // Trigger WhatsApp invite only when mobile number reaches 10 digits exactly
       if (field === "mobileNumber" && value.length === 10) {
-        openWhatsAppShare(value);
+        sendWhatsAppInvite(value);
       }
     },
-    [errors, openWhatsAppShare]
+    [errors, sendWhatsAppInvite]
   );
   
   
