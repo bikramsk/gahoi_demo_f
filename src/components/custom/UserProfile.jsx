@@ -73,8 +73,9 @@ const UserProfile = () => {
 
 
 const profile = profileData.data?.[0];
-if (!profile) {
-  setError("Profile not found or incomplete.");
+
+if (!profile || !profile.personal_information) {
+  setError('Profile not found or incomplete.');
   setLoading(false);
   return;
 }
@@ -84,6 +85,7 @@ const bioDetails = profile.biographical_details || {};
 const workInfo = profile.work_information || {};
 const additional = profile.additional_details || {};
 const suggestions = profile.your_suggestions || {};
+
 
 const transformedData = {
   personal_information: {
