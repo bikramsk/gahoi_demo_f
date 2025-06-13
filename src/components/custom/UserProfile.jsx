@@ -54,6 +54,12 @@ const UserProfile = () => {
         }
 
         const profileData = await profileResponse.json();
+        console.log('PROFILE DATA:', profileData);
+
+
+console.log('PROFILE:', profile);
+console.log('ATTRIBUTES:', profile?.attributes);
+console.log('PERSONAL INFO:', profile?.attributes?.personal_information);
 
         if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
@@ -74,6 +80,8 @@ const UserProfile = () => {
           setLoading(false);
           return;
         }
+
+
 
         const attrs = profile.attributes;
         const personalInfo = attrs.personal_information || {};
