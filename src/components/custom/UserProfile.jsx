@@ -135,8 +135,9 @@ const UserProfile = () => {
           return;
         }
 
-        // Get user by mobile number using Strapi v5 format
-        const userResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number]=${mobileNumber}`, {
+        // First try a simple API call to check access
+        console.log('Attempting to access users API...');
+        const userResponse = await fetch(`${API_BASE}/api/users`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -145,71 +146,73 @@ const UserProfile = () => {
           }
         });
 
-        console.log('User API Response:', {
+        console.log('Basic API Response:', {
           status: userResponse.status,
           ok: userResponse.ok,
-          url: userResponse.url
+          url: userResponse.url,
+          token: API_TOKEN
         });
 
-        if (!userResponse.ok) {
-          throw new Error(`Failed to fetch user: ${userResponse.status}`);
-        }
+        // If we can access the API, then try to find the specific user
+        if (userResponse.ok) {
+          const allUsers = await userResponse.json();
+          console.log('All Users:', allUsers);
 
-        const userData = await userResponse.json();
-        console.log('User Data:', userData);
-
-        if (!userData.data || userData.data.length === 0) {
-          throw new Error('User not found');
-        }
-
-        // In Strapi v5, we use documentId instead of id
-        const documentId = userData.data[0].documentId;
-        console.log('Found User Document ID:', documentId);
-
-        // Now get full profile with all relations using documentId
-        const profileUrl = `${API_BASE}/api/users/${documentId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
-        console.log('Making profile API call to:', profileUrl);
-
-        const profileResponse = await fetch(profileUrl, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${API_TOKEN}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+          // Find the user with matching mobile number
+          const user = allUsers.data.find(u => u.mobile_number === mobileNumber);
+          
+          if (!user) {
+            throw new Error('User not found');
           }
-        });
 
-        if (!profileResponse.ok) {
-          throw new Error('Failed to fetch complete profile');
+          // Now get full profile with all relations
+          const profileUrl = `${API_BASE}/api/users/${user.id}?populate=*`;
+          console.log('Making profile API call to:', profileUrl);
+
+          const profileResponse = await fetch(profileUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${API_TOKEN}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!profileResponse.ok) {
+            throw new Error('Failed to fetch complete profile');
+          }
+
+          const profileData = await profileResponse.json();
+          console.log('Profile Data:', profileData);
+
+          const transformedData = {
+            personal_information: {
+              full_name: profileData.data.attributes?.name || '',
+              mobile_number: profileData.data.attributes?.mobile_number || '',
+              email_address: profileData.data.attributes?.email || '',
+              village: profileData.data.attributes?.village || '',
+              Gender: profileData.data.attributes?.gender || '',
+              nationality: profileData.data.attributes?.nationality || '',
+              is_gahoi: profileData.data.attributes?.is_gahoi || false,
+              display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
+            },
+            family_details: profileData.data.attributes?.family_details || {},
+            biographical_details: profileData.data.attributes?.biographical_details || {},
+            work_information: profileData.data.attributes?.work_information || {},
+            additional_details: profileData.data.attributes?.additional_details || {},
+            child_name: profileData.data.attributes?.child_name || [],
+            your_suggestions: profileData.data.attributes?.your_suggestions || {},
+            gahoi_code: profileData.data.attributes?.gahoi_code || '',
+            documentId: profileData.data.id
+          };
+
+          setUserData(transformedData);
+          setLoading(false);
+          setError(null);
+
+        } else {
+          throw new Error('Failed to access users API');
         }
-
-        const profileData = await profileResponse.json();
-        console.log('Profile Data:', profileData);
-
-        const transformedData = {
-          personal_information: {
-            full_name: profileData.data.attributes?.name || '',
-            mobile_number: profileData.data.attributes?.mobile_number || '',
-            email_address: profileData.data.attributes?.email || '',
-            village: profileData.data.attributes?.village || '',
-            Gender: profileData.data.attributes?.gender || '',
-            nationality: profileData.data.attributes?.nationality || '',
-            is_gahoi: profileData.data.attributes?.is_gahoi || false,
-            display_picture: profileData.data.attributes?.display_picture?.data?.attributes?.url || null
-          },
-          family_details: profileData.data.attributes?.family_details || {},
-          biographical_details: profileData.data.attributes?.biographical_details || {},
-          work_information: profileData.data.attributes?.work_information || {},
-          additional_details: profileData.data.attributes?.additional_details || {},
-          child_name: profileData.data.attributes?.child_name || [],
-          your_suggestions: profileData.data.attributes?.your_suggestions || {},
-          gahoi_code: profileData.data.attributes?.gahoi_code || '',
-          documentId: profileData.data.id
-        };
-
-        setUserData(transformedData);
-        setLoading(false);
-        setError(null);
 
       } catch (error) {
         console.error('Error fetching user data:', error);

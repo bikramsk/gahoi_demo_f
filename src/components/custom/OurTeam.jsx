@@ -104,12 +104,24 @@ const OurTeam = () => {
         
       },
       {
-        name: "Shri Suresh Kumar Gahoi",
-        location: "Secretary",
-        period: "2023-Present",
-      image: "/dummy-profile.webp",
-        contact: "+91 98XXXXXXXX",
-        email: "secretary@gahoishakti.in"
+        name: "Naveen Nigoti",
+        location: "New",
+       image: "our_team/naveen_nigoti.jpg",       
+      },
+      {
+        name: "Naveen Nigoti",
+        location: "New",
+       image: "our_team/naveen_nigoti.jpg",       
+      },
+      {
+        name: "Naveen Nigoti",
+        location: "New",
+       image: "our_team/naveen_nigoti.jpg",       
+      },
+      {
+        name: "Naveen Nigoti",
+        location: "New",
+       image: "our_team/naveen_nigoti.jpg",       
       },
   ];
 
