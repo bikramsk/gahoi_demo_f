@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.MODE === 'production' 
@@ -22,6 +22,23 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('personal');
+
+  // Global error boundary
+  useEffect(() => {
+    const handleError = (error) => {
+      console.error('Error in UserProfile:', error);
+      setError('An unexpected error occurred. Please try again.');
+      setLoading(false);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleError);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleError);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
