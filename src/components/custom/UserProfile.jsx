@@ -90,7 +90,8 @@ const UserProfile = () => {
         }
         
         // Updated API URL format
-        const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`;
+        const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=*`;
+
    
         
         const profileResponse = await fetch(apiUrl, {
