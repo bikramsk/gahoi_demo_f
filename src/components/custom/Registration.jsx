@@ -30,6 +30,7 @@ import {
   STATE_TO_DISTRICTS,
   DISTRICT_TO_CITIES,
 } from "../../constants/locationData";
+import ReactDOM from "react-dom";
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
@@ -1314,115 +1315,6 @@ const RegistrationForm = () => {
     }
   };
 
-  const sendRegistrationSMS = async (mobileNumber, gahoiCode) => {
-    try {
-      console.log('Starting WhatsApp message send process:', {
-        mobileNumber,
-        gahoiCode,
-        apiBase: API_BASE
-      });
-      
-      const message = `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}.`;
-      
-      const formattedNumber = mobileNumber.toString().replace(/\D/g, '');
-      
-      if (!formattedNumber || formattedNumber.length < 10) {
-        console.error('Invalid mobile number:', formattedNumber);
-        return false;
-      }
-
-      const numberWithCountryCode = formattedNumber.startsWith('91') ? formattedNumber : `91${formattedNumber}`;
-
-      // First try sending through WhatsApp
-      try {
-        const response = await fetch(`${API_BASE}/api/send-sms`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            mobileNumber: numberWithCountryCode,
-            message: message
-          })
-        });
-
-        const text = await response.text();
-        console.log('Raw WhatsApp API Response:', text);
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          console.error('Failed to parse WhatsApp API response:', text);
-          // If WhatsApp fails, try SMS
-          return await sendDirectSMS(message, numberWithCountryCode);
-        }
-
-        if (!response.ok || !data.success) {
-          console.error('WhatsApp API Error:', data);
-          // If WhatsApp fails, try SMS
-          return await sendDirectSMS(message, numberWithCountryCode);
-        }
-
-        return true;
-      } catch (error) {
-        console.error('WhatsApp Error:', error);
-        // If WhatsApp fails, try SMS
-        return await sendDirectSMS(message, numberWithCountryCode);
-      }
-
-    } catch (error) {
-      console.error('Error in main message send process:', error);
-      return false;
-    }
-  };
-
-  const sendDirectSMS = async (message, number) => {
-    try {
-      console.log('Attempting fallback SMS API call with:', {
-        number,
-        messageLength: message.length
-      });
-      
-      const formData = new URLSearchParams();
-      formData.append('api_key', 'S4YKGP5ZB9Q2J8LIDNM6OACTX');
-      formData.append('message', message);
-      formData.append('number', number);
-      formData.append('route', '1');
-      
-      const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData
-      });
-
-      const text = await response.text();
-      console.log('SMS Fallback API Response:', text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-        console.log('Parsed SMS Fallback API Response:', data);
-      } catch (err) {
-        console.error('Failed to parse SMS Fallback API response:', text);
-        return false;
-      }
-
-      if (!data.status) {
-        console.error('SMS Fallback API Error:', data);
-        return false;
-      }
-
-      console.log('SMS sent successfully as fallback to:', number);
-      return true;
-    } catch (error) {
-      console.error('Error in SMS fallback:', error);
-      return false;
-    }
-  };
-
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -1477,14 +1369,7 @@ const RegistrationForm = () => {
         throw new Error("Gahoi code not found in response");
       }
 
-      // Get mobile number from location state or form data
-      const mobileNumber = location.state?.mobileNumber || formData.mobile_number;
-      console.log('Using mobile number for SMS:', mobileNumber);
-
-      // Send SMS with registration code
-      await sendRegistrationSMS(mobileNumber, gahoiCode);
-
-      // Pass the gahoi code to showSuccessMessage
+      
       showSuccessMessage(gahoiCode);
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -1496,6 +1381,36 @@ const RegistrationForm = () => {
 
   // Separate function for showing success message
   const showSuccessMessage = (gahoiCode) => {
+    // Send WhatsApp message
+    const sendWhatsAppMessage = async () => {
+      try {
+        const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
+        const numberWithCountryCode = mobileNumber.startsWith('91') ? mobileNumber : `91${mobileNumber}`;
+        
+        const msgFormData = new URLSearchParams();
+        msgFormData.append('api_key', 'S4YKGP5ZB9Q2J8LIDNM6OACTX');
+        msgFormData.append('number', numberWithCountryCode);
+        msgFormData.append('message', `Thank you for registering with Gahoi Shakti! Your registration code is: ${gahoiCode}`);
+        msgFormData.append('route', '1');
+
+        const response = await fetch('https://www.wpsenders.in/api/sendMessage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: msgFormData
+        });
+
+        const data = await response.json();
+        console.log('WhatsApp message response:', data);
+      } catch (error) {
+        console.error('Error sending WhatsApp message:', error);
+      }
+    };
+
+    // Send WhatsApp message immediately
+    sendWhatsAppMessage();
+
     const successPopup = document.createElement("div");
     successPopup.className =
       "fixed inset-0 flex items-center justify-center z-50";
@@ -1512,6 +1427,7 @@ const RegistrationForm = () => {
           <p class="text-gray-600 mb-2">Registration successful!</p>
           <p class="text-gray-600 mb-2">Your Gahoi code is:</p>
           <p class="text-xl font-bold text-[#FD7D01] mb-6">${gahoiCode}</p>
+          <div id="whatsapp-notification-container"></div>
           <div class="w-full bg-gray-200 h-2 rounded-full mt-4">
             <div class="bg-[#FD7D01] h-2 rounded-full" style="width: 0%; transition: width 2s ease-in-out;" id="progress-bar"></div>
           </div>
@@ -1521,12 +1437,21 @@ const RegistrationForm = () => {
 
     document.body.appendChild(successPopup);
     const progressBar = document.getElementById("progress-bar");
+    const whatsappContainer = document.getElementById("whatsapp-notification-container");
+
+    // Render WhatsApp notification component
+    const mobileNumber = location.state?.mobileNumber || formData.mobile_number;
+    ReactDOM.render(
+      <WhatsAppNotification mobileNumber={mobileNumber} gahoiCode={gahoiCode} />,
+      whatsappContainer
+    );
 
     setTimeout(() => {
       progressBar.style.width = "100%";
     }, 100);
 
     setTimeout(() => {
+      ReactDOM.unmountComponentAtNode(whatsappContainer);
       document.body.removeChild(successPopup);
       window.location.href = "/";
     }, 6500);
