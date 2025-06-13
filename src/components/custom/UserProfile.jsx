@@ -76,11 +76,11 @@ const profile = profileData.data?.[0];
 console.log("Profile Object:", profile);
 
 
-if (!profile || !profile.attributes) {
-  setError('Profile not found or incomplete.');
-  setLoading(false);
-  return;
-}
+// if (!profile || !profile.attributes) {
+//   setError('Profile not found or incomplete.');
+//   setLoading(false);
+//   return;
+// }
 
         const attrs = profile.attributes;  
         const personalInfo = attrs.personal_information || {};     
