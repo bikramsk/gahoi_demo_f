@@ -70,16 +70,7 @@ const UserProfile = () => {
       try {
         console.log('Starting Profile Load...');
         const mobileNumber = localStorage.getItem('verifiedMobile');
-        const token = localStorage.getItem('token');
         
-        console.log('Credentials Check:', {
-          hasMobile: !!mobileNumber,
-          hasToken: !!token,
-          mobileNumber,
-          tokenFirstChars: token?.substring(0, 20) + '...',
-          apiBase: API_BASE
-        });
-
         if (!mobileNumber) {
           console.log('Missing mobile number - redirecting to login');
           setError('Please login again to continue');
@@ -89,25 +80,8 @@ const UserProfile = () => {
           return;
         }
 
-    
-        let headers = {
-          'Authorization': token ? `Bearer ${token}` : `Bearer ${API_TOKEN}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        };
-
-        if (!headers.Authorization) {
-          console.log('No authentication tokens available');
-          setError('Authentication failed. Please login again.');
-          setTimeout(() => {
-            navigate('/login');
-          }, 2000);
-          return;
-        }
-
-    
-        console.log('Checking user status...');
-        const verifyResponse = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
+        // Directly fetch from registrations
+        const profileResponse = await fetch(`${API_BASE}/api/registrations?filters[mobile_number]=${mobileNumber}&populate=*`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -116,13 +90,14 @@ const UserProfile = () => {
           }
         });
 
-        const verifyData = await verifyResponse.json();
-        console.log('User verification:', verifyData);
+        if (!profileResponse.ok) {
+          throw new Error(`Failed to fetch profile data: ${profileResponse.status}`);
+        }
 
-        if (!verifyResponse.ok || !verifyData.exists) {
-          console.log('User verification failed');
-          localStorage.removeItem('token');
-          localStorage.removeItem('verifiedMobile');
+        const profileData = await profileResponse.json();
+        console.log('Profile Data:', profileData);
+
+        if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
           setTimeout(() => {
             navigate('/registration', { 
@@ -135,48 +110,27 @@ const UserProfile = () => {
           return;
         }
 
-        // Get user profile directly from registration data
-        const profileResponse = await fetch(`${API_BASE}/api/registrations?filters[mobile_number]=${mobileNumber}&populate=*`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${API_TOKEN}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!profileResponse.ok) {
-          throw new Error('Failed to fetch profile data');
-        }
-
-        const profileData = await profileResponse.json();
-        console.log('Profile Data:', profileData);
-
-        if (!profileData.data || profileData.data.length === 0) {
-          throw new Error('Profile not found');
-        }
-
         const profile = profileData.data[0];
         console.log('Found Profile:', profile);
 
         const transformedData = {
           personal_information: {
-            full_name: profile.name || '',
-            mobile_number: profile.mobile_number || '',
-            email_address: profile.email || '',
-            village: profile.village || '',
-            Gender: profile.gender || '',
-            nationality: profile.nationality || '',
-            is_gahoi: profile.is_gahoi || false,
-            display_picture: profile.display_picture?.url || null
+            full_name: profile.attributes.name || '',
+            mobile_number: profile.attributes.mobile_number || '',
+            email_address: profile.attributes.email || '',
+            village: profile.attributes.village || '',
+            Gender: profile.attributes.gender || '',
+            nationality: profile.attributes.nationality || '',
+            is_gahoi: profile.attributes.is_gahoi || false,
+            display_picture: profile.attributes.display_picture?.data?.attributes?.url || null
           },
-          family_details: profile.family_details || {},
-          biographical_details: profile.biographical_details || {},
-          work_information: profile.work_information || {},
-          additional_details: profile.additional_details || {},
-          child_name: profile.child_name || [],
-          your_suggestions: profile.your_suggestions || {},
-          gahoi_code: profile.gahoi_code || '',
+          family_details: profile.attributes.family_details || {},
+          biographical_details: profile.attributes.biographical_details || {},
+          work_information: profile.attributes.work_information || {},
+          additional_details: profile.attributes.additional_details || {},
+          child_name: profile.attributes.child_name || [],
+          your_suggestions: profile.attributes.your_suggestions || {},
+          gahoi_code: profile.attributes.gahoi_code || '',
           documentId: profile.id
         };
 
@@ -188,9 +142,6 @@ const UserProfile = () => {
         console.error('Error fetching profile data:', error);
         setError('Failed to load profile. Please try again.');
         setLoading(false);
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
       }
     };
 
@@ -296,13 +247,27 @@ const UserProfile = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <img 
-                src={userData.personal_information?.display_picture ? 
-                  `${API_BASE}${userData.personal_information.display_picture}` : 
-                  '/default-avatar.png'} 
-                alt="Profile" 
-                className="w-10 h-10 rounded-full border-2 border-white object-cover"
-              />
+              <div className="relative w-10 h-10">
+                <div className="absolute inset-0 bg-gray-200 rounded-full animate-pulse"></div>
+                <img 
+                  src={userData.personal_information?.display_picture ? 
+                    `${API_BASE}${userData.personal_information.display_picture}` : 
+                    '/default-avatar.png'} 
+                  alt="Profile" 
+                  className="w-10 h-10 rounded-full border-2 border-white object-cover relative z-10"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    e.target.src = '/default-avatar.png';
+                  }}
+                  onLoad={(e) => {
+                    const placeholder = e.target.parentNode.firstChild;
+                    if (placeholder) {
+                      placeholder.style.display = 'none';
+                    }
+                  }}
+                />
+              </div>
               <div>
                 <h1 className="text-xl font-bold">{userData.personal_information?.full_name}</h1>
                 <p className="text-sm opacity-90">Gahoi Code: {userData.gahoi_code}</p>
