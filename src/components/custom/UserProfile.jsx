@@ -6,15 +6,8 @@ const API_BASE = import.meta.env.MODE === 'production'
   : 'http://localhost:1337';
 
 
-  const API_TOKEN = localStorage.getItem('token');
+const API_TOKEN = localStorage.getItem('token');
 
-
-
-console.log('Environment:', {
-  mode: import.meta.env.MODE,
-  hasToken: !!API_TOKEN,
-  apiBase: API_BASE
-});
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
