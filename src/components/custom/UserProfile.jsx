@@ -95,9 +95,8 @@ const UserProfile = () => {
           return;
         }
         
-        // Properly encode the mobile number and construct the URL
-        const encodedMobileNumber = encodeURIComponent(mobileNumber);
-        const apiUrl = `${API_BASE}/api/registrations?populate=*&filters[mobile_number]=${encodedMobileNumber}`;
+        // Updated API URL format
+        const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`;
         
         console.log('Making API request:', {
           url: apiUrl,
