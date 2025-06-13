@@ -135,11 +135,8 @@ const UserProfile = () => {
           return;
         }
 
-        // Now fetch user data with a simpler query
-        const firstApiUrl = `${API_BASE}/api/users/${verifyData.userId}`;
-        console.log('Making API call to:', firstApiUrl);
-
-        const userResponse = await fetch(firstApiUrl, {
+        // Get user ID first using mobile number
+        const userIdResponse = await fetch(`${API_BASE}/api/users?filters[mobile_number][$eq]=${mobileNumber}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -148,24 +145,25 @@ const UserProfile = () => {
           }
         });
 
-        console.log('API Response:', {
-          status: userResponse.status,
-          ok: userResponse.ok,
-          statusText: userResponse.statusText
-        });
-
-        if (!userResponse.ok) {
-          throw new Error(`Failed to fetch user data: ${userResponse.status}`);
+        if (!userIdResponse.ok) {
+          throw new Error(`Failed to fetch user ID: ${userIdResponse.status}`);
         }
 
-        const userData = await userResponse.json();
-        console.log('User Data:', userData);
+        const userIdData = await userIdResponse.json();
+        console.log('User ID Response:', userIdData);
 
-        // Get full profile with all relations
-        const secondApiUrl = `${API_BASE}/api/users/${userData.id}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
-        console.log('Making second API call to:', secondApiUrl);
+        if (!userIdData.data || userIdData.data.length === 0) {
+          throw new Error('User not found');
+        }
 
-        const profileResponse = await fetch(secondApiUrl, {
+        const userId = userIdData.data[0].id;
+        console.log('Found User ID:', userId);
+
+        // Now get full profile with all relations
+        const profileUrl = `${API_BASE}/api/users/${userId}?populate[0]=personal_information&populate[1]=family_details&populate[2]=biographical_details&populate[3]=work_information&populate[4]=additional_details&populate[5]=child_name&populate[6]=your_suggestions&populate[7]=additional_details.regional_information&populate[8]=display_picture`;
+        console.log('Making profile API call to:', profileUrl);
+
+        const profileResponse = await fetch(profileUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
