@@ -144,10 +144,22 @@ const GUJARAT_CHAURASI_MAPPING = {
 const RegistrationForm = () => {
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState(() => ({
-    ...INITIAL_FORM_DATA,
-    workCategory: "professional"
-  }));
+  // Initialize form data with mobile number from location state
+  const [formData, setFormData] = useState(() => {
+    const initialData = {
+      ...INITIAL_FORM_DATA,
+      workCategory: "professional"
+    };
+    
+    // Only set mobile number if it exists in location state
+    if (location.state?.mobileNumber) {
+      initialData.mobile_number = location.state.mobileNumber;
+      console.log("Initial mobile number set:", location.state.mobileNumber);
+    }
+    
+    return initialData;
+  });
+  
   const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
   const [progress, setProgress] = useState(50);
   const [errors, setErrors] = useState({});
@@ -1315,17 +1327,19 @@ const RegistrationForm = () => {
         return false;
       }
 
+      // Add country code if not present
+      const numberWithCountryCode = formattedNumber.startsWith('91') ? formattedNumber : `91${formattedNumber}`;
+
       const formData = new URLSearchParams();
       formData.append('api_key', import.meta.env.VITE_SMS_API_KEY);
       formData.append('message', message);
-      formData.append('number', formattedNumber);
+      formData.append('number', numberWithCountryCode);
       formData.append('route', '1');
 
-      // Log 
       console.log('SMS Request Data:', {
         api_key: import.meta.env.VITE_SMS_API_KEY ? 'Present' : 'Missing',
         message: message,
-        number: formattedNumber,
+        number: numberWithCountryCode,
         route: '1'
       });
 
@@ -1337,7 +1351,17 @@ const RegistrationForm = () => {
         body: formData
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      console.log('Raw API Response:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse API response:', e);
+        return false;
+      }
+
       console.log('SMS API Full Response:', data);
 
       if (!data.status) {
@@ -1345,7 +1369,7 @@ const RegistrationForm = () => {
         throw new Error(data.message || 'Failed to send SMS');
       }
 
-      console.log('SMS sent successfully to:', formattedNumber);
+      console.log('SMS sent successfully to:', numberWithCountryCode);
       return true;
     } catch (error) {
       console.error('Error sending SMS:', error.message);
