@@ -115,21 +115,52 @@ const UserProfile = () => {
 
         const transformedData = {
           personal_information: {
-            full_name: profile.attributes.name || '',
-            mobile_number: profile.attributes.mobile_number || '',
-            email_address: profile.attributes.email || '',
-            village: profile.attributes.village || '',
-            Gender: profile.attributes.gender || '',
-            nationality: profile.attributes.nationality || '',
-            is_gahoi: profile.attributes.is_gahoi || false,
-            display_picture: profile.attributes.display_picture?.data?.attributes?.url || null
+            full_name: profile.attributes.personal_information?.full_name || profile.attributes.name || '',
+            mobile_number: profile.attributes.personal_information?.mobile_number || profile.attributes.mobile_number || '',
+            email_address: profile.attributes.personal_information?.email_address || profile.attributes.email || '',
+            village: profile.attributes.personal_information?.village || profile.attributes.village || '',
+            Gender: profile.attributes.personal_information?.Gender || profile.attributes.gender || '',
+            nationality: profile.attributes.personal_information?.nationality || profile.attributes.nationality || '',
+            is_gahoi: profile.attributes.personal_information?.is_gahoi || profile.attributes.isGahoi || false,
+            display_picture: profile.attributes.personal_information?.display_picture?.data?.attributes?.url || 
+                           profile.attributes.display_picture?.data?.attributes?.url || null
           },
           family_details: profile.attributes.family_details || {},
-          biographical_details: profile.attributes.biographical_details || {},
-          work_information: profile.attributes.work_information || {},
-          additional_details: profile.attributes.additional_details || {},
+          biographical_details: {
+            manglik_status: profile.attributes.biographical_details?.manglik_status || profile.attributes.manglik || '',
+            Grah: profile.attributes.biographical_details?.Grah || profile.attributes.grah || '',
+            Handicap: profile.attributes.biographical_details?.Handicap || profile.attributes.handicap || '',
+            is_married: profile.attributes.biographical_details?.is_married || profile.attributes.isMarried || 'Unmarried',
+            marriage_to_another_caste: profile.attributes.biographical_details?.marriage_to_another_caste || 
+                                     profile.attributes.marriageToAnotherCaste || 'Same Caste Marriage'
+          },
+          work_information: {
+            occupation: profile.attributes.work_information?.occupation || profile.attributes.occupation || '',
+            company_name: profile.attributes.work_information?.company_name || profile.attributes.companyName || '',
+            work_area: profile.attributes.work_information?.work_area || profile.attributes.workArea || '',
+            industrySector: profile.attributes.work_information?.industrySector || profile.attributes.industrySector || '',
+            businessSize: profile.attributes.work_information?.businessSize || profile.attributes.businessSize || '',
+            workType: profile.attributes.work_information?.workType || profile.attributes.workType || '',
+            employmentType: profile.attributes.work_information?.employmentType || profile.attributes.employmentType || ''
+          },
+          additional_details: {
+            blood_group: profile.attributes.additional_details?.blood_group || profile.attributes.bloodGroup || '',
+            date_of_birth: profile.attributes.additional_details?.date_of_birth || profile.attributes.birthDate || '',
+            date_of_marriage: profile.attributes.additional_details?.date_of_marriage || profile.attributes.marriageDate || '',
+            higher_education: profile.attributes.additional_details?.higher_education || profile.attributes.education || '',
+            current_address: profile.attributes.additional_details?.current_address || profile.attributes.currentAddress || '',
+            regional_information: profile.attributes.additional_details?.regional_information || {
+              State: profile.attributes.state || '',
+              RegionalAssembly: profile.attributes.regionalAssembly || '',
+              LocalPanchayatName: profile.attributes.localPanchayatName || '',
+              LocalPanchayat: profile.attributes.localPanchayat || '',
+              SubLocalPanchayat: profile.attributes.subLocalPanchayat || ''
+            }
+          },
           child_name: profile.attributes.child_name || [],
-          your_suggestions: profile.attributes.your_suggestions || {},
+          your_suggestions: profile.attributes.your_suggestions || {
+            suggestions: profile.attributes.suggestions || ''
+          },
           gahoi_code: profile.attributes.gahoi_code || '',
           documentId: profile.id
         };
