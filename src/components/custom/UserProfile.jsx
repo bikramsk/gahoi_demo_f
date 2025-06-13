@@ -5,8 +5,6 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
-const API_TOKEN = localStorage.getItem('token');
-
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
   { id: 'family', title: 'Family Details', icon: 'users' },
@@ -44,6 +42,10 @@ const UserProfile = () => {
     const fetchUserData = async () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
+        const token = localStorage.getItem('token');
+        
+        console.log('Token:', token); // Debug log
+        console.log('Mobile:', mobileNumber); // Debug log
 
         if (!mobileNumber) {
           setError('Please login again to continue');
@@ -51,27 +53,40 @@ const UserProfile = () => {
           return;
         }
 
-        if (!API_TOKEN) {
-          setError('Configuration error. Please try again later.');
+        if (!token) {
+          setError('Session expired. Please login again.');
+          setTimeout(() => navigate('/login'), 2000);
           return;
         }
 
         const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=*`;
+        console.log('API URL:', apiUrl); // Debug log
 
         const profileResponse = await fetch(apiUrl, {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${API_TOKEN}`,
-            Accept: 'application/json'
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
         });
 
+        console.log('Response status:', profileResponse.status); // Debug log
+
         if (!profileResponse.ok) {
+          if (profileResponse.status === 401 || profileResponse.status === 403) {
+            console.log('Auth error - clearing token'); // Debug log
+            localStorage.removeItem('token');
+            localStorage.removeItem('verifiedMobile');
+            setError('Session expired. Please login again.');
+            setTimeout(() => navigate('/login'), 2000);
+            return;
+          }
           throw new Error(`Failed to fetch profile data: ${profileResponse.status}`);
         }
 
         const profileData = await profileResponse.json();
-        console.log('PROFILE DATA:', profileData);
+        console.log('Profile Data:', profileData); // Debug log
 
         if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
