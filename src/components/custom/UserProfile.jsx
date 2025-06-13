@@ -35,7 +35,8 @@ const UserProfile = () => {
         }
 
         if (!API_TOKEN) {
-          setError('Configuration error. Please try again later.');
+          setError('Session expired. Please login again.');
+          setTimeout(() => navigate('/login'), 2000);
           return;
         }
 
@@ -50,13 +51,18 @@ const UserProfile = () => {
         });
 
         if (!profileResponse.ok) {
+          if (profileResponse.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('verifiedMobile');
+            setError('Session expired. Please login again.');
+            setTimeout(() => navigate('/login'), 2000);
+            return;
+          }
           throw new Error(`Failed to fetch profile data: ${profileResponse.status}`);
         }
 
         const profileData = await profileResponse.json();
         console.log('PROFILE DATA:', profileData);
-
-
 
         if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
@@ -71,23 +77,24 @@ const UserProfile = () => {
           return;
         }
 
-        // const profile = profileData.data?.[0];
-        // if (!profile || !profile.attributes || !profile.attributes.personal_information) {
-        //   setError('Profile not found or incomplete.');
-        //   setLoading(false);
-        //   return;
-        // }
-
-        const profile = profileData.data?.[0];
-
-        if (!profile || !profile.attributes) {
-          setError('Profile not found or incomplete.');
-          setLoading(false);
-          return;
-}
-
+        const profile = profileData.data[0];
         const attrs = profile.attributes;
-        const personalInfo = attrs.personal_information || {};
+
+        // Check if we have the minimum required data
+        if (!attrs || !attrs.personal_information || !attrs.personal_information.mobile_number) {
+          setError('Profile data is incomplete. Please complete your registration.');
+          setTimeout(() => {
+            navigate('/registration', {
+              state: {
+                mobileNumber,
+                fromLogin: true
+              }
+            });
+          }, 2000);
+          return;
+        }
+
+        const personalInfo = attrs.personal_information;
         const bioDetails = attrs.biographical_details || {};
         const workInfo = attrs.work_information || {};
         const additional = attrs.additional_details || {};
@@ -95,55 +102,49 @@ const UserProfile = () => {
 
         const transformedData = {
           personal_information: {
-            full_name: personalInfo.full_name || attrs.name || '',
-            mobile_number: personalInfo.mobile_number || attrs.mobile_number || '',
-            email_address: personalInfo.email_address || attrs.email || '',
-            village: personalInfo.village || attrs.village || '',
-            Gender: personalInfo.Gender || attrs.gender || '',
-            nationality: personalInfo.nationality || attrs.nationality || '',
-            is_gahoi: personalInfo.is_gahoi || attrs.isGahoi || false,
-            display_picture:
-              personalInfo.display_picture?.data?.attributes?.url ||
-              attrs.display_picture?.data?.attributes?.url ||
-              null
+            full_name: personalInfo.full_name || '',
+            mobile_number: personalInfo.mobile_number || '',
+            email_address: personalInfo.email_address || '',
+            village: personalInfo.village || '',
+            Gender: personalInfo.Gender || '',
+            nationality: personalInfo.nationality || '',
+            is_gahoi: personalInfo.is_gahoi || false,
+            display_picture: personalInfo.display_picture?.data?.attributes?.url || null
           },
           family_details: attrs.family_details || {},
           biographical_details: {
-            manglik_status: bioDetails.manglik_status || attrs.manglik || '',
-            Grah: bioDetails.Grah || attrs.grah || '',
-            Handicap: bioDetails.Handicap || attrs.handicap || '',
-            is_married: bioDetails.is_married || attrs.isMarried || 'Unmarried',
-            marriage_to_another_caste:
-              bioDetails.marriage_to_another_caste ||
-              attrs.marriageToAnotherCaste ||
-              'Same Caste Marriage'
+            manglik_status: bioDetails.manglik_status || '',
+            Grah: bioDetails.Grah || '',
+            Handicap: bioDetails.Handicap || '',
+            is_married: bioDetails.is_married || 'Unmarried',
+            marriage_to_another_caste: bioDetails.marriage_to_another_caste || 'Same Caste Marriage'
           },
           work_information: {
-            occupation: workInfo.occupation || attrs.occupation || '',
-            company_name: workInfo.company_name || attrs.companyName || '',
-            work_area: workInfo.work_area || attrs.workArea || '',
-            industrySector: workInfo.industrySector || attrs.industrySector || '',
-            businessSize: workInfo.businessSize || attrs.businessSize || '',
-            workType: workInfo.workType || attrs.workType || '',
-            employmentType: workInfo.employmentType || attrs.employmentType || ''
+            occupation: workInfo.occupation || '',
+            company_name: workInfo.company_name || '',
+            work_area: workInfo.work_area || '',
+            industrySector: workInfo.industrySector || '',
+            businessSize: workInfo.businessSize || '',
+            workType: workInfo.workType || '',
+            employmentType: workInfo.employmentType || ''
           },
           additional_details: {
-            blood_group: additional.blood_group || attrs.bloodGroup || '',
-            date_of_birth: additional.date_of_birth || attrs.birthDate || '',
-            date_of_marriage: additional.date_of_marriage || attrs.marriageDate || '',
-            higher_education: additional.higher_education || attrs.education || '',
-            current_address: additional.current_address || attrs.currentAddress || '',
+            blood_group: additional.blood_group || '',
+            date_of_birth: additional.date_of_birth || '',
+            date_of_marriage: additional.date_of_marriage || '',
+            higher_education: additional.higher_education || '',
+            current_address: additional.current_address || '',
             regional_information: additional.regional_information || {
-              State: attrs.state || '',
-              RegionalAssembly: attrs.regionalAssembly || '',
-              LocalPanchayatName: attrs.localPanchayatName || '',
-              LocalPanchayat: attrs.localPanchayat || '',
-              SubLocalPanchayat: attrs.subLocalPanchayat || ''
+              State: '',
+              RegionalAssembly: '',
+              LocalPanchayatName: '',
+              LocalPanchayat: '',
+              SubLocalPanchayat: ''
             }
           },
           child_name: attrs.child_name || [],
-          your_suggestions: suggestions || {
-            suggestions: attrs.suggestions || ''
+          your_suggestions: {
+            suggestions: suggestions.suggestions || ''
           },
           gahoi_code: attrs.gahoi_code || '',
           documentId: profile.id
