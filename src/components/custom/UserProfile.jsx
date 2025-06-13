@@ -7,6 +7,11 @@ const API_BASE = import.meta.env.MODE === 'production'
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
+// Validate API configuration
+if (!API_TOKEN) {
+  console.error('API Token is not configured. Please check your environment variables.');
+}
+
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
   { id: 'family', title: 'Family Details', icon: 'users' },
@@ -81,7 +86,7 @@ const UserProfile = () => {
         }
 
         // Directly fetch from registrations
-        const profileResponse = await fetch(`${API_BASE}/api/registrations?filters[mobile_number]=${mobileNumber}&populate=*`, {
+        const profileResponse = await fetch(`${API_BASE}/api/registrations?filters[mobile_number][$eq]=${mobileNumber}&populate=*`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -91,6 +96,11 @@ const UserProfile = () => {
         });
 
         if (!profileResponse.ok) {
+          console.error('Profile Response Error:', {
+            status: profileResponse.status,
+            statusText: profileResponse.statusText,
+            url: profileResponse.url
+          });
           throw new Error(`Failed to fetch profile data: ${profileResponse.status}`);
         }
 
@@ -98,6 +108,7 @@ const UserProfile = () => {
         console.log('Profile Data:', profileData);
 
         if (!profileData.data || profileData.data.length === 0) {
+          console.log('No profile data found for mobile:', mobileNumber);
           setError('Please complete your registration first.');
           setTimeout(() => {
             navigate('/registration', { 
