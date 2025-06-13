@@ -128,10 +128,7 @@ const UserProfile = () => {
           return;
         }
 
-
-        const responseData = await response.json();
-        const profile = responseData.data?.[0];
-        console.log('Found Profile:', profile);
+        const profile = profileData.data?.[0];
 
       //  Safety check
       if (!profile || !profile.attributes) {
