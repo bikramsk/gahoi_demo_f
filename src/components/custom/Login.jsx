@@ -426,7 +426,7 @@ const Login = () => {
         if (response.jwt) {
           localStorage.setItem('token', response.jwt);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          navigate('/profile');
+          navigate('/my-account');
         }
       } catch (error) {
         setErrors({
