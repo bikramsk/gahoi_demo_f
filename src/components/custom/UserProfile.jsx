@@ -118,7 +118,7 @@ const UserProfile = () => {
         // First verify token
         try {
           console.log('Verifying token with headers:', headers);
-          const verifyResponse = await fetch(`${API_BASE}/api/users/me`, {
+          const verifyResponse = await fetch(`${API_BASE}/api/check-user-mpin/${mobileNumber}`, {
             method: 'GET',
             headers,
             credentials: 'include'
@@ -145,6 +145,23 @@ const UserProfile = () => {
           } else {
             const verifyData = await verifyResponse.json();
             console.log('Token verification successful:', verifyData);
+            
+            // Check if user exists and has MPIN
+            if (!verifyData.exists) {
+              console.log('User not found or MPIN not set');
+              localStorage.removeItem('token');
+              localStorage.removeItem('verifiedMobile');
+              setError('Please complete your registration first.');
+              setTimeout(() => {
+                navigate('/registration', { 
+                  state: { 
+                    mobileNumber,
+                    fromLogin: true 
+                  } 
+                });
+              }, 2000);
+              return;
+            }
           }
         } catch (error) {
           console.error('Token verification error:', error);
