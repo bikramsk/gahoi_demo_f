@@ -5,9 +5,8 @@ const API_BASE = import.meta.env.MODE === 'production'
   ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
-const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+const API_TOKEN = import.meta.env.VITE_API_TOKEN;
 
-// Validate API configuration
 if (!API_TOKEN) {
   console.error('API Token is not configured. Please check your environment variables.');
 }
@@ -85,8 +84,18 @@ const UserProfile = () => {
           return;
         }
 
-        // Directly fetch from registrations
-        const profileResponse = await fetch(`${API_BASE}/api/registrations?filters[mobile_number][$eq]=${mobileNumber}&populate=*`, {
+        if (!API_TOKEN) {
+          setError('System configuration error. Please contact support.');
+          return;
+        }
+
+        // Encode the mobile number properly
+        const encodedMobile = encodeURIComponent(mobileNumber);
+        const apiUrl = `${API_BASE}/api/registrations?populate=*&filters[mobile_number][$eq]=${encodedMobile}`;
+        
+        console.log('Fetching profile from:', apiUrl);
+        
+        const profileResponse = await fetch(apiUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${API_TOKEN}`,
@@ -99,7 +108,8 @@ const UserProfile = () => {
           console.error('Profile Response Error:', {
             status: profileResponse.status,
             statusText: profileResponse.statusText,
-            url: profileResponse.url
+            url: apiUrl,
+            token: API_TOKEN ? 'Present' : 'Missing'
           });
           throw new Error(`Failed to fetch profile data: ${profileResponse.status}`);
         }
