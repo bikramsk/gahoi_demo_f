@@ -79,13 +79,11 @@ if (!profile) {
   return;
 }
 
-const attrs = profile; 
-
-const personalInfo = attrs.personal_information || {};
-const bioDetails = attrs.biographical_details || {};
-const workInfo = attrs.work_information || {};
-const additional = attrs.additional_details || {};
-const suggestions = attrs.your_suggestions || {};
+const personalInfo = profile.personal_information || {};
+const bioDetails = profile.biographical_details || {};
+const workInfo = profile.work_information || {};
+const additional = profile.additional_details || {};
+const suggestions = profile.your_suggestions || {};
 
 const transformedData = {
   personal_information: {
@@ -98,7 +96,7 @@ const transformedData = {
     is_gahoi: personalInfo.is_gahoi || false,
     display_picture: personalInfo.display_picture?.url || null
   },
-  family_details: attrs.family_details || {},
+  family_details: profile.family_details || {},
   biographical_details: {
     manglik_status: bioDetails.manglik_status || '',
     Grah: bioDetails.Grah || '',
@@ -129,17 +127,16 @@ const transformedData = {
       SubLocalPanchayat: ''
     }
   },
-  child_name: attrs.child_name || [],
-  your_suggestions: suggestions || {
-    suggestions: ''
-  },
-  gahoi_code: attrs.gahoi_code || '',
-  documentId: attrs.id || null
+  child_name: profile.child_name || [],
+  your_suggestions: suggestions || { suggestions: '' },
+  gahoi_code: profile.gahoi_code || '',
+  documentId: profile.id
 };
 
 setUserData(transformedData);
 setLoading(false);
 setError(null);
+
 
       } catch (error) {
         console.error('Error fetching profile data:', error);
