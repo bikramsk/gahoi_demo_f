@@ -1058,14 +1058,25 @@ const RegistrationForm = () => {
 
   const sendWhatsAppInvite = useCallback(async (mobileNumber) => {
     try {
+      const formData = new URLSearchParams();
+      formData.append('number', mobileNumber);
+      formData.append('message', 'Hi, you are invited to join via WhatsApp.');
+  
       const res = await fetch('https://api.gahoishakti.in/api/whatsapp/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          number: mobileNumber,
-          message: 'Hi, you are invited to join via WhatsApp.',
-        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
       });
+  
+      const contentType = res.headers.get("content-type");
+  
+      if (!contentType || !contentType.includes("application/json")) {
+        const raw = await res.text();
+        console.error('Unexpected response:', raw);
+        return;
+      }
   
       const data = await res.json();
   
@@ -1078,6 +1089,7 @@ const RegistrationForm = () => {
       console.error('Error sending WhatsApp message:', err);
     }
   }, []);
+  
   
   const handleFamilyDetailChange = useCallback(
     (index, field, value) => {
