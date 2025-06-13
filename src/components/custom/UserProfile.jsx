@@ -215,7 +215,7 @@ const UserProfile = () => {
                   alt="Profile" 
                   className="w-10 h-10 rounded-full border-2 border-white object-cover relative z-10"
                   onError={(e) => {
-                    e.target.src = '/default-avatar.png';
+                    e.target.src = '/logo.png';
                   }}
                 />
               </div>
