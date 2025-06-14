@@ -147,19 +147,22 @@ const OurTeam = () => {
 
   const TeamMemberCard = ({ member }) => (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-      <div className="aspect-w-4 aspect-h-3 relative group">
+      <div className="relative w-full pt-[100%]">
         {member.image ? (
           <>
             <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
             <img
               src={member.image}
               alt={member.name}
-              className="w-full h-full object-cover relative z-10"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              style={{
+                objectPosition: '50% 20%'
+              }}
               loading="lazy"
               decoding="async"
               onError={(e) => {
                 e.target.parentNode.innerHTML = `
-                  <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                  <div class="absolute inset-0 flex items-center justify-center bg-gray-200">
                     <span class="text-3xl font-bold text-gray-500">
                       ${member.name.split(' ').map(n => n[0]).join('')}
                     </span>
@@ -173,15 +176,15 @@ const OurTeam = () => {
                 }
               }}
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
             <span className="text-3xl font-bold text-gray-500">
               {member.name.split(' ').map(n => n[0]).join('')}
             </span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
       <div className="p-6">
         <h3 className={`text-xl font-bold text-gray-800 mb-2 ${languageFontClass}`}>
