@@ -70,7 +70,7 @@ const OurTeam = () => {
     {
       name: "Neelam Reja",
       location: "Thatipur",     
-    image: "/our_team/Neelam_Reja.jpg",
+    image: "/our_team/Neelam_Reja.webp",
       
     },
     {
