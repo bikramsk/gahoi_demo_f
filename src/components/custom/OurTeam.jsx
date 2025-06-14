@@ -29,19 +29,19 @@ const OurTeam = () => {
     {
       name: "Pradeep Pahariya",
       location: "Gwalior",
-     image: "/our_team/pradeep_pahariya.jpg",
+     image: "/our_team/pradeep_pahariya.webp",
       
     },
     {
       name: "Sudhir Rawat",
       location: "Gwalior",      
-    image: "/our_team/sudhir_rawat.jpg",
+    image: "/our_team/sudhir_rawat.webp",
      
     },
     {
         name: "Bhanu Capra",
         location: "Gwalior",        
-       image: "/our_team/bhanu_capra.jpg",
+       image: "/our_team/bhanu_capra.webp",
        
       },
       {
@@ -53,7 +53,7 @@ const OurTeam = () => {
       {
         name: "Nitesh Seth",
         location: "Noida",       
-      image: "/our_team/Nitesh_Seth.jpg",
+      image: "/our_team/Nitesh_Seth.webp",
         
       },
       
@@ -63,65 +63,65 @@ const OurTeam = () => {
     {
       name: "Chetna Nikhra",
       location: "Murar",     
-    image: "/our_team/Chetna_Nikhra.jpg",
+    image: "/our_team/Chetna_Nikhra.webp",
      
     },
     
     {
-      name: "Neelam Reza",
+      name: "Neelam Reja",
       location: "Thatipur",     
-    image: "/our_team/Neelam_Reza.jpg",
+    image: "/our_team/Neelam_Reja.jpg",
       
     },
     {
         name: "Baby Bihari Reza",
         location: "New City Center",        
-      image: "/our_team/bihari_riza.jpg",
+      image: "/our_team/bihari_riza.webp",
         
       },
       {
-        name: "Shrimati Sarika Reza",
+        name: "Shrimati Sarika Riza",
         location: "Deen Dayal Nagar",
         period: "2023-Present",
-      image: "/our_team/Sarika_Riza.jpg",
+      image: "/our_team/Sarika_Riza.webp",
       },
       {
-        name: "Shrimati Priyanka Kuwiya",
+        name: "Shrimati Priyanka Kuchiya",
         location: "Deen Dayal Nagar",     
-      image: "/our_team/Priyanka_kuwiya.jpg",
+      image: "/our_team/Priyanka_kuchiya.webp",
         
       },
       {
         name: "Shrimati Rani Seth",
         location: "Secretary",     
-      image: "/our_team/Rani_Seth.jpg",
+      image: "/our_team/Rani_Seth.webp",
         
       },
       {
         name: "Shrimati Dipti Lahariya",
         location: "Deen Dayal Nagar",     
-      image: "/our_team/Dipti_Lahariya.jpg",
+      image: "/our_team/Dipti_Lahariya.webp",
         
       },
       {
         name: "Naveen Nigoti",
         location: "New",
-       image: "our_team/naveen_nigoti.jpg",       
+       image: "our_team/naveen_nigoti.webp",       
       },
       {
-        name: "Pravin Reza",
+        name: "Pravin Reja",
         location: "Madhavganj",
-       image: "our_team/Pravin_Reza.jpg",       
+       image: "our_team/Pravin_Reja.webp",       
       },
       {
         name: "Satish Soni",
         location: "Naka Chandbadni",
-       image: "our_team/Satish_Soni.jpg",       
+       image: "our_team/Satish_Soni.webp",       
       },
       {
         name: "Sachin kuchiya",
         location: "Murar",
-       image: "our_team/Sachin_kuchiya.jpg",       
+       image: "our_team/Sachin_kuchiya.webp",       
       },
       {
         name: "Mukesh Soni",
@@ -131,7 +131,7 @@ const OurTeam = () => {
       {
         name: "Mukesh Sanwla",
         location: "LohaMandi",
-       image: "our_team/Mukesh_Sanwla.jpg",       
+       image: "our_team/Mukesh_Sanwla.webp",       
       },
       {
         name: "Madan Mohan Gandi",
@@ -141,7 +141,7 @@ const OurTeam = () => {
        {
         name: "Himanshu Piparseniya",
         location: "Thathipur",
-       image: "our_team/Himanshu_piparseniya.jpg",       
+       image: "our_team/Himanshu_piparseniya.webp",       
       },
   ];
 
