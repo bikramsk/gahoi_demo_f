@@ -30,7 +30,7 @@ const LatestNews = () => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${import.meta.env.VITE_API_TOKEN}`
+              // "Authorization": `Bearer ${import.meta.env.VITE_API_TOKEN}`
             },
           }
         );
