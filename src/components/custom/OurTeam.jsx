@@ -126,12 +126,12 @@ const OurTeam = () => {
       {
         name: "Mukesh Soni",
         location: "Murar",
-       image: "our_team/Mukesh_Soni.jpg",       
+       image: "our_team/Mukesh_Soni.webp",       
       },
       {
         name: "Mukesh Sanwla",
         location: "LohaMandi",
-       image: "our_team/Mukesh_Sanwla.webp",       
+       image: "our_team/Mukesh_Sanwla.jpg",       
       },
       {
         name: "Madan Mohan Gandi",
