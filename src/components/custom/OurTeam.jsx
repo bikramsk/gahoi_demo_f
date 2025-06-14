@@ -47,7 +47,7 @@ const OurTeam = () => {
       {
         name: "Bhai Siyasaran Kastwar",
         location: "Gwalior",        
-      image: "/our_team/Siyasaran_kastwar.jpg",
+      image: "/our_team/Siyasaran_kastwar.webp",
         
       },
       {
