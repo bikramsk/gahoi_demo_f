@@ -143,7 +143,7 @@ const SupportedStudentsSection = () => {
                   <img
                     src={student.photo}
                     alt={student.name}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-64 object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   {student.achievement && (
@@ -154,11 +154,11 @@ const SupportedStudentsSection = () => {
                     </div>
                   )}
                 </div>
-                <div className="p-6 flex flex-col h-[calc(32rem-12rem)]">
+                <div className="p-4 flex flex-col h-[calc(32rem-16rem)]">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{student.name}</h3>
-                    <p className="text-gray-600 mb-4">{student.school}</p>
-                    <div className="flex items-center gap-3 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{student.name}</h3>
+                    <p className="text-gray-600 text-sm mb-2">{student.school}</p>
+                    <div className="flex items-center gap-3 mb-3">
                       <span className="text-sm font-medium text-red-800 bg-red-100 px-3 py-1 rounded-full">
                         {student.marks}
                       </span>
@@ -166,29 +166,14 @@ const SupportedStudentsSection = () => {
                         {student.supportAmount}
                       </span>
                     </div>
-                    <div className="overflow-y-auto mb-4 pr-2" style={{ maxHeight: '120px' }}>
+                    <div className="overflow-y-auto mb-3 pr-2" style={{ maxHeight: '80px' }}>
                       <p className="text-gray-700 text-sm">{student.story}</p>
                     </div>
                   </div>
-                  <div className="border-t pt-4 mt-auto">
-                        <p className="text-sm text-gray-500 mb-2">
-                          {t('funds.HonoredBy')}
-                        </p>
-                    {/* <div className="flex items-center">
-                      <img
-                        src={student.supporter.photo}
-                        alt={student.supporter.name}
-                        className="w-10 h-10 rounded-full object-cover mr-3"
-                      />
-                      <div className="flex flex-col">
-                        <p className="text-sm font-medium text-gray-900">
-                          {student.supporter.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {student.supporter.role}
-                        </p>
-                      </div>
-                    </div> */}
+                  <div className="border-t pt-3 mt-auto">
+                    <p className="text-sm text-gray-500">
+                      {t('funds.HonoredBy')}
+                    </p>
                   </div>
                 </div>
               </div>
