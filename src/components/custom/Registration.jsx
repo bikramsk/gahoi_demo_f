@@ -2358,8 +2358,8 @@ const RegistrationForm = () => {
                                     e.target.value
                                   )
                                 }
-                                pattern="[0-9]*"    
-                            inputMode="numeric" 
+                            //     pattern="[0-9]*"    
+                            // inputMode="numeric" 
                                 className={`block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
                                   hasFamilyError(index, "name")
                                     ? "border-red-500 bg-red-50"
