@@ -138,12 +138,12 @@ const SupportedStudentsSection = () => {
         <Slider {...sliderSettings}>
           {supportedStudents.map((student, index) => (
             <div key={index} className="px-2">
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden h-[32rem]">
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden h-[28rem]">
                 <div className="aspect-w-16 aspect-h-9 relative">
                   <img
                     src={student.photo}
                     alt={student.name}
-                    className="w-full h-64 object-cover"
+                    className="w-full h-72 object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   {student.achievement && (
@@ -154,23 +154,23 @@ const SupportedStudentsSection = () => {
                     </div>
                   )}
                 </div>
-                <div className="p-4 flex flex-col h-[calc(32rem-16rem)]">
+                <div className="p-3 flex flex-col h-[calc(28rem-18rem)]">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{student.name}</h3>
-                    <p className="text-gray-600 text-sm mb-2">{student.school}</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-sm font-medium text-red-800 bg-red-100 px-3 py-1 rounded-full">
+                    <h3 className="text-lg font-semibold text-gray-900">{student.name}</h3>
+                    <p className="text-gray-600 text-sm">{student.school}</p>
+                    <div className="flex items-center gap-2 my-2">
+                      <span className="text-sm font-medium text-red-800 bg-red-100 px-2 py-0.5 rounded-full">
                         {student.marks}
                       </span>
-                      <span className="text-sm font-medium text-green-800 bg-green-100 px-3 py-1 rounded-full">
+                      <span className="text-sm font-medium text-green-800 bg-green-100 px-2 py-0.5 rounded-full">
                         {student.supportAmount}
                       </span>
                     </div>
-                    <div className="overflow-y-auto mb-3 pr-2" style={{ maxHeight: '80px' }}>
+                    <div className="overflow-y-auto pr-2" style={{ maxHeight: '60px' }}>
                       <p className="text-gray-700 text-sm">{student.story}</p>
                     </div>
                   </div>
-                  <div className="border-t pt-3 mt-auto">
+                  <div className="border-t pt-2 mt-auto">
                     <p className="text-sm text-gray-500">
                       {t('funds.HonoredBy')}
                     </p>
