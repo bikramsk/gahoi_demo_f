@@ -1,7 +1,7 @@
 export const FORM_STEPS = [
   {
     name: "Personal Information",
-    fields: ["name", "mobileNumber", "village", "id", "email", "gender", "nationality"],
+    fields: ["name", "mobileNumber", "village", "id", "gender", "nationality"],
   },
   {
     name: "Additional Details",
@@ -52,7 +52,6 @@ export const REQUIRED_FIELDS = [
   "name", 
   "mobileNumber", 
   "village", 
-  "email", 
   "bloodGroup",
   "birthDate", 
   "education", 

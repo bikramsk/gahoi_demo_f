@@ -22,7 +22,7 @@ export const validateMobileNumber = (number) => {
 
 // Validate email
 export const validateEmail = (email) => {
-  if (!email) return 'Email is required';
+  if (!email) return '';  
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) return 'Invalid email format';
   return '';
