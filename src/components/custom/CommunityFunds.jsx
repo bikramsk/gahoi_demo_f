@@ -377,41 +377,39 @@ const CommunityFunds = () => {
             <Slider {...sliderSettings}>
               {supportedStudents.map((student, index) => (
                 <div key={index} className="px-2">
-                  <div className="bg-white rounded-lg shadow-lg overflow-hidden h-[32rem]">
+                  <div className="bg-white rounded-lg shadow-lg overflow-hidden h-[28rem]">
                     <div className="aspect-w-16 aspect-h-9 relative">
                       <img
                         src={student.photo}
                         alt={student.name}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-72 object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       {student.achievement && (
                         <div className="absolute bottom-3 left-3">
-                          <span className="text-sm font-medium text-blue-800 bg-blue-100 px-3 py-1 rounded-full">
+                          <span className="text-sm font-medium text-blue-800 bg-blue-100 px-2 py-0.5 rounded-full">
                             {student.achievement}
                           </span>
                         </div>
                       )}
                     </div>
-                    <div className="p-6 flex flex-col h-[calc(32rem-12rem)]">
+                    <div className="p-3 flex flex-col h-[calc(28rem-18rem)]">
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{student.name}</h3>
-                        <p className="text-gray-600 mb-4">{student.school}</p>
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="text-sm font-medium text-red-800 bg-red-100 px-3 py-1 rounded-full">
+                        <h3 className="text-lg font-semibold text-gray-900">{student.name}</h3>
+                        <p className="text-gray-600 text-sm">{student.school}</p>
+                        <div className="flex items-center gap-2 my-2">
+                          <span className="text-sm font-medium text-red-800 bg-red-100 px-2 py-0.5 rounded-full">
                             {student.marks}
                           </span>
-                       
                         </div>
-                        <div className="overflow-y-auto mb-4 pr-2" style={{ maxHeight: '120px' }}>
+                        <div className="overflow-y-auto pr-2" style={{ maxHeight: '60px' }}>
                           <p className="text-gray-700 text-sm">{student.story}</p>
                         </div>
                       </div>
-                      <div className="border-t pt-4 mt-auto">
-                        <p className="text-sm text-gray-500 mb-2">
+                      <div className="border-t pt-2 mt-auto">
+                        <p className="text-sm text-gray-500">
                           {t('funds.HonoredBy')}
                         </p>
-                       
                       </div>
                     </div>
                   </div>
