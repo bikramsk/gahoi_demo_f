@@ -106,7 +106,7 @@
     "otpAuthEnterDigits": "Enter 6 digits code",
     "otpAuthRemainingTime": "Resend available in {{seconds}} seconds",
     "mobilePlaceholder": "Enter your 10 digit mobile number",
-    "otpSentMessage": "OTP has been sent to your mobile number",
+    "otpSentMessage": "OTP has been sent to your Whatsapp",
     "otpPlaceholder": "Enter 4 digit OTP",
     "welcomeTitle": "Welcome to Gahoi Jan Kalyan Samiti",
     "communityConnect": "Connect with your community",

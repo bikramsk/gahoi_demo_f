@@ -804,7 +804,8 @@ const Login = () => {
                     )}
                     {otpSent && !errors.otp && (
                       <p className="text-[10px] sm:text-xs text-gray-600">
-                        {t('login.otpSentMessage')} <span className="font-medium">WhatsApp</span>
+                        {t('login.otpSentMessage')} 
+                      {/*  <span className="font-medium">WhatsApp</span>*/}
                       </p>
                     )}
                   </div>
