@@ -19,7 +19,7 @@ const Contact = () => {
   const languageFontClass = i18n.language === "hi" ? "font-hindi" : "font-english";
 
   const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
-  const WHATSAPP_API_URL = 'https://admin.gahoishakti.in/api/whatsapp/send';
+  const WHATSAPP_API_URL = 'https://api.gahoishakti.in/api/whatsapp/send';
 
   const contact1 = {
     // name: t('contact.addresses.primary.name'),
