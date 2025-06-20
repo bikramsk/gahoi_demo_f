@@ -93,20 +93,27 @@ const Contact = () => {
       const adminNumber = '7049004444'.replace(/\D/g, '');
       const formattedAdminNumber = adminNumber.startsWith('91') ? adminNumber : `91${adminNumber}`;
       
+      // Create URL-encoded form data
+      const urlEncodedData = new URLSearchParams();
+      urlEncodedData.append('number', formattedAdminNumber);
+      urlEncodedData.append('message', message);
+
       const response = await fetch(WHATSAPP_API_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          number: formattedAdminNumber,
-          message: message
-        })
+        body: urlEncodedData.toString()
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || `WhatsApp API responded with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.status) {
+        throw new Error(data.message || 'Failed to send WhatsApp message');
       }
 
       return true;
