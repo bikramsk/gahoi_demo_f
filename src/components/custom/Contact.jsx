@@ -89,9 +89,9 @@ const Contact = () => {
     try {
       const message = `*New Contact Form Submission*\n\n*Name:* ${formData.name}\n*Mobile:* ${formData.mobile}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n\n*Message:*\n${formData.message}`;
       
-      
-      const adminNumber = '7049004444'.replace(/\D/g, '');
-      const formattedAdminNumber = adminNumber.startsWith('91') ? adminNumber : `91${adminNumber}`;
+     
+      const adminNumber = '7049004444'.replace(/\D/g, '').slice(-10);
+          const formattedAdminNumber = `91${adminNumber}`;
       
       console.log('Sending WhatsApp message to:', formattedAdminNumber);
 
