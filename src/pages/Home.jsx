@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
+import OurTestimonialsSection from '../components/sections/OurTestimonialsSection';
 
 const API_URL =
   import.meta.env.VITE_PUBLIC_STRAPI_API_URL || "http://localhost:1337";
@@ -226,6 +227,8 @@ const Home = () => {
         <CowSevaSection />
       </SectionWrapper>
 
+ 
+
        {/* Latest News & Events */}
       <SectionWrapper name="LatestNewsSection">
         <LatestNewsSection newsData={newsData} />
@@ -236,7 +239,11 @@ const Home = () => {
         <SuccessStories />
       </SectionWrapper>
 
-  
+       {/* Our Testimonials Section */}
+      <SectionWrapper name="OurTestimonialsSection">
+        <OurTestimonialsSection />
+      </SectionWrapper>
+      
     </div>
   );
 };

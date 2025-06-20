@@ -3,11 +3,11 @@ import { REQUIRED_FIELDS } from '../../config/formConfig';
 // Validate a single field
 export const validateField = (name, value) => {
   if (REQUIRED_FIELDS.includes(name) && !value) {
-    // Format field name for display
+    
     const displayName = name
       .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
-      .trim(); // Remove extra spaces
+      .replace(/^./, str => str.toUpperCase()) 
+      .trim(); 
     return `${displayName} is required`;
   }
   return '';

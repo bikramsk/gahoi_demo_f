@@ -198,7 +198,7 @@ const AboutUs = () => {
               </div>
 
               <ul className="space-y-2 md:space-y-3">
-                {t("aboutUs.programs.list", { returnObjects: true }).map((program, index) => (
+                {(t("aboutUs.programs.list", { returnObjects: true }) || []).map((program, index) => (
                   <li key={index} className="flex items-start group">
                     <span className="flex-shrink-0 mt-1 mr-2 md:mr-3 w-5 h-5 md:w-6 md:h-6 rounded-full bg-purple-100 text-[#FD7D01] flex items-center justify-center text-xs md:text-sm font-bold group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
                       {index + 1}
@@ -239,7 +239,7 @@ const AboutUs = () => {
               </div>
 
               <ul className="space-y-2 md:space-y-3">
-                {t("aboutUs.benefits.list", { returnObjects: true }).map((benefit, index) => (
+                {(t("aboutUs.benefits.list", { returnObjects: true }) || []).map((benefit, index) => (
                   <li key={index} className="flex items-start group">
                     <span className="flex-shrink-0 mt-1 mr-2 md:mr-3 w-5 h-5 md:w-6 md:h-6 rounded-full bg-purple-100 text-[#FD7D01] flex items-center justify-center text-xs md:text-sm font-bold group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
                       <svg
@@ -302,7 +302,7 @@ const AboutUs = () => {
 
             <div className="bg-white shadow-md p-6 rounded-lg border-l-4 border-red-700">
               <ul className="space-y-4">
-                {t("aboutUs.responsibilities.list", { returnObjects: true }).map((responsibility, index) => (
+                {(t("aboutUs.responsibilities.list", { returnObjects: true }) || []).map((responsibility, index) => (
                   <li
                     key={index}
                     className="flex items-start bg-gray-50 p-4 rounded-lg"

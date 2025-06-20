@@ -594,8 +594,8 @@
       "viewAll": "View All News",
       "items": {
         "0": {
-          "title": "Community Gathering Success",
-          "excerpt": "Recent community gathering brings together families from across the region"
+          "title": "Gahoi Shakti Expression: Honoring Outstanding Student Achievements",
+          "excerpt": "Recently, students with outstanding performance were honored"
         },
         "1": {
           "title": "Strategic Input for Mahakaushal Assembly",
@@ -722,6 +722,10 @@
       "appRating": "Rated 4+",
       "installButton": "Install",
       "aboutApp": "About this app"
+    },
+    "testimonials": {
+      "title": "Our Testimonials",
+      "description": "What do people say about our team"
     }
   },
   "privacyPolicy": {
@@ -930,6 +934,20 @@
       "contribution": "Contribution",
       "contact": "Contact",
       "email": "Email"
+    }
+  },
+  "gallery": {
+    "title": "Gallery",
+    "subtitle": "Explore our community events and celebrations",
+    "viewGallery": "View Gallery",
+    "photos": "Photos",
+    "loginRequired": "Login Required",
+    "loginToView": "Login to View Images",
+    "lightbox": {
+      "close": "Close",
+      "previous": "Previous",
+      "next": "Next",
+      "imageOf": "Image {{current}} of {{total}}"
     }
   }
 } 

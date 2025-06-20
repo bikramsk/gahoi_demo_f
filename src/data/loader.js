@@ -2,7 +2,7 @@ import qs from "qs";
 // import { getStrapiURL } from "../lib/utils";
 
 
-const baseUrl = "https://api.gahoishakti.in";
+const baseUrl = "https://admin.gahoishakti.in";
 
 export async function fetchData(url, authToken) {
   const headers = {
@@ -53,19 +53,3 @@ export async function getAboutUsPageData() {
   return await fetchData(url.href);
 }
 
-// Fetch global data
-// export async function getGlobalPageData() {
-//   const url = new URL("/api/global", baseUrl);
-//   url.search = qs.stringify({
-//     populate: [
-//       "header.logo",       
-//       "footer.privacyPolicy" 
-//     ],
-//   });
-
-//   return await fetchData(url.href);
-// }
-
-
-
-  

@@ -27,7 +27,7 @@ const NotFound = () => {
 
   return (
     <div 
-      className="min-h-screen relative flex items-center justify-center px-4 sm:px-6 lg:px-8"
+      className="min-h-screen relative flex items-center justify-center px-4 sm:px-6 lg:px-6"
       style={{
         backgroundImage: 'url("/decorative-bg.webp")',
         backgroundSize: 'cover',

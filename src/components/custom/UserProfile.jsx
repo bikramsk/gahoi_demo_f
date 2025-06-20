@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://api.gahoishakti.in'
+  ? 'https://admin.gahoishakti.in'
   : 'http://localhost:1337';
 
 const SECTIONS = [

@@ -17,6 +17,7 @@ import LatestNews from "./components/custom/LatestNews";
 import NotFound from "./components/NotFound";
 import CommunityFunds from "./components/custom/CommunityFunds";
 import OurTeam from "./components/custom/OurTeam";
+import Gallery from "./components/custom/Gallery";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/video" element={<Video />} />
           <Route path="/latestnews" element={<LatestNews />} />
           <Route path="/community-funds" element={<CommunityFunds />} />
+          <Route path="/gallery" element={<Gallery />} />
           {/* 404 route*/}
           <Route path="*" element={<NotFound />} />
         </Routes>
