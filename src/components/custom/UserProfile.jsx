@@ -44,8 +44,7 @@ const UserProfile = () => {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('token');
         
-        console.log('Token:', token); // Debug log
-        console.log('Mobile:', mobileNumber); // Debug log
+    
 
         if (!mobileNumber) {
           setError('Please login again to continue');
@@ -60,7 +59,7 @@ const UserProfile = () => {
         }
 
         const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=*`;
-        console.log('API URL:', apiUrl); // Debug log
+       
 
         const profileResponse = await fetch(apiUrl, {
           method: 'GET',
@@ -71,11 +70,11 @@ const UserProfile = () => {
           }
         });
 
-        console.log('Response status:', profileResponse.status); // Debug log
+        
 
         if (!profileResponse.ok) {
           if (profileResponse.status === 401 || profileResponse.status === 403) {
-            console.log('Auth error - clearing token'); // Debug log
+           
             localStorage.removeItem('token');
             localStorage.removeItem('verifiedMobile');
             setError('Session expired. Please login again.');
@@ -86,7 +85,7 @@ const UserProfile = () => {
         }
 
         const profileData = await profileResponse.json();
-        console.log('Profile Data:', profileData); // Debug log
+       
 
         if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
