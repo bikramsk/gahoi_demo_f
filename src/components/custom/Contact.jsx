@@ -18,7 +18,13 @@ const Contact = () => {
   // Language-specific font class
   const languageFontClass = i18n.language === "hi" ? "font-hindi" : "font-english";
 
-  const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+  // const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+
+  const API_URL = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1337'; 
+
+
   const WHATSAPP_API_URL = 'https://api.gahoishakti.in/api/whatsapp/send';
 
   const contact1 = {
