@@ -66,7 +66,7 @@ const Contact = () => {
     }
     if (!formData.mobile.trim()) {
       newErrors.mobile = t('contact.form.mobile.error');
-    } else if (!/^[0-9]{10}$/.test(formData.mobile)) {
+    } else if (!/^[0-9]{10}$/.test(formData.mobile.replace(/\D/g, ''))) {
       newErrors.mobile = t('contact.form.mobile.invalidError');
     }
     if (!formData.email.trim()) {
@@ -89,14 +89,17 @@ const Contact = () => {
     try {
       const message = `*New Contact Form Submission*\n\n*Name:* ${formData.name}\n*Mobile:* ${formData.mobile}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n\n*Message:*\n${formData.message}`;
       
-      // Format number
+      // Format Number
       const adminNumber = '7049004444'.replace(/\D/g, '');
-      const formattedAdminNumber = adminNumber.startsWith('91') ? adminNumber : `91${adminNumber}`;
+      const formattedAdminNumber = adminNumber.length === 10 ? `91${adminNumber}` : adminNumber;
       
-      // Create URL-encoded form data
+      // Create URL-encoded form data 
       const urlEncodedData = new URLSearchParams();
+      urlEncodedData.append('route', '1');
       urlEncodedData.append('number', formattedAdminNumber);
       urlEncodedData.append('message', message);
+
+      console.log('Sending WhatsApp message to:', formattedAdminNumber);
 
       const response = await fetch(WHATSAPP_API_URL, {
         method: 'POST',
@@ -106,12 +109,13 @@ const Contact = () => {
         body: urlEncodedData.toString()
       });
 
+      const data = await response.json();
+      console.log('WhatsApp API Response:', data);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || `WhatsApp API responded with status ${response.status}`);
+        throw new Error(data.error?.message || `WhatsApp API responded with status ${response.status}`);
       }
 
-      const data = await response.json();
       if (!data.status) {
         throw new Error(data.message || 'Failed to send WhatsApp message');
       }
