@@ -89,28 +89,19 @@ const Contact = () => {
     try {
       const message = `*New Contact Form Submission*\n\n*Name:* ${formData.name}\n*Mobile:* ${formData.mobile}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n\n*Message:*\n${formData.message}`;
       
-      const formUrlEncoded = new URLSearchParams();
-      formUrlEncoded.append('number', '917049004444');
-      formUrlEncoded.append('message', message);
-
-      // const response = await fetch(WHATSAPP_API_URL, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/x-www-form-urlencoded',
-      //   },
-      //   body: formUrlEncoded.toString()
-      // });
+  
+      const mobileNumber = '917049004444';  
+      
       const response = await fetch(WHATSAPP_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          number: '917049004444',
+          number: mobileNumber,
           message: message
         })
       });
-
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
