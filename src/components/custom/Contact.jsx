@@ -89,8 +89,9 @@ const Contact = () => {
     try {
       const message = `*New Contact Form Submission*\n\n*Name:* ${formData.name}\n*Mobile:* ${formData.mobile}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n\n*Message:*\n${formData.message}`;
       
-  
-      const mobileNumber = '917049004444';  
+      // Format number
+      const adminNumber = '7049004444'.replace(/\D/g, '');
+      const formattedAdminNumber = adminNumber.startsWith('91') ? adminNumber : `91${adminNumber}`;
       
       const response = await fetch(WHATSAPP_API_URL, {
         method: 'POST',
@@ -98,7 +99,7 @@ const Contact = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          number: mobileNumber,
+          number: formattedAdminNumber,
           message: message
         })
       });
