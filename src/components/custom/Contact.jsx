@@ -89,32 +89,34 @@ const Contact = () => {
     try {
       const message = `*New Contact Form Submission*\n\n*Name:* ${formData.name}\n*Mobile:* ${formData.mobile}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n\n*Message:*\n${formData.message}`;
       
-      // Format Number
-      const adminNumber = '7049004444'.replace(/\D/g, '');
-      const formattedAdminNumber = adminNumber.length === 10 ? `91${adminNumber}` : adminNumber;
       
-      // Create URL-encoded form data 
-      const urlEncodedData = new URLSearchParams();
-      urlEncodedData.append('route', '1');
-      urlEncodedData.append('number', formattedAdminNumber);
-      urlEncodedData.append('message', message);
-
+      const adminNumber = '7049004444'.replace(/\D/g, '');
+      const formattedAdminNumber = adminNumber.startsWith('91') ? adminNumber : `91${adminNumber}`;
+      
       console.log('Sending WhatsApp message to:', formattedAdminNumber);
+
+      const formUrlEncoded = new URLSearchParams();
+      formUrlEncoded.append('number', formattedAdminNumber);
+      formUrlEncoded.append('message', message);
+      formUrlEncoded.append('route', '1');
 
       const response = await fetch(WHATSAPP_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: urlEncodedData.toString()
+        body: formUrlEncoded
       });
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const raw = await response.text();
+        console.error('Unexpected response:', raw);
+        throw new Error('Invalid response from server');
+      }
 
       const data = await response.json();
       console.log('WhatsApp API Response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || `WhatsApp API responded with status ${response.status}`);
-      }
 
       if (!data.status) {
         throw new Error(data.message || 'Failed to send WhatsApp message');
