@@ -89,30 +89,30 @@ const Contact = () => {
     try {
       const message = `*New Contact Form Submission*\n\n*Name:* ${formData.name}\n*Mobile:* ${formData.mobile}\n*Email:* ${formData.email}\n*Subject:* ${formData.subject}\n\n*Message:*\n${formData.message}`;
       
-     
+      // Format number 
       const adminNumber = '7049004444'.replace(/\D/g, '').slice(-10);
-          const formattedAdminNumber = `91${adminNumber}`;
       
-      console.log('Sending WhatsApp message to:', formattedAdminNumber);
+      console.log('Sending WhatsApp message to:', adminNumber);
 
       const formUrlEncoded = new URLSearchParams();
-      formUrlEncoded.append('number', formattedAdminNumber);
+      formUrlEncoded.append('number', adminNumber);
       formUrlEncoded.append('message', message);
       formUrlEncoded.append('route', '1');
+      formUrlEncoded.append('token', 'HVW5LEKQ81BPR3SJU6F7TCMYZ'); 
 
       const response = await fetch(WHATSAPP_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
         },
         body: formUrlEncoded
       });
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const raw = await response.text();
-        console.error('Unexpected response:', raw);
-        throw new Error('Invalid response from server');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('WhatsApp API error response:', errorText);
+        throw new Error('Failed to send WhatsApp message');
       }
 
       const data = await response.json();
@@ -125,7 +125,7 @@ const Contact = () => {
       return true;
     } catch (error) {
       console.error('Error sending to WhatsApp:', error);
-      return false;
+      throw error; 
     }
   };
 
@@ -151,9 +151,20 @@ const Contact = () => {
       }
 
       // Send to WhatsApp
-      await sendToWhatsApp(formData);
+      try {
+        await sendToWhatsApp(formData);
+      } catch (whatsappError) {
+        console.error('WhatsApp error:', whatsappError);
+       
+        setSubmitStatus({
+          type: 'warning',
+          message: t('contact.form.success') + ' ' + t('contact.form.whatsappError')
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Reset form
+      // Reset form on complete success
       setFormData({
         name: "",
         mobile: "",
