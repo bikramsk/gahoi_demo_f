@@ -17,35 +17,53 @@ const Gallery = () => {
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Check authentication status immediately and on token/mobile changes
   useEffect(() => {
-    // Simple authentication check
-    const token = localStorage.getItem('token');
-    const verifiedMobile = localStorage.getItem('verifiedMobile');
-    setIsAuthenticated(!!token && !!verifiedMobile);
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const verifiedMobile = localStorage.getItem('verifiedMobile');
+      setIsAuthenticated(!!token && !!verifiedMobile);
+    };
+
+    // Check initially
+    checkAuth();
+
+    // Set up event listeners for storage changes
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
   }, []);
 
+  // Fetch events only if authenticated
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
+        const token = localStorage.getItem('token');
+        
         const response = await fetch(`${API_URL}/api/gallery-events?populate=*`, {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : undefined
           }
         });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            setIsAuthenticated(false);
+            throw new Error('Please login to view gallery');
+          }
           const errorData = await response.json().catch(() => null);
           throw new Error(errorData?.error?.message || `Server responded with status ${response.status}`);
         }
 
         const { data } = await response.json();
-
         if (!Array.isArray(data)) {
           throw new Error('Invalid data format received from server');
         }
 
-        // transform data
         const transformedEvents = data.map(event => ({
           id: event.id,
           documentId: event.documentId,
@@ -63,13 +81,16 @@ const Gallery = () => {
       } catch (err) {
         console.error('Error fetching gallery events:', err);
         setError(err.message || 'Failed to load gallery events');
+        if (err.message.includes('Please login')) {
+          setEvents([]); // Clear events if not authenticated
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvents();
-  }, []);
+  }, [isAuthenticated]); // Re-fetch when authentication status changes
 
   const openLightbox = useCallback((event, imageIdx = 0) => {
     if (!isAuthenticated) {
@@ -156,13 +177,42 @@ const Gallery = () => {
             <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed">
               {t('gallery.subtitle')}
             </p>
+            {!isAuthenticated && (
+              <button
+                onClick={() => navigate('/login', { 
+                  state: { 
+                    from: '/gallery',
+                    message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
+                  } 
+                })}
+                className="mt-8 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white py-3 px-8 rounded-full font-semibold transition-colors duration-200"
+              >
+                {t('gallery.loginToView') || 'Login to View Gallery'}
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Events Grid Section - Shows loading/error states */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {loading ? (
+        {!isAuthenticated ? (
+          <div className="text-center py-12">
+            <Lock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 text-xl mb-6">Please login to view gallery images</p>
+            <button
+              onClick={() => navigate('/login', { 
+                state: { 
+                  from: '/gallery',
+                  message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
+                } 
+              })}
+              className="bg-red-600 hover:bg-red-700 text-white py-3 px-8 rounded-full font-semibold transition-colors duration-200"
+            >
+              {t('gallery.loginToView') || 'Login to View'}
+            </button>
+          </div>
+        ) : loading ? (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">Loading gallery events...</p>
           </div>
