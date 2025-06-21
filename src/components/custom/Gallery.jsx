@@ -22,14 +22,51 @@ const Gallery = () => {
   const [verifyingMpin, setVerifyingMpin] = useState(false);
   const [userMobile, setUserMobile] = useState('');
 
+  // Check authentication status on mount and after login
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const verifiedMobile = localStorage.getItem('verifiedMobile');
+      if (token && verifiedMobile) {
+        setIsAuthenticated(true);
+        setUserMobile(verifiedMobile);
+      }
+    };
+
+    // Check immediately
+    checkAuth();
+
+    // Listen for storage changes (in case of login in another tab)
+    window.addEventListener('storage', checkAuth);
+    
+    // Listen for custom login event
+    const handleLoginSuccess = () => {
+      checkAuth();
+      const pendingEventId = sessionStorage.getItem('pendingEventId');
+      if (pendingEventId) {
+        const event = events.find(e => e.id === parseInt(pendingEventId));
+        if (event) {
+          setSelectedEvent(event);
+          setSelectedImageIdx(0);
+          document.body.style.overflow = 'hidden';
+        }
+        sessionStorage.removeItem('pendingEventId');
+      }
+    };
+
+    window.addEventListener('loginSuccess', handleLoginSuccess);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('loginSuccess', handleLoginSuccess);
+    };
+  }, [events]);
 
   const openLightbox = useCallback((event, imageIdx = 0) => {
     const token = localStorage.getItem('token');
     const verifiedMobile = localStorage.getItem('verifiedMobile');
     const isUserAuthenticated = !!token && !!verifiedMobile;
-    setIsAuthenticated(isUserAuthenticated);
-    setUserMobile(verifiedMobile || '');
-
+    
     if (!isUserAuthenticated) {
       // Store the current URL and event ID for return after login
       sessionStorage.setItem('returnTo', '/gallery');
@@ -39,7 +76,8 @@ const Gallery = () => {
         state: { 
           returnTo: '/gallery',
           pendingEventId: event.id,
-          message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
+          message: t('gallery.pleaseLogin') || 'Please login to view gallery images.',
+          redirectToGallery: true 
         } 
       });
       return;
@@ -50,31 +88,7 @@ const Gallery = () => {
     document.body.style.overflow = 'hidden';
   }, [navigate, t]);
 
-  // Check for pending view on component mount
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const verifiedMobile = localStorage.getItem('verifiedMobile');
-    const returnTo = sessionStorage.getItem('returnTo');
-    const pendingEventId = sessionStorage.getItem('pendingEventId');
-    
-    if (token && verifiedMobile && returnTo === '/gallery' && pendingEventId) {
-      // Clear stored data
-      sessionStorage.removeItem('returnTo');
-      sessionStorage.removeItem('pendingEventId');
-      
-      // Find and open the pending event
-      const event = events.find(e => e.id === parseInt(pendingEventId));
-      if (event) {
-        setIsAuthenticated(true);
-        setUserMobile(verifiedMobile);
-        setSelectedEvent(event);
-        setSelectedImageIdx(0);
-        document.body.style.overflow = 'hidden';
-      }
-    }
-  }, [events]);
-
-  // Handle MPIN verification with proper redirect
+  // Handle MPIN verification
   const handleMpinVerify = async (e) => {
     e.preventDefault();
     if (mpin.length !== 4) {
@@ -107,7 +121,9 @@ const Gallery = () => {
         setShowLoginModal(false);
         setMpin('');
 
-     
+        // Dispatch login success event
+        window.dispatchEvent(new Event('loginSuccess'));
+        
         if (selectedEvent) {
           setSelectedImageIdx(0);
           document.body.style.overflow = 'hidden';
@@ -123,7 +139,8 @@ const Gallery = () => {
             returnTo: '/gallery',
             pendingEventId: selectedEvent?.id,
             mobile: userMobile,
-            message: t('gallery.completeRegistration') || 'Please create account to view gallery.'
+            message: t('gallery.completeRegistration') || 'Please create account to view gallery.',
+            redirectToGallery: true // Add explicit flag for gallery redirect
           } 
         });
       } else {
@@ -137,7 +154,6 @@ const Gallery = () => {
     }
   };
 
- 
   useEffect(() => {
     const returnPath = localStorage.getItem('returnPath');
     if (returnPath === '/gallery') {
