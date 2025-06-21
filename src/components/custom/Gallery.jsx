@@ -16,13 +16,97 @@ const Gallery = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [mpin, setMpin] = useState('');
+  const [mpinError, setMpinError] = useState('');
+  const [verifyingMpin, setVerifyingMpin] = useState(false);
+  const [userMobile, setUserMobile] = useState('');
 
   useEffect(() => {
     // Simple authentication check
     const token = localStorage.getItem('token');
     const verifiedMobile = localStorage.getItem('verifiedMobile');
+    setUserMobile(verifiedMobile || '');
     setIsAuthenticated(!!token && !!verifiedMobile);
   }, []);
+
+  // Handle MPIN verification
+  const handleMpinVerify = async (e) => {
+    e.preventDefault();
+    if (mpin.length !== 4) {
+      setMpinError(t('gallery.mpinLengthError') || 'MPIN must be 4 digits');
+      return;
+    }
+
+    try {
+      setVerifyingMpin(true);
+      setMpinError('');
+
+      const response = await fetch(`${API_URL}/api/verify-mpin`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          mobileNumber: userMobile,
+          mpin: mpin
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && data.jwt) {
+        localStorage.setItem('token', data.jwt);
+        setIsAuthenticated(true);
+        setShowLoginModal(false);
+        setMpin('');
+      } else {
+        setMpinError(t('gallery.mpinError') || 'Invalid MPIN');
+      }
+    } catch (error) {
+      console.error('MPIN verification error:', error);
+      setMpinError(t('gallery.mpinVerificationError') || 'Failed to verify MPIN');
+    } finally {
+      setVerifyingMpin(false);
+    }
+  };
+
+  // Check if user exists
+  const checkUser = async (mobile) => {
+    try {
+      const response = await fetch(`${API_URL}/api/check-user/${mobile}`);
+      const data = await response.json();
+      if (!data.exists) {
+        // Redirect to registration with return path
+        navigate('/login', { 
+          state: { 
+            from: '/gallery',
+            mobile: mobile,
+            message: t('gallery.completeRegistration') || 'Please complete registration to view gallery.'
+          } 
+        });
+      }
+      return data.exists;
+    } catch (error) {
+      console.error('Error checking user:', error);
+      return false;
+    }
+  };
+
+  // Handle mobile number submit
+  const handleMobileSubmit = async (e) => {
+    e.preventDefault();
+    if (userMobile.length !== 10) {
+      setMpinError(t('gallery.invalidMobile') || 'Please enter valid mobile number');
+      return;
+    }
+
+    const exists = await checkUser(userMobile);
+    if (exists) {
+      setShowLoginModal(true);
+    }
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -159,6 +243,112 @@ const Gallery = () => {
           </div>
         </div>
       </div>
+
+      {/* Login/MPIN Modal */}
+      {!isAuthenticated && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              {showLoginModal ? t('gallery.enterMpin') : t('gallery.enterMobile')}
+            </h3>
+            
+            {showLoginModal ? (
+              <form onSubmit={handleMpinVerify}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('gallery.mpinLabel')}
+                    </label>
+                    <input
+                      type="password"
+                      value={mpin}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value.length <= 4 && /^\d*$/.test(value)) {
+                          setMpin(value);
+                          setMpinError('');
+                        }
+                      }}
+                      className={`w-full px-4 py-2 text-center text-lg tracking-widest border rounded-lg ${
+                        mpinError ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      maxLength={4}
+                      placeholder="••••"
+                      autoFocus
+                    />
+                    {mpinError && (
+                      <p className="mt-1 text-sm text-red-600">{mpinError}</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowLoginModal(false);
+                        setMpin('');
+                        setMpinError('');
+                      }}
+                      className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      disabled={verifyingMpin}
+                    >
+                      {t('common.back')}
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                      disabled={verifyingMpin || mpin.length !== 4}
+                    >
+                      {verifyingMpin ? (
+                        <span className="inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                      ) : (
+                        t('common.verify')
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleMobileSubmit}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t('gallery.mobileLabel')}
+                    </label>
+                    <input
+                      type="tel"
+                      value={userMobile}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value.length <= 10 && /^\d*$/.test(value)) {
+                          setUserMobile(value);
+                          setMpinError('');
+                        }
+                      }}
+                      className={`w-full px-4 py-2 text-center text-lg tracking-widest border rounded-lg ${
+                        mpinError ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      maxLength={10}
+                      placeholder="Enter mobile number"
+                      autoFocus
+                    />
+                    {mpinError && (
+                      <p className="mt-1 text-sm text-red-600">{mpinError}</p>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    {t('common.continue')}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Events Grid Section - Shows loading/error states */}
       <div className="max-w-7xl mx-auto px-4 py-8">
