@@ -30,36 +30,22 @@ const Gallery = () => {
       if (token && verifiedMobile) {
         setIsAuthenticated(true);
         setUserMobile(verifiedMobile);
-      }
-    };
-
-    // Check immediately
-    checkAuth();
-
-    // Listen for storage changes (in case of login in another tab)
-    window.addEventListener('storage', checkAuth);
-    
-    // Listen for custom login event
-    const handleLoginSuccess = () => {
-      checkAuth();
-      const pendingEventId = sessionStorage.getItem('pendingEventId');
-      if (pendingEventId) {
-        const event = events.find(e => e.id === parseInt(pendingEventId));
-        if (event) {
-          setSelectedEvent(event);
-          setSelectedImageIdx(0);
-          document.body.style.overflow = 'hidden';
+        
+        // If there's a pending event to view, open it
+        const pendingEventId = sessionStorage.getItem('pendingEventId');
+        if (pendingEventId) {
+          const event = events.find(e => e.id === parseInt(pendingEventId));
+          if (event) {
+            setSelectedEvent(event);
+            setSelectedImageIdx(0);
+            document.body.style.overflow = 'hidden';
+          }
+          sessionStorage.removeItem('pendingEventId');
         }
-        sessionStorage.removeItem('pendingEventId');
       }
     };
 
-    window.addEventListener('loginSuccess', handleLoginSuccess);
-
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-      window.removeEventListener('loginSuccess', handleLoginSuccess);
-    };
+    checkAuth();
   }, [events]);
 
   const openLightbox = useCallback((event, imageIdx = 0) => {
@@ -69,24 +55,17 @@ const Gallery = () => {
     
     if (!isUserAuthenticated) {
       // Store the current URL and event ID for return after login
-      sessionStorage.setItem('returnTo', '/gallery');
-      sessionStorage.setItem('pendingEventId', event.id);
+      localStorage.setItem('returnTo', '/gallery');
+      localStorage.setItem('pendingEventId', event.id);
       
-      navigate('/login', { 
-        state: { 
-          returnTo: '/gallery',
-          pendingEventId: event.id,
-          message: t('gallery.pleaseLogin') || 'Please login to view gallery images.',
-          redirectToGallery: true 
-        } 
-      });
+      navigate('/login');
       return;
     }
     
     setSelectedEvent(event);
     setSelectedImageIdx(imageIdx);
     document.body.style.overflow = 'hidden';
-  }, [navigate, t]);
+  }, [navigate]);
 
   // Handle MPIN verification
   const handleMpinVerify = async (e) => {
@@ -120,9 +99,6 @@ const Gallery = () => {
         setIsAuthenticated(true);
         setShowLoginModal(false);
         setMpin('');
-
-        // Dispatch login success event
-        window.dispatchEvent(new Event('loginSuccess'));
         
         if (selectedEvent) {
           setSelectedImageIdx(0);
@@ -130,19 +106,11 @@ const Gallery = () => {
         }
       } else if (response.status === 404) {
         // User not found - redirect to registration with return path
-        sessionStorage.setItem('returnTo', '/gallery');
+        localStorage.setItem('returnTo', '/gallery');
         if (selectedEvent) {
-          sessionStorage.setItem('pendingEventId', selectedEvent.id);
+          localStorage.setItem('pendingEventId', selectedEvent.id);
         }
-        navigate('/login', { 
-          state: { 
-            returnTo: '/gallery',
-            pendingEventId: selectedEvent?.id,
-            mobile: userMobile,
-            message: t('gallery.completeRegistration') || 'Please create account to view gallery.',
-            redirectToGallery: true // Add explicit flag for gallery redirect
-          } 
-        });
+        navigate('/login');
       } else {
         setMpinError(t('gallery.mpinError') || 'Invalid MPIN');
       }
