@@ -24,7 +24,6 @@ const Gallery = () => {
 
 
   const openLightbox = useCallback((event, imageIdx = 0) => {
-    
     const token = localStorage.getItem('token');
     const verifiedMobile = localStorage.getItem('verifiedMobile');
     const isUserAuthenticated = !!token && !!verifiedMobile;
@@ -32,12 +31,14 @@ const Gallery = () => {
     setUserMobile(verifiedMobile || '');
 
     if (!isUserAuthenticated) {
-     
-      localStorage.setItem('returnPath', '/gallery');
-    
+      // Store the current URL and event ID for return after login
+      sessionStorage.setItem('returnTo', '/gallery');
+      sessionStorage.setItem('pendingEventId', event.id);
+      
       navigate('/login', { 
         state: { 
-          from: '/gallery',
+          returnTo: '/gallery',
+          pendingEventId: event.id,
           message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
         } 
       });
@@ -48,6 +49,30 @@ const Gallery = () => {
     setSelectedImageIdx(imageIdx);
     document.body.style.overflow = 'hidden';
   }, [navigate, t]);
+
+  // Check for pending view on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const verifiedMobile = localStorage.getItem('verifiedMobile');
+    const returnTo = sessionStorage.getItem('returnTo');
+    const pendingEventId = sessionStorage.getItem('pendingEventId');
+    
+    if (token && verifiedMobile && returnTo === '/gallery' && pendingEventId) {
+      // Clear stored data
+      sessionStorage.removeItem('returnTo');
+      sessionStorage.removeItem('pendingEventId');
+      
+      // Find and open the pending event
+      const event = events.find(e => e.id === parseInt(pendingEventId));
+      if (event) {
+        setIsAuthenticated(true);
+        setUserMobile(verifiedMobile);
+        setSelectedEvent(event);
+        setSelectedImageIdx(0);
+        document.body.style.overflow = 'hidden';
+      }
+    }
+  }, [events]);
 
   // Handle MPIN verification with proper redirect
   const handleMpinVerify = async (e) => {
@@ -88,10 +113,15 @@ const Gallery = () => {
           document.body.style.overflow = 'hidden';
         }
       } else if (response.status === 404) {
-        // User not found - redirect to registration
+        // User not found - redirect to registration with return path
+        sessionStorage.setItem('returnTo', '/gallery');
+        if (selectedEvent) {
+          sessionStorage.setItem('pendingEventId', selectedEvent.id);
+        }
         navigate('/login', { 
           state: { 
-            from: '/gallery',
+            returnTo: '/gallery',
+            pendingEventId: selectedEvent?.id,
             mobile: userMobile,
             message: t('gallery.completeRegistration') || 'Please create account to view gallery.'
           } 
