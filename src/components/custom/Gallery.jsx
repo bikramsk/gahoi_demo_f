@@ -189,9 +189,9 @@ const Gallery = () => {
               >
                 <div className="relative h-64 overflow-hidden">
                   {!isAuthenticated && (
-                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 p-6">
-                      <Lock className="w-8 h-8 text-white mb-3" />
-                      <p className="text-white text-center mb-4">
+                    <div className="absolute inset-0 z-20 bg-black/75 backdrop-blur-[2px] flex flex-col items-center justify-center p-6">
+                      <Lock className="w-12 h-12 text-white/90 mb-4" strokeWidth={1.5} />
+                      <p className="text-white/90 text-center text-lg mb-4 font-medium">
                         {t('gallery.loginRequired') || 'Please login to view gallery images'}
                       </p>
                       <button
@@ -201,7 +201,7 @@ const Gallery = () => {
                             message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
                           } 
                         })}
-                        className="bg-white/20 backdrop-blur-sm text-white py-2 px-4 rounded-full font-semibold hover:bg-white/30 transition-colors duration-200"
+                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white py-3 px-6 rounded-full font-semibold transition-colors duration-200"
                       >
                         {t('gallery.loginToView') || 'Login to View'}
                       </button>
@@ -210,7 +210,7 @@ const Gallery = () => {
                   <img
                     src={event.images[0]?.url || '/placeholder-image.jpg'}
                     alt={event.name}
-                    className={`w-full h-full object-cover transition-transform duration-700 ${!isAuthenticated ? 'brightness-100' : ''}`}
+                    className={`w-full h-full object-cover transition-transform duration-700 ${!isAuthenticated ? 'filter blur-[2px]' : ''}`}
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
