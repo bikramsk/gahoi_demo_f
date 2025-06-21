@@ -156,20 +156,23 @@ const Gallery = () => {
   }, []);
 
   const openLightbox = useCallback((event, imageIdx = 0) => {
-    if (!isAuthenticated) {
-      navigate('/login', { 
-        state: { 
-          from: '/gallery',
-          message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
-        } 
-      });
+    // Check authentication only when trying to open an image
+    const token = localStorage.getItem('token');
+    const verifiedMobile = localStorage.getItem('verifiedMobile');
+    const isUserAuthenticated = !!token && !!verifiedMobile;
+    setIsAuthenticated(isUserAuthenticated);
+    setUserMobile(verifiedMobile || '');
+
+    if (!isUserAuthenticated) {
+      // Show the login modal instead of redirecting
+      setShowLoginModal(true);
       return;
     }
     
     setSelectedEvent(event);
     setSelectedImageIdx(imageIdx);
     document.body.style.overflow = 'hidden';
-  }, [isAuthenticated, navigate, t]);
+  }, []);
 
   const closeLightbox = useCallback(() => {
     setSelectedEvent(null);
