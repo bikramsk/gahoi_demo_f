@@ -16,27 +16,44 @@ const sendReminderMessage = async (mobileNumber) => {
     const message = `प्रिय सदस्य
 जय गहोई, जय भारत।
 
-गहोई शक्ति से संपर्क करने के लिए धन्यवाद। हम आपतक जल्द ही पहुंचेंगे। 
+गहोई शक्ति से संपर्क करने के लिए धन्यवाद। हम आप तक जल्द ही पहुंचेंगे। 
 यदि आप अपना पासवर्ड भूल गए हैं, तो आप अपने व्हाट्सएप पर प्राप्त ओटीपी के माध्यम से सत्यापन करके पासवर्ड भूल जाएं लिंक पर क्लिक करके इसे रीसेट कर सकते हैं।
 
 सादर।
 गहोई शक्ति परिवार
 www.gahoishakti.in`;
 
+    // Format the number
+    const formattedNumber = mobileNumber.replace(/\D/g, '').slice(-10);
+    
     const formUrlEncoded = new URLSearchParams();
-    formUrlEncoded.append('number', mobileNumber.startsWith('91') ? mobileNumber : `91${mobileNumber}`);
+    formUrlEncoded.append('number', formattedNumber);
     formUrlEncoded.append('message', message);
+    formUrlEncoded.append('route', '1');
+    formUrlEncoded.append('token', 'HVW5LEKQ81BPR3SJU6F7TCMYZ');
+
+    console.log('Sending reminder to number:', formattedNumber);
 
     const response = await fetch(WHATSAPP_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
       },
-      body: formUrlEncoded.toString()
+      body: formUrlEncoded
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('WhatsApp API error response:', errorText);
       throw new Error('Failed to send reminder message');
+    }
+
+    const data = await response.json();
+    console.log('WhatsApp API Response:', data);
+
+    if (!data.status) {
+      throw new Error(data.message || 'Failed to send reminder message');
     }
 
     return true;
@@ -68,7 +85,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
         console.log('Sending OTP verification reminder...');
         await sendReminderMessage(mobileNumber);
       }
-    }, 1 * 60 * 1000); 
+    }, 30 * 1000); // 30 seconds
 
     // Clear timeout if component unmounts
     window.addEventListener('beforeunload', () => clearTimeout(otpReminderTimeout));
@@ -469,7 +486,7 @@ const Login = () => {
         } catch (error) {
           console.error('Error checking registration status:', error);
         }
-      }, 2 * 60 * 1000); // 2 minutes
+      }, 45 * 1000); // 45 seconds
 
       // Clear timeout if component unmounts
       window.addEventListener('beforeunload', () => clearTimeout(registrationReminderTimeout));
