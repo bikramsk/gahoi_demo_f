@@ -3,7 +3,9 @@ import { X, ChevronLeft, ChevronRight, Calendar, Image, Maximize2, Lock } from '
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+const API_URL = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1337';
 
 const Gallery = () => {
   const { t } = useTranslation();
@@ -16,7 +18,7 @@ const Gallery = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check if user is authenticated
+    // Simple authentication check
     const token = localStorage.getItem('token');
     const verifiedMobile = localStorage.getItem('verifiedMobile');
     setIsAuthenticated(!!token && !!verifiedMobile);
@@ -44,19 +46,17 @@ const Gallery = () => {
         }
 
         // transform data
-        const transformedEvents = data.map(event => {
-          return {
-            id: event.id,
-            documentId: event.documentId,
-            name: event.Name,
-            description: event.Description,
-            date: event.Date,
-            images: event.Images || [],
-            createdAt: event.createdAt,
-            updatedAt: event.updatedAt,
-            publishedAt: event.publishedAt
-          };
-        });
+        const transformedEvents = data.map(event => ({
+          id: event.id,
+          documentId: event.documentId,
+          name: event.Name,
+          description: event.Description,
+          date: event.Date,
+          images: event.Images || [],
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
+          publishedAt: event.publishedAt
+        }));
 
         setEvents(transformedEvents);
         setError(null);
@@ -71,19 +71,21 @@ const Gallery = () => {
     fetchEvents();
   }, []);
 
-  const handleLoginRedirect = () => {
-    navigate('/login', { state: { from: '/gallery' } });
-  };
-
   const openLightbox = useCallback((event, imageIdx = 0) => {
     if (!isAuthenticated) {
-      handleLoginRedirect();
+      navigate('/login', { 
+        state: { 
+          from: '/gallery',
+          message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
+        } 
+      });
       return;
     }
+    
     setSelectedEvent(event);
     setSelectedImageIdx(imageIdx);
     document.body.style.overflow = 'hidden';
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, t]);
 
   const closeLightbox = useCallback(() => {
     setSelectedEvent(null);
@@ -186,18 +188,25 @@ const Gallery = () => {
                 className="group bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-500"
               >
                 <div className="relative h-64 overflow-hidden">
-                  {!isAuthenticated ? (
+                  {!isAuthenticated && (
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center z-10 p-6">
                       <Lock className="w-8 h-8 text-white mb-3" />
-                      <p className="text-white text-center mb-4">{t('gallery.loginRequired')}</p>
+                      <p className="text-white text-center mb-4">
+                        {t('gallery.loginRequired') || 'Please login to view gallery images'}
+                      </p>
                       <button
-                        onClick={handleLoginRedirect}
+                        onClick={() => navigate('/login', { 
+                          state: { 
+                            from: '/gallery',
+                            message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
+                          } 
+                        })}
                         className="bg-white/20 backdrop-blur-sm text-white py-2 px-4 rounded-full font-semibold hover:bg-white/30 transition-colors duration-200"
                       >
-                        {t('gallery.loginToView')}
+                        {t('gallery.loginToView') || 'Login to View'}
                       </button>
                     </div>
-                  ) : null}
+                  )}
                   <img
                     src={event.images[0]?.url || '/placeholder-image.jpg'}
                     alt={event.name}

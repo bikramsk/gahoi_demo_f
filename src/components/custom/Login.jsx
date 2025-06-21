@@ -32,7 +32,7 @@ www.gahoishakti.in`;
     formUrlEncoded.append('route', '1');
     formUrlEncoded.append('token', 'HVW5LEKQ81BPR3SJU6F7TCMYZ');
 
-    console.log('Sending reminder to number:', formattedNumber);
+    
 
     const response = await fetch(WHATSAPP_API_URL, {
       method: 'POST',
@@ -82,10 +82,10 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     const otpReminderTimeout = setTimeout(async () => {
       const otpVerified = sessionStorage.getItem('otpVerified');
       if (!otpVerified) {
-        console.log('Sending OTP verification reminder...');
+        
         await sendReminderMessage(mobileNumber);
       }
-    }, 30 * 1000); // 30 seconds
+    }, 5 * 60 * 1000); // 5 minutes
 
     // Clear timeout if component unmounts
     window.addEventListener('beforeunload', () => clearTimeout(otpReminderTimeout));
@@ -463,7 +463,7 @@ const Login = () => {
       // Mark MPIN as created
       localStorage.setItem('mpinCreated', 'true');
 
-      
+      // Send reminder message 
       const registrationReminderTimeout = setTimeout(async () => {
         try {
           console.log('Checking registration status...');
@@ -480,13 +480,13 @@ const Login = () => {
 
           const data = await registrationResponse.json();
           if (!data.data || data.data.length === 0) {
-            console.log('Registration not completed, sending reminder...');
+           
             await sendReminderMessage(mobileNumber);
           }
         } catch (error) {
           console.error('Error checking registration status:', error);
         }
-      }, 45 * 1000); // 45 seconds
+      }, 15 * 60 * 1000); // 15 minutes
 
       // Clear timeout if component unmounts
       window.addEventListener('beforeunload', () => clearTimeout(registrationReminderTimeout));
