@@ -90,12 +90,12 @@ const UserProfile = () => {
         if (!profileData.data || profileData.data.length === 0) {
           setError('Please complete your registration first.');
           setTimeout(() => {
-            navigate('/registration', { 
-              state: { 
-                mobileNumber,
-                fromLogin: true 
-              } 
-            });
+          navigate('/registration', { 
+            state: { 
+              mobileNumber,
+              fromLogin: true 
+            } 
+          });
           }, 2000);
           return;
         }
@@ -222,16 +222,16 @@ const UserProfile = () => {
             <div className="flex items-center space-x-4">
               <div className="relative w-10 h-10">
                 <div className="absolute inset-0 bg-gray-200 rounded-full animate-pulse"></div>
-                <img 
+              <img 
                   src={displayData.personal_information?.display_picture ? 
                     `${API_BASE}${displayData.personal_information.display_picture}` : 
-                    '/default-avatar.png'} 
-                  alt="Profile" 
+                  '/default-avatar.png'} 
+                alt="Profile" 
                   className="w-10 h-10 rounded-full border-2 border-white object-cover relative z-10"
                   onError={(e) => {
                     e.target.src = '/logo.png';
                   }}
-                />
+              />
               </div>
               <div>
                 <h1 className="text-xl font-bold">{displayData.personal_information?.full_name || 'Username'}</h1>
@@ -242,14 +242,14 @@ const UserProfile = () => {
             <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
               <button 
                 onClick={() => navigate('/registration', { 
-                  state: { 
+                    state: { 
                     mobileNumber: displayData.personal_information?.mobile_number,
-                    isEdit: true,
-                    userData: {
+                      isEdit: true,
+                      userData: {
                       id: displayData.documentId,
                       attributes: displayData
-                    }
-                  } 
+                      }
+                    } 
                 })}
                 className="px-4 py-2 text-sm bg-red-700 rounded-lg hover:bg-red-600 transition-colors flex items-center whitespace-nowrap"
               >
@@ -330,24 +330,24 @@ const UserProfile = () => {
                     <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Family Details</h2>
                     </div>
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                      <dl className="divide-y divide-gray-200">
+                      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.family_details || {}).length > 0 ? (
                           Object.entries(displayData.family_details || {}).map(([key, value]) => (
                             <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
                               <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
-                                {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                              </dt>
+                                  {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                </dt>
                               <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
-                              </dd>
-                            </div>
+                                </dd>
+                              </div>
                           ))
                         ) : (
                           <div className="px-4 py-6 text-center text-gray-500">
                             No family details available
-                          </div>
-                        )}
+                        </div>
+                      )}
                       </dl>
                     </div>
                   </section>
@@ -357,7 +357,7 @@ const UserProfile = () => {
                   <section>
                     <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Biographical Details</h2>
-                    </div>
+                      </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.biographical_details || {}).length > 0 ? (
@@ -369,12 +369,12 @@ const UserProfile = () => {
                               <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
-                            </div>
+                      </div>
                           ))
                         ) : (
                           <div className="px-4 py-6 text-center text-gray-500">
                             No biographical details available
-                          </div>
+                      </div>
                         )}
                       </dl>
                     </div>
@@ -385,7 +385,7 @@ const UserProfile = () => {
                   <section>
                     <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Work Information</h2>
-                    </div>
+                      </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.work_information || {}).length > 0 ? (
@@ -397,12 +397,12 @@ const UserProfile = () => {
                               <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
-                            </div>
+                      </div>
                           ))
                         ) : (
                           <div className="px-4 py-6 text-center text-gray-500">
                             No work information available
-                          </div>
+                      </div>
                         )}
                       </dl>
                     </div>
@@ -413,7 +413,7 @@ const UserProfile = () => {
                   <section>
                     <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Additional Details</h2>
-                    </div>
+                      </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.additional_details || {}).filter(([key]) => key !== 'regional_information').length > 0 ? (
@@ -426,13 +426,13 @@ const UserProfile = () => {
                                 <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                   {value?.toString() || 'N/A'}
                                 </dd>
-                              </div>
+                      </div>
                             )
                           ))
                         ) : (
                           <div className="px-4 py-6 text-center text-gray-500">
                             No additional details available
-                          </div>
+                      </div>
                         )}
                       </dl>
                     </div>
@@ -443,7 +443,7 @@ const UserProfile = () => {
                   <section>
                     <div className="flex justify-between items-center mb-6">
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Regional Information</h2>
-                    </div>
+                      </div>
                     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                       <dl className="divide-y divide-gray-200">
                         {Object.entries(displayData.additional_details?.regional_information || {}).length > 0 ? (
@@ -455,12 +455,12 @@ const UserProfile = () => {
                               <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                 {value?.toString() || 'N/A'}
                               </dd>
-                            </div>
+                      </div>
                           ))
                         ) : (
                           <div className="px-4 py-6 text-center text-gray-500">
                             No regional information available
-                          </div>
+                      </div>
                         )}
                       </dl>
                     </div>

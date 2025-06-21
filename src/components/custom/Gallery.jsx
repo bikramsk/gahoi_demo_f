@@ -22,7 +22,34 @@ const Gallery = () => {
   const [verifyingMpin, setVerifyingMpin] = useState(false);
   const [userMobile, setUserMobile] = useState('');
 
-  // Handle MPIN verification
+
+  const openLightbox = useCallback((event, imageIdx = 0) => {
+    
+    const token = localStorage.getItem('token');
+    const verifiedMobile = localStorage.getItem('verifiedMobile');
+    const isUserAuthenticated = !!token && !!verifiedMobile;
+    setIsAuthenticated(isUserAuthenticated);
+    setUserMobile(verifiedMobile || '');
+
+    if (!isUserAuthenticated) {
+     
+      localStorage.setItem('returnPath', '/gallery');
+    
+      navigate('/login', { 
+        state: { 
+          from: '/gallery',
+          message: t('gallery.pleaseLogin') || 'Please login to view gallery images.'
+        } 
+      });
+      return;
+    }
+    
+    setSelectedEvent(event);
+    setSelectedImageIdx(imageIdx);
+    document.body.style.overflow = 'hidden';
+  }, [navigate, t]);
+
+  // Handle MPIN verification with proper redirect
   const handleMpinVerify = async (e) => {
     e.preventDefault();
     if (mpin.length !== 4) {
@@ -50,9 +77,25 @@ const Gallery = () => {
       
       if (response.ok && data.jwt) {
         localStorage.setItem('token', data.jwt);
+        localStorage.setItem('verifiedMobile', userMobile);
         setIsAuthenticated(true);
         setShowLoginModal(false);
         setMpin('');
+
+     
+        if (selectedEvent) {
+          setSelectedImageIdx(0);
+          document.body.style.overflow = 'hidden';
+        }
+      } else if (response.status === 404) {
+        // User not found - redirect to registration
+        navigate('/login', { 
+          state: { 
+            from: '/gallery',
+            mobile: userMobile,
+            message: t('gallery.completeRegistration') || 'Please create account to view gallery.'
+          } 
+        });
       } else {
         setMpinError(t('gallery.mpinError') || 'Invalid MPIN');
       }
@@ -63,6 +106,20 @@ const Gallery = () => {
       setVerifyingMpin(false);
     }
   };
+
+ 
+  useEffect(() => {
+    const returnPath = localStorage.getItem('returnPath');
+    if (returnPath === '/gallery') {
+      localStorage.removeItem('returnPath');
+      const token = localStorage.getItem('token');
+      const verifiedMobile = localStorage.getItem('verifiedMobile');
+      if (token && verifiedMobile) {
+        setIsAuthenticated(true);
+        setUserMobile(verifiedMobile);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -109,25 +166,6 @@ const Gallery = () => {
     };
 
     fetchEvents();
-  }, []);
-
-  const openLightbox = useCallback((event, imageIdx = 0) => {
-    // Check authentication only when trying to open an image
-    const token = localStorage.getItem('token');
-    const verifiedMobile = localStorage.getItem('verifiedMobile');
-    const isUserAuthenticated = !!token && !!verifiedMobile;
-    setIsAuthenticated(isUserAuthenticated);
-    setUserMobile(verifiedMobile || '');
-
-    if (!isUserAuthenticated) {
-      // Show the login modal instead of redirecting
-      setShowLoginModal(true);
-      return;
-    }
-    
-    setSelectedEvent(event);
-    setSelectedImageIdx(imageIdx);
-    document.body.style.overflow = 'hidden';
   }, []);
 
   const closeLightbox = useCallback(() => {
