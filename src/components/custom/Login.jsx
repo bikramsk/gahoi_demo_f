@@ -61,13 +61,17 @@ const sendWhatsAppOTP = async (mobileNumber) => {
       throw new Error(data.message || 'Failed to send OTP');
     }
 
-    // Send reminder message after 5 minutes if OTP is not verified
-    setTimeout(async () => {
+    // Send reminder message 
+    const otpReminderTimeout = setTimeout(async () => {
       const otpVerified = sessionStorage.getItem('otpVerified');
       if (!otpVerified) {
+        console.log('Sending OTP verification reminder...');
         await sendReminderMessage(mobileNumber);
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 1 * 60 * 1000); 
+
+    // Clear timeout if component unmounts
+    window.addEventListener('beforeunload', () => clearTimeout(otpReminderTimeout));
 
     if (import.meta.env.MODE === 'development' && data.otp) {
       console.log('Development OTP:', data.otp);
@@ -442,9 +446,10 @@ const Login = () => {
       // Mark MPIN as created
       localStorage.setItem('mpinCreated', 'true');
 
-      // Set a timeout to check if registration was completed
-      setTimeout(async () => {
+      
+      const registrationReminderTimeout = setTimeout(async () => {
         try {
+          console.log('Checking registration status...');
           const token = localStorage.getItem('token');
           const registrationResponse = await fetch(
             `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`,
@@ -458,13 +463,16 @@ const Login = () => {
 
           const data = await registrationResponse.json();
           if (!data.data || data.data.length === 0) {
-            // Registration not completed, send reminder
+            console.log('Registration not completed, sending reminder...');
             await sendReminderMessage(mobileNumber);
           }
         } catch (error) {
           console.error('Error checking registration status:', error);
         }
-      }, 15 * 60 * 1000); // 15 minutes
+      }, 2 * 60 * 1000); // 2 minutes
+
+      // Clear timeout if component unmounts
+      window.addEventListener('beforeunload', () => clearTimeout(registrationReminderTimeout));
 
       return await response.json();
     } catch (error) {
