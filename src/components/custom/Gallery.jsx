@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.MODE === 'production' 
-  ? 'https://admin.gahoishakti.in'
+  ? 'https://api.gahoishakti.in'
   : 'http://localhost:1337';
 
 const Gallery = () => {
