@@ -444,15 +444,14 @@ export const formatDate = (dateString) => {
 export const validateStep = (step, formData) => {
   const errors = {};
   
-  // Get fields for current step
+ 
   const currentStepFields = FORM_STEPS[step].fields;
   
-  // Check if state has regional assemblies
   const hasRegionalAssemblies = formData.state && STATE_TO_ASSEMBLIES[formData.state];
   
-  // Validate required fields for current step
+ 
   currentStepFields.forEach(field => {
-    // Skip regional assembly related fields if state doesn't have assemblies
+    
     if (
       !hasRegionalAssemblies && 
       (field === 'regionalAssembly' || 
@@ -571,8 +570,8 @@ export const formatFormData = (data, displayPictureId = null) => {
       mother_mobile: data.familyDetails?.[1]?.mobileNumber ?? "",
       spouse_name: data.spouseName || data.familyDetails?.[2]?.name || "",
       spouse_mobile: data.spouseMobile || data.familyDetails?.[2]?.mobileNumber || "",
-      gotra: data.marriageToAnotherCaste ? "Others" : (data.gotra ?? ""),
-      aakna: data.marriageToAnotherCaste ? "Others" : (data.aakna ?? ""),
+      gotra: data.gotra ?? "",
+      aakna: data.aakna ?? "",
       siblingDetails: (data.familyDetails || [])
         .filter(member => member?.relation === "Sibling")
         .map((sibling) => ({
@@ -596,15 +595,9 @@ export const formatFormData = (data, displayPictureId = null) => {
       })) || [],
     biographical_details: {
       is_married: data.isMarried || "Unmarried",
-      marriage_to_another_caste: data.marriageCommunity ? 
-        (data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage") 
-        : "",
-      Gotra: data.marriageCommunity ? 
-        (data.marriageCommunity === "other" ? "Others" : (data.spouseGotra || "")) 
-        : "",
-      Aakna: data.marriageCommunity ? 
-        (data.marriageCommunity === "other" ? "Others" : (data.spouseAakna || "")) 
-        : "",
+      marriage_to_another_caste: data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage",
+      Gotra: data.spouseGotra ?? "",
+      Aakna: data.spouseAakna ?? "",
       consider_second_marriage: data.considerSecondMarriage || false
     },
     personal_information: {
