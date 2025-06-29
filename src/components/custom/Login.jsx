@@ -190,6 +190,7 @@ const Login = () => {
   });
   const [formData, setFormData] = useState({
     mobileNumber: '',
+    name: '',
     otp: '',
     mpin: ''
   });
@@ -402,6 +403,13 @@ const Login = () => {
       newErrors.mobileNumber = t('login.errors.mobileRequired');
     } else if (formData.mobileNumber.length !== 10) {
       newErrors.mobileNumber = t('login.errors.mobileLength');
+    }
+
+    // Validate name only for new users after mobile verification
+    if (!userExists && formData.mobileNumber.length === 10 && !showOtpInput) {
+      if (!formData.name || !formData.name.trim()) {
+        newErrors.name = t('login.errors.nameRequired') || 'Please enter your name';
+      }
     }
 
     if (hasMpin && showMpinInput) {
@@ -805,7 +813,7 @@ const Login = () => {
                   </div>
                 )}
                 
-                {/* Mobile Number Input */}
+                {/* Mobile Number */}
                 <div className="space-y-1 sm:space-y-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">
@@ -831,6 +839,32 @@ const Login = () => {
                     <p className="text-red-500 text-[10px] sm:text-xs">{errors.mobileNumber}</p>
                   )}
                 </div>
+
+                {/* Name Input - Only show after mobile verification for new users */}
+                {!userExists && formData.mobileNumber.length === 10 && !showOtpInput && (
+                  <div className="space-y-1 sm:space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                      {t('login.fullName')}
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 text-sm ${
+                        hasError('name') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
+                      placeholder={t('login.namePlaceholder')}
+                      disabled={loading}
+                    />
+                    {hasError('name') && (
+                      <p className="text-red-500 text-[10px] sm:text-xs">{errors.name}</p>
+                    )}
+                  </div>
+                )}
 
                 {/* MPIN Input for Existing Users */}
                 {hasMpin && showMpinInput && (
@@ -999,7 +1033,7 @@ const Login = () => {
                       showMpinCreation ? t('login.setMpin') || 'Set MPIN' :
                       showOtpInput ? t('login.verifyOtp') || 'Verify OTP' :
                       showMpinInput ? t('common.submit') || 'Submit' :
-                      t('login.sendOtp') || 'Send OTP'
+                      t('login.sendOtp') || 'Next'
                     )}
                   </button>
                 </div>

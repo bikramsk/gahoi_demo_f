@@ -143,6 +143,16 @@ const OurTeam = () => {
         location: "Thathipur",
        image: "our_team/Himanshu_piparseniya.webp",       
       },
+      {
+        name: "Anil Seth",
+        location: "Madhavganj",
+       image: "our_team/Anil_Seth.webp",       
+      },
+      {
+        name: "Dharmendra Bileya",
+        location: "Chandravadni",
+       image: "our_team/Dharmendra_Bileya.webp",       
+      },
   ];
 
   const TeamMemberCard = ({ member }) => (

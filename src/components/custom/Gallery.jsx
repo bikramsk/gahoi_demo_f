@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.MODE === 'production' 
-  ? 'https://api.gahoishakti.in'
+  ? 'https://admin.gahoishakti.in'
   : 'http://localhost:1337';
 
 const Gallery = () => {
@@ -22,7 +22,7 @@ const Gallery = () => {
   const [verifyingMpin, setVerifyingMpin] = useState(false);
   const [userMobile, setUserMobile] = useState('');
 
-  // Check authentication status on mount and after login
+ 
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('token');
@@ -31,7 +31,7 @@ const Gallery = () => {
         setIsAuthenticated(true);
         setUserMobile(verifiedMobile);
         
-        // If there's a pending event to view, open it
+   
         const pendingEventId = sessionStorage.getItem('pendingEventId');
         if (pendingEventId) {
           const event = events.find(e => e.id === parseInt(pendingEventId));
@@ -54,7 +54,7 @@ const Gallery = () => {
     const isUserAuthenticated = !!token && !!verifiedMobile;
     
     if (!isUserAuthenticated) {
-      // Store the current URL and event ID for return after login
+      
       localStorage.setItem('returnTo', '/gallery');
       localStorage.setItem('pendingEventId', event.id);
       

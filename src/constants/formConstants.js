@@ -71,11 +71,9 @@ export const WORK_TYPES = [
 // Other
 
 export const EMPLOYMENT_TYPES = [
-  "Full-time",
-  "Part-time",
-  "Contract/Temporary",
-  "Self-employed",
-  "Not Currently Employed"
+  "Central Government Employee",
+  "State Government Employee",
+  "Private Sector Employee"
 ];
 
 
@@ -98,7 +96,7 @@ export const INITIAL_FAMILY_MEMBERS = [
 
 export const MAX_CHILDREN = 4;
 export const MAX_SIBLINGS = 5;
-export const MARITAL_STATUS_OPTIONS = ["Married", "Unmarried"];
+export const MARITAL_STATUS_OPTIONS = ["Married", "Unmarried", "Widow/Widower", "Divorced"];
 export const EDUCATION_OPTIONS = ["Primary", "Secondary", "Higher Secondary", "Graduate", "Post Graduate", "Other"];
 export const OCCUPATION_OPTIONS = ["Student", "Employed", "Self-Employed", "Business", "Homemaker", "Other"];
 export const SIBLING_RELATION_OPTIONS = [
@@ -129,10 +127,6 @@ export const FORM_STEPS = [
     ],
   },
   { name: "Family Information", fields: ["familyDetails"] },
-  // {
-  //   name: "Biographical Details",
-  //   fields: ["manglik", "grah", "handicap", "gotra", "aakna"],
-  // },
   {
     name: "Work Information",
     fields: [
@@ -175,14 +169,8 @@ export const INITIAL_FORM_DATA = {
   district: "",
   state: "",
   familyDetails: INITIAL_FAMILY_MEMBERS,
-  manglik: "",
-  grah: "",
-  handicap: "",
   gotra: "",
   aakna: "",
-  occupation: "",
-  companyName: "",
-  workArea: "",
   industrySector: "",
   businessSize: "",
   workType: "",
@@ -193,6 +181,12 @@ export const INITIAL_FORM_DATA = {
   referenceBy: "",
   gender: "",
   isMarried: "Unmarried",
+  marriageCommunity: "",
+  spouseName: "",
+  spouseMobile: "",
+  spouseGotra: "",
+  spouseAakna: "",
+  considerSecondMarriage: false,
   marriageToAnotherCaste: "Same Caste Marriage",
   regionalAssembly: "",
   localPanchayat: "",

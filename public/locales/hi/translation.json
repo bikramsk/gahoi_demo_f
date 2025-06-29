@@ -51,7 +51,8 @@
     "address": "12, तरुण विहार कॉलोनी, थाटीपुर, ग्वालियर-474011 (म.प्र.)",
     "email": "ईमेल: gahloishakti@gmail.com",
     "phone": "फ़ोन: +91 7049004444",
-    "copyright": "© गहोई शक्ति जन कल्याण समिति भारत २०२५"
+    "copyright": "© गहोई शक्ति जन कल्याण समिति भारत २०२५",
+    "gallery": "गैलरी"
   },
   "cowSeva": {
     "title": "गौ सेवा",
@@ -532,7 +533,7 @@
     "subtitle": "अपने खाते में लॉगिन करें",
     "mobileNumber": "मोबाइल नंबर",
     "enterOtp": "OTP दर्ज करें",
-    "sendOtp": "OTP भेजें",
+    "sendOtp": "अगला",
     "verifyOtp": "OTP सत्यापित करें",
     "resendOtp": "OTP पुनः भेजें",
     "waitMessage": "नया OTP अनुरोध करने से पहले कृपया {{seconds}} सेकंड प्रतीक्षा करें",
@@ -599,7 +600,9 @@
     "confirmMpinPlaceholder": "एमपिन दोबारा दर्ज करें",
     "useWhatsAppOtp": "व्हाट्सएप ओटीपी का उपयोग करें",
     "setMpin": "एमपिन सेट करें",
-    "setting": "एमपिन सेट हो रहा है..."
+    "setting": "एमपिन सेट हो रहा है...",
+    "fullName": "पूरा नाम",
+    "namePlaceholder": "अपना पूरा नाम दर्ज करें"
   },
   "latestNews": {
     "meta": {
@@ -1090,16 +1093,22 @@
   },
   "gallery": {
     "title": "गैलरी",
-    "subtitle": "हमारे सामुदायिक कार्यक्रमों और समारोहों की झलक",
-    "viewGallery": "गैलरी देखें",
+    "subtitle": "हमारे सामुदायिक कार्यक्रमों और यादों की झलक",
+    "loginRequired": "गैलरी की तस्वीरें देखने के लिए कृपया लॉगिन करें",
+    "loginToView": "देखने के लिए लॉगिन करें",
+    "pleaseLogin": "गैलरी की तस्वीरें देखने के लिए कृपया लॉगिन करें।",
     "photos": "तस्वीरें",
-    "loginRequired": "लॉगिन आवश्यक है",
-    "loginToView": "तस्वीरें देखने के लिए लॉगिन करें",
+    "viewGallery": "गैलरी देखें",
+    "enterMpin": "MPIN दर्ज करें",
+    "mpinLabel": "MPIN",
+    "mpinError": "अमान्य MPIN",
+    "mpinLengthError": "MPIN 4 अंकों का होना चाहिए",
+    "mpinVerificationError": "MPIN सत्यापन में विफल",
     "lightbox": {
       "close": "बंद करें",
       "previous": "पिछला",
       "next": "अगला",
-      "imageOf": "तस्वीर {{current}} / {{total}}"
+      "imageOf": "तस्वीर {{current}}/{{total}}"
     }
   }
 } 

@@ -72,7 +72,7 @@ const CowSevaCollection = () => {
       try {
         setLoading(true);
         const API_TOKEN = import.meta.env.VITE_API_TOKEN;
-        const response = await fetch('https://api.gahoishakti.in/api/cowsevas?populate[donations][populate]=*&populate[monthlyExpenses][populate]=*&populate[sevaPlaces][populate]=*', {
+        const response = await fetch('https://api.gahoishakti.inin/api/cowsevas?populate[donations][populate]=*&populate[monthlyExpenses][populate]=*&populate[sevaPlaces][populate]=*', {
           headers: {
             // 'Authorization': `Bearer ${API_TOKEN}`,
             'Content-Type': 'application/json',

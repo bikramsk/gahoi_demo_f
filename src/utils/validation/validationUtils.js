@@ -1,4 +1,5 @@
-import { REQUIRED_FIELDS } from '../../config/formConfig';
+import { REQUIRED_FIELDS, FORM_STEPS } from '../../config/formConfig';
+import { STATE_TO_ASSEMBLIES } from '../../constants/formConstants';
 
 // Validate a single field
 export const validateField = (name, value) => {
@@ -96,5 +97,73 @@ export const validateFamilyMember = (member, index) => {
     if (!member.maritalStatus) errors[`familyDetails.${index}.maritalStatus`] = 'Marital status is required';
   }
   
+  return errors;
+};
+
+// Validate work information fields
+export const validateWorkInformation = (workType, employmentType, industrySector, businessSize) => {
+  const errors = {};
+
+  if (!workType) {
+    errors.workType = 'Work type is required';
+    return errors;
+  }
+
+  // Validate based on work type
+  if (workType === 'Business Owner') {
+    if (!industrySector) errors.industrySector = 'Industry sector is required for business owners';
+    if (!businessSize) errors.businessSize = 'Business size is required for business owners';
+  } else if (workType === 'Professional') {
+    if (!industrySector) errors.industrySector = 'Industry sector is required for professionals';
+    if (!employmentType) errors.employmentType = 'Employment type is required for professionals';
+  }
+
+  return errors;
+};
+
+// Update validateStep to include work information validation
+export const validateStep = (step, formData) => {
+  const errors = {};
+  
+  // Get fields for current step
+  const currentStepFields = FORM_STEPS[step].fields;
+  
+  // Check if state has regional assemblies
+  const hasRegionalAssemblies = formData.state && STATE_TO_ASSEMBLIES[formData.state];
+  
+  // Validate required fields for current step
+  currentStepFields.forEach(field => {
+    // Skip regional assembly related fields if state doesn't have assemblies
+    if (
+      !hasRegionalAssemblies && 
+      (field === 'regionalAssembly' || 
+       field === 'localPanchayatName' || 
+       field === 'localPanchayat' || 
+       field === 'subLocalPanchayat')
+    ) {
+      return;
+    }
+
+    if (REQUIRED_FIELDS.includes(field)) {
+      const error = validateField(field, formData[field]);
+      if (error) {
+        errors[field] = error;
+      }
+    }
+  });
+
+  // Special validations for current step
+  if (currentStepFields.includes('workType')) {
+    const workErrors = validateWorkInformation(
+      formData.workType,
+      formData.employmentType,
+      formData.industrySector,
+      formData.businessSize
+    );
+    Object.assign(errors, workErrors);
+  }
+
+  // ... rest of the existing validations ...
+
   return errors;
 }; 

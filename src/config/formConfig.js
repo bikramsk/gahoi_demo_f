@@ -1,7 +1,7 @@
 export const FORM_STEPS = [
   {
     name: "Personal Information",
-    fields: ["name", "mobileNumber", "village", "id", "gender", "nationality"],
+    fields: ["name", "mobileNumber", "id", "gender", "nationality"],
   },
   {
     name: "Additional Details",
@@ -27,18 +27,11 @@ export const FORM_STEPS = [
     fields: ["familyDetails"] 
   },
   {
-    name: "Biographical Details",
-    fields: ["manglik", "grah", "handicap"],
-  },
-  {
     name: "Work Information",
     fields: [
-      "occupation",
-      "companyName",
-      "workArea",
+      "workType",
       "industrySector",
       "businessSize",
-      "workType",
       "employmentType"
     ],
   },
@@ -51,28 +44,19 @@ export const FORM_STEPS = [
 export const REQUIRED_FIELDS = [
   "name", 
   "mobileNumber", 
-  "village", 
   "bloodGroup",
   "birthDate", 
   "education", 
-  "currentAddress", 
   "gender",
   "nationality",
   "state", 
-  "occupation", 
-  "companyName", 
-  "workArea", 
-  "industrySector",
-  "businessSize", 
-  "workType", 
-  "employmentType"
+  "workType"
 ];
 
 export const INITIAL_FORM_STATE = {
   name: "",
   mobileNumber: "",
   display_picture: null,
-  village: "",
   email: "",
   nationality: "",
   bloodGroup: "",
@@ -84,14 +68,8 @@ export const INITIAL_FORM_STATE = {
   district: "",
   state: "",
   familyDetails: [],
-  manglik: "",
-  grah: "",
-  handicap: "",
   gotra: "",
   aakna: "",
-  occupation: "",
-  companyName: "",
-  workArea: "",
   industrySector: "",
   businessSize: "",
   workType: "",

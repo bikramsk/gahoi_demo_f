@@ -114,7 +114,7 @@ const HeroSection = () => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === bannerImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 5000);
+    }, 7000);
 
     return () => clearInterval(timer);
   }, [bannerImages.length]);
@@ -153,10 +153,10 @@ const HeroSection = () => {
   const imagePath = isMobile ? currentBanner.mobile : currentBanner.desktop;
 
   return (
-    <section className="relative h-[40vh] sm:h-[50vh] md:h-[80vh] lg:h-screen w-full overflow-hidden">
+    <section className="relative h-[40vh] sm:h-[50vh] md:h-[92vh] lg:h-[92vh] w-full overflow-hidden">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-center bg-no-repeat transition-all duration-1000 ease-in-out"
+        className="absolute inset-0 bg-center bg-no-repeat mt-24 lg:mt-32"
         style={{ 
           backgroundImage: `url("${imagePath}")`,
           backgroundSize: 'cover',
@@ -165,6 +165,7 @@ const HeroSection = () => {
         role="img"
         aria-label={currentBanner.altText}
       />
+
 {/* 
       Optional overlay for better text readability */}
       {/* <div className="absolute inset-0 bg-black/10" /> */}

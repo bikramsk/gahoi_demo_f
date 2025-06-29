@@ -183,18 +183,18 @@ const FIXED_CODES = {
     "Other": "99",
     // Chaurasi Regional Assembly sub-panchayats
     "Shivpuri": "69",
-    "Malhawani": "70",
-    "Pipara": "71",
-    "Semri": "72",
-    "Bamore Damaroun": "73",
-    "Manpura": "74",
-    "Pichhore": "75",
+    "Malhawani-Chaurasi": "70",
+    "Pipara-Chaurasi": "71",
+    "Semri-Chaurasi": "72",
+    "Bamore-Damaroun-Chaurasi": "73",
+    "Manpura-Chaurasi": "74",
+    "Pichhore-Chaurasi": "75",
     "Ashok Nagar": "76",
     "Bamore Kala": "77",
     "Guna": "78",
     "Gandhi Nagar": "79",
-    "Karera": "80",
-    "Bhonti": "81",
+    "Karera-Chaurasi": "80",
+    "Bhonti-Chaurasi": "81",
     "Dinara": "82",
   },
   // Gotra codes 
@@ -550,12 +550,16 @@ export const formatFormData = (data, displayPictureId = null) => {
     LocalPanchayat: data.localPanchayat ?? "",
     SubLocalPanchayat: data.subLocalPanchayat ?? "",
     State: data.state ?? "",
+    local_body: data.localBody ?? "",
+    gram_panchayat: data.gramPanchayat ?? ""
   } : {
     RegionalAssembly: "",
     LocalPanchayatName: "",
     LocalPanchayat: "",
     SubLocalPanchayat: "",
-    State: "", // Send empty string for non-listed states
+    State: "",
+    local_body: "",
+    gram_panchayat: ""
   };
 
   return {
@@ -564,8 +568,8 @@ export const formatFormData = (data, displayPictureId = null) => {
       father_mobile: data.familyDetails?.[0]?.mobileNumber ?? "",
       mother_name: data.familyDetails?.[1]?.name ?? "",
       mother_mobile: data.familyDetails?.[1]?.mobileNumber ?? "",
-      spouse_name: data.familyDetails?.[2]?.name ?? "",
-      spouse_mobile: data.familyDetails?.[2]?.mobileNumber ?? "",
+      spouse_name: data.spouseName || data.familyDetails?.[2]?.name || "",
+      spouse_mobile: data.spouseMobile || data.familyDetails?.[2]?.mobileNumber || "",
       gotra: data.marriageToAnotherCaste ? "Others" : (data.gotra ?? ""),
       aakna: data.marriageToAnotherCaste ? "Others" : (data.aakna ?? ""),
       siblingDetails: (data.familyDetails || [])
@@ -590,28 +594,22 @@ export const formatFormData = (data, displayPictureId = null) => {
         phone_number: child?.mobileNumber ?? ""
       })) || [],
     biographical_details: {
-      manglik_status: data.manglik ?? "",
-      Grah: data.grah ?? "",
-      Handicap: data.handicap ?? "",
-      is_married: data.isMarried ? "Married" : "Unmarried",
-      marriage_to_another_caste: data.marriageToAnotherCaste
-        ? "Married to Another Caste"
-        : "Same Caste Marriage",
+      is_married: data.isMarried || "Unmarried",
+      marriage_to_another_caste: data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage",
+      Gotra: data.marriageCommunity === "other" ? "Others" : (data.spouseGotra || "Others"),
+      Aakna: data.marriageCommunity === "other" ? "Others" : (data.spouseAakna || "Others"),
+      consider_second_marriage: data.considerSecondMarriage || false
     },
     personal_information: {
       full_name: data.name ?? "",
-      village: data.village ?? "",
       mobile_number: data.mobileNumber ?? "",
-      email_address: data.email ?? "",
+      email_address: data.email || null,
       display_picture: displayPictureId,
       Gender: data.gender ?? "",
       nationality: data.nationality ?? "",
       is_gahoi: data.isGahoi ?? "Yes",
     },
     work_information: {
-      occupation: data.occupation ?? "",
-      company_name: data.companyName ?? "",
-      work_area: data.workArea ?? "",
       industrySector: data.industrySector ?? "",
       businessSize: data.businessSize ?? "",
       workType: data.workType ?? "",
