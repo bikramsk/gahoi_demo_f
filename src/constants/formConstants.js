@@ -187,7 +187,7 @@ export const INITIAL_FORM_DATA = {
   spouseGotra: "",
   spouseAakna: "",
   considerSecondMarriage: false,
-  marriageToAnotherCaste: "Same Caste Marriage",
+  marriageToAnotherCaste: "",
   regionalAssembly: "",
   localPanchayat: "",
   localPanchayatName: "",

@@ -252,7 +252,9 @@ const RegistrationForm = () => {
   const [formData, setFormData] = useState(() => {
     const initialData = {
       ...INITIAL_FORM_DATA,
-      workCategory: "professional"
+      workCategory: "professional",
+      workType: "Professional",
+      employmentType: ""
     };
     
     // Only set mobile number if it exists in location state

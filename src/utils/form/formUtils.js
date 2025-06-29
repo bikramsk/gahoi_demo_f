@@ -595,9 +595,15 @@ export const formatFormData = (data, displayPictureId = null) => {
       })) || [],
     biographical_details: {
       is_married: data.isMarried || "Unmarried",
-      marriage_to_another_caste: data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage",
-      Gotra: data.marriageCommunity === "other" ? "Others" : (data.spouseGotra || "Others"),
-      Aakna: data.marriageCommunity === "other" ? "Others" : (data.spouseAakna || "Others"),
+      marriage_to_another_caste: data.marriageCommunity ? 
+        (data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage") 
+        : "",
+      Gotra: data.marriageCommunity ? 
+        (data.marriageCommunity === "other" ? "Others" : (data.spouseGotra || "")) 
+        : "",
+      Aakna: data.marriageCommunity ? 
+        (data.marriageCommunity === "other" ? "Others" : (data.spouseAakna || "")) 
+        : "",
       consider_second_marriage: data.considerSecondMarriage || false
     },
     personal_information: {
