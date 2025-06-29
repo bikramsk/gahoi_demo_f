@@ -254,7 +254,7 @@ const RegistrationForm = () => {
       ...INITIAL_FORM_DATA,
       workCategory: "professional",
       workType: "Professional",
-      employmentType: ""
+       employmentType: ""
     };
     
     // Only set mobile number if it exists in location state
@@ -4771,11 +4771,11 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               Local Body
             </label>
             <select
-              name="city"
-              value={formData.city || ""}
+              name="localBody"
+              value={formData.localBody || ""}
               onChange={handleInputChange}
               className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
-                hasError("city")
+                hasError("localBody")
                   ? "border-red-500 bg-red-50 error-field"
                   : "border-gray-300"
               }`}
@@ -5182,8 +5182,8 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                 ))
               )}
             </select>
-            {hasError("city") && (
-              <p className="text-red-500 text-xs">{errors.city}</p>
+            {hasError("localBody") && (
+              <p className="text-red-500 text-xs">{errors.localBody}</p>
             )}
           </div>
 
