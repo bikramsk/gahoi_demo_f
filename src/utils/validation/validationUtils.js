@@ -46,10 +46,8 @@ export const validateMarriageDate = (date, isMarried) => {
 };
 
 // Validate gotra based on marriage type
-export const validateGotra = (gotra, marriageToAnotherCaste) => {
-  if (!marriageToAnotherCaste && !gotra) {
-    return 'Gotra is required for same caste marriages';
-  }
+export const validateGotra = () => {
+  
   return '';
 };
 
@@ -163,7 +161,7 @@ export const validateStep = (step, formData) => {
     Object.assign(errors, workErrors);
   }
 
-  // ... rest of the existing validations ...
+  
 
   return errors;
 }; 
