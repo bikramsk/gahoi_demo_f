@@ -132,7 +132,7 @@ import ReactDOM from "react-dom";
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
-  : 'http://localhost:1337';
+  : 'http://localhost:1340';
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
@@ -4771,11 +4771,11 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               Local Body
             </label>
             <select
-              name="localBody"
-              value={formData.localBody || ""}
+              name="city"
+              value={formData.city || ""}
               onChange={handleInputChange}
               className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
-                hasError("localBody")
+                hasError("city")
                   ? "border-red-500 bg-red-50 error-field"
                   : "border-gray-300"
               }`}
@@ -5182,8 +5182,8 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                 ))
               )}
             </select>
-            {hasError("localBody") && (
-              <p className="text-red-500 text-xs">{errors.localBody}</p>
+            {hasError("city") && (
+              <p className="text-red-500 text-xs">{errors.city}</p>
             )}
           </div>
 

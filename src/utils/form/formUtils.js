@@ -550,7 +550,8 @@ export const formatFormData = (data, displayPictureId = null) => {
     LocalPanchayat: data.localPanchayat ?? "",
     SubLocalPanchayat: data.subLocalPanchayat ?? "",
     State: data.state ?? "",
-    local_body: data.localBody ?? "",
+    // local_body: data.localBody ?? "",
+    local_body: data.city ?? "",
     gram_panchayat: data.gramPanchayat ?? ""
   } : {
     RegionalAssembly: "",
