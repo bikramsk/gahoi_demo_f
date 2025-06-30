@@ -1,16 +1,53 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../custom/LanguageSwitcher';
 
+const API_BASE = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1337';
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState(null);
   const dropdownRef = useRef(null);
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
 
   const hindiTextClass = i18n.language === "hi" 
     ? "text-base lg:text-lg font-hindi" 
     : "text-sm md:text-xs lg:text-base font-english";
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const verifiedMobile = localStorage.getItem('verifiedMobile');
+      if (token && verifiedMobile) {
+        setIsAuthenticated(true);
+        // Fetch user data
+        fetch(`${API_BASE}/api/users/${verifiedMobile}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          setUserData(data);
+        })
+        .catch(console.error);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('verifiedMobile');
+    setIsAuthenticated(false);
+    setUserData(null);
+    navigate('/');
+  };
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -39,7 +76,7 @@ const Header = () => {
 
   const menuItems = [
     { to: '/', label: t('navigation.home') },
-    { to: '/login', label: t('navigation.login') },
+    ...(isAuthenticated ? [] : [{ to: '/login', label: t('navigation.login') }]),
     { to: '/about-us', label: t('navigation.about') },
     { to: '/our-team', label: t('navigation.team', 'Our Team') },
     { to: '/contact-us', label: t('navigation.contact') },
@@ -50,7 +87,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 bg-[#800000]">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#800000]">
       <nav className="container mx-auto px-4 py-2">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-3 z-50">
@@ -92,6 +129,32 @@ const Header = () => {
                   </Link>
                 </div>
               ))}
+              {isAuthenticated && (
+                <>
+                  <Link
+                    to="/my-account"
+                    className={`${hindiTextClass} text-white hover:text-yellow-200 transition-colors drop-shadow-lg px-1 lg:px-2 whitespace-nowrap flex items-center`}
+                  >
+                    <img 
+                      src={userData?.personal_information?.display_picture 
+                        ? `${API_BASE}${userData.personal_information.display_picture}` 
+                        : '/default-avatar.png'} 
+                      alt="Profile" 
+                      className="w-8 h-8 rounded-full mr-2"
+                      onError={(e) => {
+                        e.target.src = '/logo.png';
+                      }}
+                    />
+                    <span>{userData?.personal_information?.full_name || 'Profile'}</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className={`${hindiTextClass} text-white hover:text-yellow-200 transition-colors drop-shadow-lg px-1 lg:px-2 whitespace-nowrap`}
+                  >
+                    {t('navigation.logout', 'Logout')}
+                  </button>
+                </>
+              )}
             </div>
             <div className="ml-4">
               <LanguageSwitcher />
@@ -126,6 +189,36 @@ const Header = () => {
                       {item.label}
                     </Link>
                   ))}
+                  {isAuthenticated && (
+                    <>
+                      <Link
+                        to="/my-account"
+                        className={`${hindiTextClass} block text-white hover:text-yellow-200 py-2 text-lg font-medium flex items-center`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <img 
+                          src={userData?.personal_information?.display_picture 
+                            ? `${API_BASE}${userData.personal_information.display_picture}` 
+                            : '/default-avatar.png'} 
+                          alt="Profile" 
+                          className="w-8 h-8 rounded-full mr-2"
+                          onError={(e) => {
+                            e.target.src = '/logo.png';
+                          }}
+                        />
+                        <span>{userData?.personal_information?.full_name || 'Profile'}</span>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsMenuOpen(false);
+                        }}
+                        className={`${hindiTextClass} block text-white hover:text-yellow-200 py-2 text-lg font-medium text-left w-full`}
+                      >
+                        {t('navigation.logout', 'Logout')}
+                      </button>
+                    </>
+                  )}
                   <div className="mt-4 border-t border-red-700 pt-4">
                     <LanguageSwitcher />
                   </div>
