@@ -1115,6 +1115,35 @@
     "buttons": {
       "registerNow": "Register Now",
       "joinEvent": "Join the Event"
+    },
+    "committees": {
+      "mainTitle": "PARICHAY SAMMELAN COMMITTEES",
+      "registration": {
+        "title": "Registration Committee",
+        "members": {
+          "ramPrakash": "Shri Ram Prakash Soni",
+          "rameshGandhi": "Shri Ramesh Babu Gandhi",
+          "omPrakash": "Shri Om Prakash Karikhmau",
+          "mahadev": "Shri Mahadev Prasad Neekhra",
+          "priyanka": "Smt. Priyanka Kuchia"
+        }
+      },
+      "patrika": {
+        "title": "Patrika/Advertisement Committee",
+        "members": {
+          "radheshyam": "Shri Radheshyam Seth",
+          "chetna": "Smt. Chetna Neekhra"
+        }
+      },
+      "accommodation": {
+        "title": "Accommodation Committee",
+        "members": {
+          "sanjeev": "Shri Sanjeev Neekhra",
+          "ramesh": "Shri Ramesh Seth",
+          "pawan": "Shri Pawan Nagariya",
+          "neelam": "Smt. Neelam Reja"
+        }
+      }
     }
   }
 } 

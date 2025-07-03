@@ -1264,6 +1264,35 @@
     "buttons": {
       "registerNow": "अभी रजिस्टर करें",
       "joinEvent": "कार्यक्रम में शामिल हों"
+    },
+    "committees": {
+      "mainTitle": "परिचय सम्मेलन समिति",
+      "registration": {
+        "title": "पंजीकरण समिति",
+        "members": {
+          "ramPrakash": "श्री राम प्रकाश सोनी",
+          "rameshGandhi": "श्री रमेश बाबू गांधी",
+          "omPrakash": "श्री ओम प्रकाश करिखमऊ",
+          "mahadev": "श्री महादेव प्रसाद नीखरा",
+          "priyanka": "श्रीमती प्रियंका कुचिया"
+        }
+      },
+      "patrika": {
+        "title": "पत्रिका/विज्ञापन समिति",
+        "members": {
+          "radheshyam": "श्री राधेश्याम सेठ",
+          "chetna": "श्रीमती चेतना नीखरा"
+        }
+      },
+      "accommodation": {
+        "title": "आवास समिति",
+        "members": {
+          "sanjeev": "श्री संजीव नीखरा",
+          "ramesh": "श्री रमेश सेठ",
+          "pawan": "श्री पवन नगरिया",
+          "neelam": "श्रीमती नीलम रेजा"
+        }
+      }
     }
   }
 } 
