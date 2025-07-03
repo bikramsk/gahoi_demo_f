@@ -531,14 +531,13 @@ const Login = () => {
     if (!validateForm()) return;
 
     // Existing User Flow - MPIN Login
-    if (userExists && hasMpin) {
+    if (userExists && hasMpin && showMpinInput) {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
         console.log('MPIN verification response:', response);
         
         if (response.jwt) {
-          
           localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           
@@ -558,9 +557,8 @@ const Login = () => {
       return;
     }
 
-    // New User Flow
+    // Send OTP Flow (both new users and existing users choosing OTP)
     if (!showOtpInput) {
-      // Step 1: Send WhatsApp OTP
       setLoading(true);
       try {
         const result = await sendWhatsAppOTP(formData.mobileNumber);
@@ -578,17 +576,26 @@ const Login = () => {
       } finally {
         setLoading(false);
       }
-    } else if (showOtpInput && !showMpinCreation) {
-      // Step 2: Verify OTP
+    } else if (showOtpInput) {
+      // Verify OTP Flow
       setLoading(true);
       try {
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          // New user must create MPIN
-          setShowMpinCreation(true);
-          setCurrentStep(3);
+          
+          // If user exists, redirect to home page
+          if (userExists) {
+            navigate('/', { replace: true });
+            return;
+          }
+          
+          // Only show MPIN creation for new users
+          if (!userExists) {
+            setShowMpinCreation(true);
+            setCurrentStep(3);
+          }
         }
       } catch (error) {
         setErrors({
@@ -598,7 +605,7 @@ const Login = () => {
         setLoading(false);
       }
     } else if (showMpinCreation) {
-      // Step 3: Create MPIN and complete registration
+      // MPIN creation only happens for new users
       if (validateMpin()) {
         setLoading(true);
         try {
@@ -671,14 +678,15 @@ const Login = () => {
     setProcessSteps(updatedSteps);
   }, [currentStep]);
 
-  // Add switch to OTP option
+  // Update switchToOTP function to properly handle the transition
   const switchToOTP = () => {
     setShowMpinInput(false);
     setShowOtpInput(false);
     setFormData(prev => ({ ...prev, mpin: '', otp: '' }));
     setErrors({});
     setAuthMode('otp');
-    setHasMpin(false);  // Reset MPIN flag to allow OTP flow
+    // Don't reset hasMpin since the user still has a MPIN
+    // setHasMpin(false);  // Remove this line
   };
 
   return (
