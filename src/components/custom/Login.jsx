@@ -7,7 +7,7 @@ import { getLoginPageData } from "../../data/loader";
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
-  : 'http://localhost:1337'; 
+  : 'http://localhost:1340'; 
 
 const WHATSAPP_API_URL = 'https://api.gahoishakti.in/api/whatsapp/send';
 
@@ -173,7 +173,8 @@ const verifyMPIN = async (mobileNumber, mpin) => {
       throw new Error(errorMessage);
     }
 
-    return JSON.parse(responseText);
+    const data = JSON.parse(responseText);
+    return data;
   } catch (error) {
     console.error('Error verifying MPIN:', error);
     throw error;
@@ -238,6 +239,7 @@ const Login = () => {
     mpin: '',
     confirmMpin: ''
   });
+  const [isCheckingUser, setIsCheckingUser] = useState(false);
 
   React.useEffect(() => {
     const loadPageData = async () => {
@@ -268,6 +270,7 @@ const Login = () => {
   useEffect(() => {
     const checkUser = async () => {
       if (formData.mobileNumber.length === 10) {
+        setIsCheckingUser(true);
         try {
           const API_TOKEN = localStorage.getItem('token');
           const response = await fetch(`${API_BASE}/api/check-user-mpin/${formData.mobileNumber}`, {
@@ -301,6 +304,8 @@ const Login = () => {
             ...prev,
             mobileNumber: 'Failed to check user status. Please try again.'
           }));
+        } finally {
+          setIsCheckingUser(false);
         }
       }
     };
@@ -530,12 +535,20 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
+        console.log('MPIN verification response:', response);
+        
         if (response.jwt) {
-          localStorage.setItem('token', response.jwt);
+          
+          localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          navigate('/my-account');
+          
+          // Redirect to homepage 
+          console.log('MPIN verified, redirecting to homepage');
+          navigate('/', { replace: true });
+          return;
         }
       } catch (error) {
+        console.error('Login error:', error);
         setErrors({
           mpin: error.message || 'Invalid MPIN'
         });
@@ -571,7 +584,7 @@ const Login = () => {
       try {
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
         if (response.jwt) {
-          localStorage.setItem('token', response.jwt);
+          localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           // New user must create MPIN
           setShowMpinCreation(true);
@@ -664,6 +677,8 @@ const Login = () => {
     setShowOtpInput(false);
     setFormData(prev => ({ ...prev, mpin: '', otp: '' }));
     setErrors({});
+    setAuthMode('otp');
+    setHasMpin(false);  // Reset MPIN flag to allow OTP flow
   };
 
   return (
@@ -841,7 +856,7 @@ const Login = () => {
                 </div>
 
                 {/* Name Input - Only show after mobile verification for new users */}
-                {!userExists && formData.mobileNumber.length === 10 && !showOtpInput && (
+                {!isCheckingUser && !userExists && formData.mobileNumber.length === 10 && !showOtpInput && (
                   <div className="space-y-1 sm:space-y-2">
                     <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">

@@ -129,6 +129,7 @@ import {
   VIDISHA_GRAM_PANCHAYATS,
 } from "../../constants/locationData";
 import ReactDOM from "react-dom";
+import PreviousMarriageSection from './PreviousMarriageSection';
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
@@ -1481,6 +1482,8 @@ const RegistrationForm = () => {
         displayPictureId
       );
 
++     console.log('Payload to Strapi:', strapiData);
+
       const response = await fetch(
         // `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages`,
         `${API_BASE}/api/registration-pages`,
@@ -2215,6 +2218,260 @@ const RegistrationForm = () => {
               </div>
             </div>
 
+            
+           {/* Siblings Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-purple-600"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                  </svg>
+                  Siblings Information
+                </h3>
+                {formData.familyDetails.filter(
+                  (member) => member.relation === "Sibling"
+                ).length < MAX_SIBLINGS && (
+                  <button
+                    type="button"
+                    onClick={addSibling}
+                    className="inline-flex items-center px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-1"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Add Sibling
+                  </button>
+                )}
+              </div>
+              <div className="p-6">
+                <div className="space-y-6">
+                  {formData.familyDetails
+                    .filter((member) => member.relation === "Sibling")
+                    .map((member, siblingIndex) => {
+                      const index = formData.familyDetails.indexOf(member);
+                      return (
+                        <div
+                          key={index}
+                          className="bg-gray-50 rounded-lg p-4 space-y-4 relative"
+                        >
+                          {/* Add Remove Button for Siblings */}
+                          {index > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => removeSibling(index)}
+                              className="absolute top-2 right-2 p-1 text-red-600 hover:text-red-800 transition-colors duration-200"
+                              title="Remove Sibling"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-4">
+                              <select
+                                value={member.siblingRelation || ""}
+                                onChange={(e) =>
+                                  handleFamilyDetailChange(
+                                    index,
+                                    "siblingRelation",
+                                    e.target.value
+                                  )
+                                }
+                                className="block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+                              >
+                                <option value="">Select Relation</option>
+                                {SIBLING_RELATION_OPTIONS.map((rel) => (
+                                  <option key={rel} value={rel}>
+                                    {rel}
+                                  </option>
+                                ))}
+                              </select>
+                              <input
+                                type="text"
+                                value={member.name}
+                                onChange={(e) =>
+                                  handleFamilyDetailChange(
+                                    index,
+                                    "name",
+                                    e.target.value
+                                  )
+                                }
+                                className="block w-full px-4 py-2.5 text-gray-700 bg-white rounded-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+                                placeholder={`Sibling ${
+                                  siblingIndex + 1
+                                }'s name`}
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <div className="flex gap-2">
+                                <input
+                                  type="tel"
+                                  value={member.mobileNumber}
+                                  onChange={(e) =>
+                                    handleFamilyDetailChange(
+                                      index,
+                                      "mobileNumber",
+                                      e.target.value
+                                    )
+                                  }
+                             
+                                  className="block flex-1 px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+                                  pattern="[0-9]*"
+                                  inputMode="numeric"
+                                  maxLength={10}
+                                  placeholder="Mobile number"
+                                />
+                                {member.mobileNumber?.length === 10 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => openWhatsAppShare(member.mobileNumber)}
+                                    className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+                                    title="Invite to join"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-5 w-5"
+                                      viewBox="0 0 20 20"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                              <input
+                                type="number"
+                                value={member.age}
+                                onChange={(e) =>
+                                  handleFamilyDetailChange(
+                                    index,
+                                    "age",
+                                    e.target.value
+                                  )
+                                }
+                                className={`block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                                  hasFamilyError(index, "age")
+                                    ? "border-red-500 bg-red-50"
+                                    : "border-gray-300"
+                                }`}
+                                placeholder="Age"
+                                min="0"
+                                max="120"
+                              />
+                              {hasFamilyError(index, "age") && (
+                                <p className="text-red-500 text-xs">
+                                  Age is required
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-6">
+                            <div className="space-y-1">
+                              <div
+                                className={`flex items-center space-x-6 px-4 py-2.5 border rounded-lg ${
+                                  hasFamilyError(index, "gender")
+                                    ? "border-red-500 bg-red-50"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                <label className="inline-flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`gender-${index}`}
+                                    value="Male"
+                                    checked={member.gender === "Male"}
+                                    onChange={(e) =>
+                                      handleFamilyDetailChange(
+                                        index,
+                                        "gender",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-700">
+                                    Male
+                                  </span>
+                                </label>
+                                <label className="inline-flex items-center">
+                                  <input
+                                    type="radio"
+                                    name={`gender-${index}`}
+                                    value="Female"
+                                    checked={member.gender === "Female"}
+                                    onChange={(e) =>
+                                      handleFamilyDetailChange(
+                                        index,
+                                        "gender",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                                  />
+                                  <span className="ml-2 text-sm text-gray-700">
+                                    Female
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+
+                            <select
+                              value={member.maritalStatus}
+                              onChange={(e) =>
+                                handleFamilyDetailChange(
+                                  index,
+                                  "maritalStatus",
+                                  e.target.value
+                                )
+                              }
+                              className={`px-4 py-2 text-sm text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200${
+                                hasFamilyError(index, "maritalStatus")
+                                  ? "border-red-500 bg-red-50"
+                                  : "border-gray-300"
+                              }`}
+                            >
+                              <option value="">Marital Status</option>
+                              {MARITAL_STATUS_OPTIONS.map((status) => (
+                                <option key={status} value={status}>
+                                  {status}
+                                </option>
+                              ))}
+                            </select>
+
+                           
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            </div>
+
             {/* Marital Status Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-purple-50 to-white px-6 py-4 border-b border-gray-100">
@@ -2700,260 +2957,16 @@ const RegistrationForm = () => {
             </div>
             )}
 
-           {/* Siblings Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 text-purple-600"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                  </svg>
-                  Siblings Information
-                </h3>
-                {formData.familyDetails.filter(
-                  (member) => member.relation === "Sibling"
-                ).length < MAX_SIBLINGS && (
-                  <button
-                    type="button"
-                    onClick={addSibling}
-                    className="inline-flex items-center px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Add Sibling
-                  </button>
-                )}
-              </div>
-              <div className="p-6">
-                <div className="space-y-6">
-                  {formData.familyDetails
-                    .filter((member) => member.relation === "Sibling")
-                    .map((member, siblingIndex) => {
-                      const index = formData.familyDetails.indexOf(member);
-                      return (
-                        <div
-                          key={index}
-                          className="bg-gray-50 rounded-lg p-4 space-y-4 relative"
-                        >
-                          {/* Add Remove Button for Siblings */}
-                          {index > 2 && (
-                            <button
-                              type="button"
-                              onClick={() => removeSibling(index)}
-                              className="absolute top-2 right-2 p-1 text-red-600 hover:text-red-800 transition-colors duration-200"
-                              title="Remove Sibling"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </button>
-                          )}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-4">
-                              <select
-                                value={member.siblingRelation || ""}
-                                onChange={(e) =>
-                                  handleFamilyDetailChange(
-                                    index,
-                                    "siblingRelation",
-                                    e.target.value
-                                  )
-                                }
-                                className="block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
-                              >
-                                <option value="">Select Relation</option>
-                                {SIBLING_RELATION_OPTIONS.map((rel) => (
-                                  <option key={rel} value={rel}>
-                                    {rel}
-                                  </option>
-                                ))}
-                              </select>
-                              <input
-                                type="text"
-                                value={member.name}
-                                onChange={(e) =>
-                                  handleFamilyDetailChange(
-                                    index,
-                                    "name",
-                                    e.target.value
-                                  )
-                                }
-                                className="block w-full px-4 py-2.5 text-gray-700 bg-white rounded-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
-                                placeholder={`Sibling ${
-                                  siblingIndex + 1
-                                }'s name`}
-                              />
-                            </div>
-                            <div className="space-y-4">
-                              <div className="flex gap-2">
-                                <input
-                                  type="tel"
-                                  value={member.mobileNumber}
-                                  onChange={(e) =>
-                                    handleFamilyDetailChange(
-                                      index,
-                                      "mobileNumber",
-                                      e.target.value
-                                    )
-                                  }
-                             
-                                  className="block flex-1 px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
-                                  pattern="[0-9]*"
-                                  inputMode="numeric"
-                                  maxLength={10}
-                                  placeholder="Mobile number"
-                                />
-                                {member.mobileNumber?.length === 10 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => openWhatsAppShare(member.mobileNumber)}
-                                    className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-                                    title="Invite to join"
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      className="h-5 w-5"
-                                      viewBox="0 0 20 20"
-                                      fill="currentColor"
-                                    >
-                                      <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
-                                    </svg>
-                                  </button>
-                                )}
-                              </div>
-                              <input
-                                type="number"
-                                value={member.age}
-                                onChange={(e) =>
-                                  handleFamilyDetailChange(
-                                    index,
-                                    "age",
-                                    e.target.value
-                                  )
-                                }
-                                className={`block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
-                                  hasFamilyError(index, "age")
-                                    ? "border-red-500 bg-red-50"
-                                    : "border-gray-300"
-                                }`}
-                                placeholder="Age"
-                                min="0"
-                                max="120"
-                              />
-                              {hasFamilyError(index, "age") && (
-                                <p className="text-red-500 text-xs">
-                                  Age is required
-                                </p>
-                              )}
-                            </div>
-                          </div>
 
-                          <div className="flex flex-wrap items-center gap-6">
-                            <div className="space-y-1">
-                              <div
-                                className={`flex items-center space-x-6 px-4 py-2.5 border rounded-lg ${
-                                  hasFamilyError(index, "gender")
-                                    ? "border-red-500 bg-red-50"
-                                    : "border-gray-300"
-                                }`}
-                              >
-                                <label className="inline-flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`gender-${index}`}
-                                    value="Male"
-                                    checked={member.gender === "Male"}
-                                    onChange={(e) =>
-                                      handleFamilyDetailChange(
-                                        index,
-                                        "gender",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-700">
-                                    Male
-                                  </span>
-                                </label>
-                                <label className="inline-flex items-center">
-                                  <input
-                                    type="radio"
-                                    name={`gender-${index}`}
-                                    value="Female"
-                                    checked={member.gender === "Female"}
-                                    onChange={(e) =>
-                                      handleFamilyDetailChange(
-                                        index,
-                                        "gender",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                                  />
-                                  <span className="ml-2 text-sm text-gray-700">
-                                    Female
-                                  </span>
-                                </label>
-                              </div>
-                            </div>
-
-                            <select
-                              value={member.maritalStatus}
-                              onChange={(e) =>
-                                handleFamilyDetailChange(
-                                  index,
-                                  "maritalStatus",
-                                  e.target.value
-                                )
-                              }
-                              className={`px-4 py-2 text-sm text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200${
-                                hasFamilyError(index, "maritalStatus")
-                                  ? "border-red-500 bg-red-50"
-                                  : "border-gray-300"
-                              }`}
-                            >
-                              <option value="">Marital Status</option>
-                              {MARITAL_STATUS_OPTIONS.map((status) => (
-                                <option key={status} value={status}>
-                                  {status}
-                                </option>
-                              ))}
-                            </select>
-
-                           
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </div>
-
-           
+            {/* Previous Marriage Section - Only show if Widow/Widower or Divorced AND considerSecondMarriage is true */}
+            {( (formData.isMarried === "Widow/Widower" || formData.isMarried === "Divorced") && formData.considerSecondMarriage === true ) && (
+              <PreviousMarriageSection 
+                formData={formData}
+                setFormData={setFormData}
+                errors={errors}
+                setErrors={setErrors}
+              />
+            )}
           </div>
         );
 
@@ -2987,8 +3000,8 @@ const RegistrationForm = () => {
                 </label>
                 <div className="flex items-center space-x-8 px-4 py-2.5 border border-gray-300 rounded-lg bg-white">
                   <label className="inline-flex items-center cursor-pointer">
-                    <input
-                      type="radio"
+                  <input
+                    type="radio"
                       name="workCategory"
                       value="business_owner"
                       checked={formData.workCategory === "business_owner"}
@@ -3001,10 +3014,10 @@ const RegistrationForm = () => {
                           employmentType: "Business Owner"
                         });
                       }}
-                      className="h-4 w-4 text-red-700 focus:ring-red-500"
-                    />
+                    className="h-4 w-4 text-red-700 focus:ring-red-500"
+                  />
                     <span className="ml-2 text-sm text-gray-700">Business Owner</span>
-                  </label>
+                </label>
                   <label className="inline-flex items-center cursor-pointer">
                     <input
                       type="radio"
@@ -3682,7 +3695,7 @@ if (formData.state === "Madhya Pradesh" && (formData.city === "Lakhnadon" || for
 
 }
 
-  
+
 
     // Bundelkhand Regional Assembly cases
     if (formData.regionalAssembly === "Bundelkhand Regional Assembly") {
@@ -3808,7 +3821,7 @@ if (formData.state === "Madhya Pradesh" && (formData.city === "Lakhnadon" || for
       return [formData.district];
 
       
-      
+
     }
 
 
@@ -3870,7 +3883,7 @@ if (formData.state === "Madhya Pradesh" && (formData.city === "Lakhnadon" || for
         ["Laundi", "Nowgong", "Chhatarpur", "Harpalpur", "Bada Malhera"].includes(formData.city)) {
       return ["Chhatarpur"];
     }
- 
+
     if (formData.district === "Chhatarpur") {
       if (formData.regionalAssembly === "Vindhya Regional Assembly" && formData.localPanchayatName === "Gahoi Vaishya Panchayat") 
         return ["Chhatarpur"];
@@ -3930,9 +3943,9 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           }
 
           
-        
+    
           //Sagar
-
+    
           if (
                   (formData.localPanchayatName === "Gahoi Vaishya Panchayat" && 
                   (formData.city === "Rehli" || formData.district === "Sagar")) ||
@@ -4177,7 +4190,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           if (formData.localPanchayat === "Guna") return ["Raghavgarh"];
         }
       }
-      
+
 
       // Guna district cases
       if (formData.district === "Rewa") {
@@ -4185,7 +4198,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           if (formData.localPanchayat === "Rewa") return ["Rewa"];
         }
       }
-
+      
       // Jabalpur district cases
       if (formData.district === "Jabalpur") {
         if (formData.localPanchayatName === "Gahoi Vaishya Panchayat") {

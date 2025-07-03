@@ -18,8 +18,8 @@ export const FORM_STEPS = [
       "state",
       "regionalAssembly",
       "localPanchayatName",
-      "localPanchayat",
-      "subLocalPanchayat",
+      "city",
+     "gramPanchayat"
     ],
   },
   { 
@@ -43,13 +43,17 @@ export const FORM_STEPS = [
 
 export const REQUIRED_FIELDS = [
   "name", 
-  "mobileNumber", 
-  "bloodGroup",
+  "mobileNumber",
   "birthDate", 
-  "education", 
   "gender",
   "nationality",
-  "state", 
+  "state",
+  "district",
+  "local_body",
+  "city",
+  "gramPanchayat",
+  "localPanchayat",
+  "subLocalPanchayat",
   "workType"
 ];
 

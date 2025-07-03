@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://admin.gahoishakti.in'
-  : 'http://localhost:1337';
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1340';
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal Information', icon: 'user' },
@@ -21,7 +21,7 @@ const UserProfile = () => {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('personal');
 
-  // Global error boundary
+
   useEffect(() => {
     const handleError = (error) => {
       console.error('Error in UserProfile:', error);
@@ -43,72 +43,123 @@ const UserProfile = () => {
       try {
         const mobileNumber = localStorage.getItem('verifiedMobile');
         const token = localStorage.getItem('token');
-        
-    
+        const documentId = localStorage.getItem('documentId');
 
-        if (!mobileNumber) {
-          setError('Please login again to continue');
-          setTimeout(() => navigate('/login'), 2000);
-          return;
-        }
-
-        if (!token) {
-          setError('Session expired. Please login again.');
-          setTimeout(() => navigate('/login'), 2000);
-          return;
-        }
-
-        const apiUrl = `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=*`;
-       
-
-        const profileResponse = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
+        console.log('Auth check:', { 
+          hasMobile: !!mobileNumber, 
+          hasToken: !!token,
+          hasDocumentId: !!documentId,
+          apiBase: API_BASE 
         });
 
-        
+        if (!token) {
+          console.log('Missing auth token');
+          setError('Please login again to continue');
+          localStorage.clear();
+          setTimeout(() => navigate('/login', { replace: true }), 2000);
+          return;
+        }
 
-        if (!profileResponse.ok) {
-          if (profileResponse.status === 401 || profileResponse.status === 403) {
-           
-            localStorage.removeItem('token');
-            localStorage.removeItem('verifiedMobile');
-            setError('Session expired. Please login again.');
-            setTimeout(() => navigate('/login'), 2000);
-            return;
+        let profileData = null;
+        let lastError = null;
+
+        // Try different approaches 
+        const attempts = [
+          // Attempt 1: Try with mobile number filter
+          async () => {
+            if (mobileNumber) {
+              // console.log('Attempting to fetch by mobile number:', mobileNumber);
+              const response = await fetch(
+                `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}&populate=*`,
+                {
+                  headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              if (response.ok) {
+                const data = await response.json();
+                // console.log('Mobile number fetch response:', data);
+                return data.data?.[0];
+              }
+              lastError = `Mobile number fetch failed with status: ${response.status}`;
+            }
+            return null;
+          },
+
+          // Attempt 2: Try with document ID if available
+          async () => {
+            if (documentId) {
+              // console.log('Attempting to fetch by document ID:', documentId);
+              const response = await fetch(
+                `${API_BASE}/api/registration-pages/${documentId}?populate=*`,
+                {
+                  headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              if (response.ok) {
+                const data = await response.json();
+                // console.log('Document ID fetch response:', data);
+                return data.data;
+              }
+              lastError = `Document ID fetch failed with status: ${response.status}`;
+            }
+            return null;
+          },
+
+          // Attempt 3: Get all registration pages and filter client-side
+          async () => {
+            // console.log('Attempting to fetch all registration pages');
+            const response = await fetch(
+              `${API_BASE}/api/registration-pages?populate=*`,
+              {
+                headers: { 
+                  'Authorization': `Bearer ${token}`,
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+            if (response.ok) {
+              const data = await response.json();
+              // console.log('All registration pages response:', data);
+              return data.data?.find(entry => 
+                entry.attributes?.personal_information?.mobile_number === mobileNumber
+              );
+            }
+            lastError = `All pages fetch failed with status: ${response.status}`;
+            return null;
           }
-          throw new Error(`Failed to fetch profile data: ${profileResponse.status}`);
+        ];
+
+        // Try each method 
+        for (const attempt of attempts) {
+          try {
+            const result = await attempt();
+            if (result) {
+              profileData = result;
+              break;
+            }
+          } catch (error) {
+            console.warn('Attempt failed:', error);
+            lastError = error.message;
+            continue;
+          }
         }
 
-        const profileData = await profileResponse.json();
+        if (!profileData) {
+          throw new Error(`Could not fetch user data. Last error: ${lastError}`);
+        }
+
        
-
-        if (!profileData.data || profileData.data.length === 0) {
-          setError('Please complete your registration first.');
-          setTimeout(() => {
-            navigate('/registration', { 
-              state: { 
-                mobileNumber,
-                fromLogin: true 
-              } 
-            });
-          }, 2000);
-          return;
-        }
-
-        const profile = profileData.data[0];
-        if (!profile || !profile.attributes) {
-          setError('Profile not found or incomplete.');
-          setLoading(false);
-          return;
-        }
-
-        const attrs = profile.attributes;
-        const transformedData = {
+        const attrs = profileData.attributes || profileData;
+        setUserData({
           personal_information: attrs.personal_information || {},
           family_details: attrs.family_details || {},
           biographical_details: attrs.biographical_details || {},
@@ -117,15 +168,20 @@ const UserProfile = () => {
           child_name: attrs.child_name || [],
           your_suggestions: attrs.your_suggestions || {},
           gahoi_code: attrs.gahoi_code || '',
-          documentId: profile.id,
+          documentId: profileData.id,
           createdAt: attrs.createdAt,
           updatedAt: attrs.updatedAt,
           publishedAt: attrs.publishedAt
-        };
+        });
+        
+        
+        if (profileData.id && !localStorage.getItem('documentId')) {
+          localStorage.setItem('documentId', profileData.id);
+        }
 
-        setUserData(transformedData);
         setLoading(false);
         setError(null);
+
       } catch (error) {
         console.error('Error fetching profile data:', error);
         setError('Failed to load profile. Please try again.');
@@ -135,12 +191,6 @@ const UserProfile = () => {
 
     fetchUserData();
   }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('verifiedMobile');
-    navigate('/login');
-  };
 
   const renderIcon = (iconName) => {
     switch (iconName) {
@@ -194,6 +244,14 @@ const UserProfile = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+        <span>Failed to load profile</span>
+      </div>
+    );
+  }
+
   // Initialize empty data structure if no data is available
   const emptyData = {
     personal_information: {},
@@ -223,8 +281,9 @@ const UserProfile = () => {
             </div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <dl className="divide-y divide-gray-200">
-                {Object.entries(displayData.personal_information || {}).map(([key, value]) => (
-                  key !== 'display_picture' && (
+                {Object.entries(displayData.personal_information || {})
+                  .filter(([key]) => key !== 'id' && key !== 'display_picture')
+                  .map(([key, value]) => (
                     <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
                       <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                         {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -233,8 +292,7 @@ const UserProfile = () => {
                         {value?.toString() || 'N/A'}
                       </dd>
                     </div>
-                  )
-                ))}
+                  ))}
               </dl>
             </div>
           </section>
@@ -248,16 +306,18 @@ const UserProfile = () => {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <dl className="divide-y divide-gray-200">
                 {Object.entries(displayData.family_details || {}).length > 0 ? (
-                  Object.entries(displayData.family_details || {}).map(([key, value]) => (
-                    <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                      <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
-                        {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                      </dt>
-                      <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                        {value?.toString() || 'N/A'}
-                      </dd>
-                    </div>
-                  ))
+                  Object.entries(displayData.family_details || {})
+                    .filter(([key]) => key !== 'id')
+                    .map(([key, value]) => (
+                      <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                        <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
+                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </dt>
+                        <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          {value?.toString() || 'N/A'}
+                        </dd>
+                      </div>
+                    ))
                 ) : (
                   <div className="px-4 py-6 text-center text-gray-500">
                     No family details available
@@ -275,8 +335,9 @@ const UserProfile = () => {
             </div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <dl className="divide-y divide-gray-200">
-                {Object.entries(displayData.biographical_details || {}).length > 0 ? (
-                  Object.entries(displayData.biographical_details || {}).map(([key, value]) => (
+                {Object.entries(displayData.biographical_details || {})
+                  .filter(([key]) => key !== 'id')
+                  .map(([key, value]) => (
                     <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
                       <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                         {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -285,12 +346,7 @@ const UserProfile = () => {
                         {value?.toString() || 'N/A'}
                       </dd>
                     </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-6 text-center text-gray-500">
-                    No biographical details available
-                  </div>
-                )}
+                  ))}
               </dl>
             </div>
           </section>
@@ -304,16 +360,18 @@ const UserProfile = () => {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <dl className="divide-y divide-gray-200">
                 {Object.entries(displayData.work_information || {}).length > 0 ? (
-                  Object.entries(displayData.work_information || {}).map(([key, value]) => (
-                    <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                      <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
-                        {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                      </dt>
-                      <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                        {value?.toString() || 'N/A'}
-                      </dd>
-                    </div>
-                  ))
+                  Object.entries(displayData.work_information || {})
+                    .filter(([key]) => key !== 'id')
+                    .map(([key, value]) => (
+                      <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                        <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
+                          {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </dt>
+                        <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          {value?.toString() || 'N/A'}
+                        </dd>
+                      </div>
+                    ))
                 ) : (
                   <div className="px-4 py-6 text-center text-gray-500">
                     No work information available
@@ -331,9 +389,10 @@ const UserProfile = () => {
             </div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <dl className="divide-y divide-gray-200">
-                {Object.entries(displayData.additional_details || {}).filter(([key]) => key !== 'regional_information').length > 0 ? (
-                  Object.entries(displayData.additional_details || {}).map(([key, value]) => (
-                    key !== 'regional_information' && (
+                {Object.entries(displayData.additional_details || {}).filter(([key]) => key !== 'regional_information' && key !== 'id').length > 0 ? (
+                  Object.entries(displayData.additional_details || {})
+                    .filter(([key]) => key !== 'regional_information' && key !== 'id')
+                    .map(([key, value]) => (
                       <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
                         <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
                           {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -342,8 +401,7 @@ const UserProfile = () => {
                           {value?.toString() || 'N/A'}
                         </dd>
                       </div>
-                    )
-                  ))
+                    ))
                 ) : (
                   <div className="px-4 py-6 text-center text-gray-500">
                     No additional details available
@@ -362,16 +420,18 @@ const UserProfile = () => {
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <dl className="divide-y divide-gray-200">
                 {Object.entries(displayData.additional_details?.regional_information || {}).length > 0 ? (
-                  Object.entries(displayData.additional_details?.regional_information || {}).map(([key, value]) => (
-                    <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                      <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
-                        {key.split(/(?=[A-Z])/).join(' ')}
-                      </dt>
-                      <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                        {value?.toString() || 'N/A'}
-                      </dd>
-                    </div>
-                  ))
+                  Object.entries(displayData.additional_details?.regional_information || {})
+                    .filter(([key]) => key !== 'id')
+                    .map(([key, value]) => (
+                      <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                        <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
+                          {key.split(/(?=[A-Z])/).join(' ')}
+                        </dt>
+                        <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          {value?.toString() || 'N/A'}
+                        </dd>
+                      </div>
+                    ))
                 ) : (
                   <div className="px-4 py-6 text-center text-gray-500">
                     No regional information available
@@ -387,7 +447,7 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-20">
+    <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-xl overflow-hidden">
           <div className="flex flex-col lg:flex-row">
@@ -409,7 +469,7 @@ const UserProfile = () => {
                   </button>
                 ))}
               </nav>
-            </div>
+              </div>
 
             {/* Content */}
             <div className="flex-1 p-4 lg:p-6">

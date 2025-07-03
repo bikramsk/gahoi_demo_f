@@ -5,12 +5,11 @@ import LanguageSwitcher from '../custom/LanguageSwitcher';
 
 const API_BASE = import.meta.env.MODE === 'production' 
   ? 'https://api.gahoishakti.in'
-  : 'http://localhost:1337';
+  : 'http://localhost:1340';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userData, setUserData] = useState(null);
   const dropdownRef = useRef(null);
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -25,17 +24,7 @@ const Header = () => {
       const verifiedMobile = localStorage.getItem('verifiedMobile');
       if (token && verifiedMobile) {
         setIsAuthenticated(true);
-        // Fetch user data
-        fetch(`${API_BASE}/api/users/${verifiedMobile}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-        .then(res => res.json())
-        .then(data => {
-          setUserData(data);
-        })
-        .catch(console.error);
+       
       }
     };
     checkAuth();
@@ -45,7 +34,6 @@ const Header = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('verifiedMobile');
     setIsAuthenticated(false);
-    setUserData(null);
     navigate('/');
   };
 
@@ -87,148 +75,137 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#800000]">
-      <nav className="container mx-auto px-4 py-2">
-        <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-3 z-50">
-            <img 
-              src="/logo.png" 
-              alt="Gahoi Logo" 
-              className="h-20 sm:h-14 md:h-16 lg:h-28 w-auto object-contain"
-            />
-          </Link>
-
-          <div className="flex items-center space-x-3">
-            {/* Hamburger icon */}
-            {!isMenuOpen && (
-              <button 
-                onClick={() => setIsMenuOpen(true)}
-                className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors z-50"
-                aria-label="Open menu"
+    <>
+      {/* Top Bar  */}
+      {isAuthenticated && (
+        <div className="bg-red-900 text-white w-full">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-end items-center py-1">
+              <Link
+                to="/my-account"
+                className="text-sm text-white hover:text-yellow-200 px-4 py-1 border-r border-red-800"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                {t('navigation.myProfile')}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-white hover:text-yellow-200 px-4 py-1"
+              >
+                {t('navigation.logout')}
               </button>
-            )}
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <div className="flex space-x-2 lg:space-x-4 items-center">
-              {menuItems.map((item) => (
-                <div 
-                  key={item.to}
-                  className="relative"
+      {/* Main Header */}
+      <header className="bg-[#800000]">
+        <nav className="container mx-auto px-4 py-2">
+          <div className="flex justify-between items-center">
+            <Link to="/" className="flex items-center space-x-3 z-50">
+              <img 
+                src="/logo.png" 
+                alt="Gahoi Logo" 
+                className="h-20 sm:h-14 md:h-16 lg:h-28 w-auto object-contain"
+              />
+            </Link>
+
+            <div className="flex items-center space-x-3">
+              {/* Hamburger icon */}
+              {!isMenuOpen && (
+                <button 
+                  onClick={() => setIsMenuOpen(true)}
+                  className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors z-50"
+                  aria-label="Open menu"
                 >
-                  <Link
-                    to={item.to}
-                    className={`${hindiTextClass} text-white hover:text-yellow-200 transition-colors drop-shadow-lg px-1 lg:px-2 whitespace-nowrap`}
-                  >
-                    {item.label}
-                  </Link>
-                </div>
-              ))}
-              {isAuthenticated && (
-                <>
-                  <Link
-                    to="/my-account"
-                    className={`${hindiTextClass} text-white hover:text-yellow-200 transition-colors drop-shadow-lg px-1 lg:px-2 whitespace-nowrap flex items-center`}
-                  >
-                    <img 
-                      src={userData?.personal_information?.display_picture 
-                        ? `${API_BASE}${userData.personal_information.display_picture}` 
-                        : '/default-avatar.png'} 
-                      alt="Profile" 
-                      className="w-8 h-8 rounded-full mr-2"
-                      onError={(e) => {
-                        e.target.src = '/logo.png';
-                      }}
-                    />
-                    <span>{userData?.personal_information?.full_name || 'Profile'}</span>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className={`${hindiTextClass} text-white hover:text-yellow-200 transition-colors drop-shadow-lg px-1 lg:px-2 whitespace-nowrap`}
-                  >
-                    {t('navigation.logout', 'Logout')}
-                  </button>
-                </>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
               )}
             </div>
-            <div className="ml-4">
-              <LanguageSwitcher />
-            </div>
-          </div>
 
-          {/* Mobile Menu */}
-          {isMenuOpen && (
-            <div 
-              ref={dropdownRef}
-              className="md:hidden fixed inset-0 top-[88px] bg-red-800/95 backdrop-blur-sm z-40"
-            >
-              {/* Close button */}
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-lg transition-colors z-50"
-                aria-label="Close menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <div className="container mx-auto px-4 py-4">
-                <div className="flex flex-col space-y-4">
-                  {menuItems.map((item) => (
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="flex space-x-2 lg:space-x-4 items-center">
+                {menuItems.map((item) => (
+                  <div 
+                    key={item.to}
+                    className="relative"
+                  >
                     <Link
-                      key={item.to}
                       to={item.to}
-                      className={`${hindiTextClass} block text-white hover:text-yellow-200 py-2 text-lg font-medium`}
-                      onClick={() => setIsMenuOpen(false)}
+                      className={`${hindiTextClass} text-white hover:text-yellow-200 transition-colors drop-shadow-lg px-1 lg:px-2 whitespace-nowrap`}
                     >
                       {item.label}
                     </Link>
-                  ))}
-                  {isAuthenticated && (
-                    <>
+                  </div>
+                ))}
+              </div>
+              <div className="ml-4">
+                <LanguageSwitcher />
+              </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {isMenuOpen && (
+              <div 
+                ref={dropdownRef}
+                className="md:hidden fixed inset-0 top-[88px] bg-red-800/95 backdrop-blur-sm z-40"
+              >
+                {/* Close button */}
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-lg transition-colors z-50"
+                  aria-label="Close menu"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <div className="container mx-auto px-4 py-4">
+                  <div className="flex flex-col space-y-4">
+                    {menuItems.map((item) => (
                       <Link
-                        to="/my-account"
-                        className={`${hindiTextClass} block text-white hover:text-yellow-200 py-2 text-lg font-medium flex items-center`}
+                        key={item.to}
+                        to={item.to}
+                        className={`${hindiTextClass} block text-white hover:text-yellow-200 py-2 text-lg font-medium`}
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <img 
-                          src={userData?.personal_information?.display_picture 
-                            ? `${API_BASE}${userData.personal_information.display_picture}` 
-                            : '/default-avatar.png'} 
-                          alt="Profile" 
-                          className="w-8 h-8 rounded-full mr-2"
-                          onError={(e) => {
-                            e.target.src = '/logo.png';
-                          }}
-                        />
-                        <span>{userData?.personal_information?.full_name || 'Profile'}</span>
+                        {item.label}
                       </Link>
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setIsMenuOpen(false);
-                        }}
-                        className={`${hindiTextClass} block text-white hover:text-yellow-200 py-2 text-lg font-medium text-left w-full`}
-                      >
-                        {t('navigation.logout', 'Logout')}
-                      </button>
-                    </>
-                  )}
-                  <div className="mt-4 border-t border-red-700 pt-4">
-                    <LanguageSwitcher />
+                    ))}
+                    {isAuthenticated && (
+                      <div className="border-t border-red-700 pt-4">
+                        <Link
+                          to="/my-account"
+                          className="block text-white hover:text-yellow-200 py-2 text-lg font-medium"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {t('navigation.myProfile')}
+                        </Link>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setIsMenuOpen(false);
+                          }}
+                          className="block text-white hover:text-yellow-200 py-2 text-lg font-medium text-left w-full"
+                        >
+                          {t('navigation.logout')}
+                        </button>
+                      </div>
+                    )}
+                    <div className="mt-4 border-t border-red-700 pt-4">
+                      <LanguageSwitcher />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      </nav>
-    </header>
+            )}
+          </div>
+        </nav>
+      </header>
+    </>
   );
 };
 

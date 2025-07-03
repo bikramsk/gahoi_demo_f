@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Helmet } from "react-helmet-async";
 import { useState } from 'react';
+import { Users } from 'lucide-react';
 
 const GotraAankna = () => {
   const { t, i18n } = useTranslation();
@@ -22,35 +23,20 @@ const GotraAankna = () => {
       </Helmet>
 
       {/* Hero Banner */}
-      <div className="relative w-full bg-red-800 h-[300px] sm:h-[400px] md:h-[500px]">
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-        <img
-          src="/gotra-bg.webp"
-          alt="Gotra & Aankna Background"
-          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay"
-        />
-        <div className="container mx-auto px-4 relative z-10 h-full flex items-center">
-          <div className="text-center w-full pt-12 sm:pt-16 md:pt-20">
-            <div className="p-3 md:p-5 bg-white/10 rounded-full w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 backdrop-blur-sm">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-full w-full text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                />
-              </svg>
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-red-900 via-red-800 to-orange-800"></div>
+        <div className="absolute inset-0 bg-[url('/gotra-bg.webp')] bg-cover bg-center opacity-20"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/40"></div>
+        
+        <div className="relative pt-16 pb-12 px-4">
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-6 shadow-xl">
+              <Users className="w-8 h-8 text-white" />
             </div>
-            <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 ${languageFontClass}`}>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
               {t('gotraAankna.title')}
             </h1>
-            <p className={`text-lg sm:text-xl md:text-2xl text-white opacity-90 max-w-3xl mx-auto px-4 ${languageFontClass}`}>
+            <p className="text-lg md:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed">
               {t('gotraAankna.subtitle')}
             </p>
           </div>

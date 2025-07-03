@@ -237,7 +237,7 @@ const OurTeam = () => {
       </Helmet>
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-red-800 to-red-900 pt-32 pb-20 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-red-800 to-red-900 pt-16 pb-12 overflow-hidden">
         <div className="absolute inset-0">
           <img 
             src="/ourteam-bg.webp" 
@@ -246,21 +246,14 @@ const OurTeam = () => {
           />
           <div className="absolute inset-0 bg-red-900/70"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-red-900/90 to-transparent"></div>
-          <div className="absolute inset-0" style={{
-            backgroundImage: "url('/ourteam-bg.webp')",
-            backgroundSize: 'cover',
-            backgroundlocation: 'center',
-            mixBlendMode: 'overlay',
-            opacity: 0.1
-          }}></div>
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="p-3 md:p-5 bg-white/10 rounded-full w-20 h-20 mx-auto mb-6 backdrop-blur-sm">
+            <div className="inline-flex items-center justify-center p-3 bg-white/10 rounded-full w-16 h-16 mx-auto mb-4 backdrop-blur-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-full w-full text-white"
+                className="h-8 w-8 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -273,7 +266,7 @@ const OurTeam = () => {
                 />
               </svg>
             </div>
-            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 ${languageFontClass}`}>
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 ${languageFontClass}`}>
               {t("team.hero.title")}
             </h1>
             <p className={`text-xl text-white/90 max-w-3xl mx-auto ${languageFontClass}`}>

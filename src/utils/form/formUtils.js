@@ -518,6 +518,75 @@ export const validateStep = (step, formData) => {
     });
   }
 
+  // Special validation for Previous Marriage Information
+  if (
+    formData.considerSecondMarriage === true ||
+    formData.considerSecondMarriage === 'true'
+  ) {
+    const prev = formData.previousMarriage || {};
+    const requiredPrevFields = [
+      'current_status',
+      'spouse_name',
+      'marriage_date',
+      'termination_date',
+      'termination_reason',
+      'expectations',
+      'current_living_with',
+      'future_living_with',
+      'children_living_details',
+      'partner_age_preference',
+      'partner_education_preference',
+      'partner_type_preference',
+      'location_preference',
+      'accept_partner_with_children',
+      'is_kundli_available',
+      'want_kundli_match',
+      'aadhaar_front',
+      'aadhaar_back',
+      'payment_proof',
+    ];
+
+    requiredPrevFields.forEach(field => {
+      if (
+        prev[field] === undefined ||
+        prev[field] === null ||
+        (typeof prev[field] === 'string' && prev[field].trim() === '')
+      ) {
+        errors[`previous_marriage.${field}`] = 'This field is required';
+      }
+    });
+
+    // Children array validation
+    if (!prev.children || prev.children.length === 0) {
+      errors['previous_marriage.children'] = 'At least one child entry is required';
+    } else {
+      prev.children.forEach((child, idx) => {
+        if (!child.child_name || !child.age || !child.gender) {
+          errors[`previous_marriage.children.${idx}`] = 'Child name, age, and gender are required';
+        }
+      });
+    }
+
+    // File uploads (IDs)
+    ['aadhaar_front', 'aadhaar_back', 'payment_proof'].forEach(field => {
+      if (!prev[field]) {
+        errors[`previous_marriage.${field}`] = 'This document is required';
+      }
+    });
+
+    // Divorce/Death certificate required based on currentStatus
+    if (prev.current_status === 'Divorced' && !prev.divorce_certificate) {
+      errors['previous_marriage.divorce_certificate'] = 'Divorce certificate is required';
+    }
+    // if ((prev.current_status === 'Widow' || prev.current_status === 'Widower') && !prev.death_certificate) {
+    //   errors['previous_marriage.death_certificate'] = 'Death certificate is required';
+    // }
+    // Kundli required if is_kundli_available is true
+    if (prev.is_kundli_available === true && !prev.kundli) {
+      errors['previous_marriage.kundli'] = 'Kundli is required';
+    }
+  }
+
   return errors;
 };
 
@@ -590,15 +659,13 @@ export const formatFormData = (data, displayPictureId = null) => {
       .filter(member => member?.relation === "Child")
       .map((child) => ({ 
         child_name: child?.name ?? "",
-        gender: child?.gender || null,
-        phone_number: child?.mobileNumber ?? ""
+        // gender: child?.gender || null,
+        // phone_number: child?.mobileNumber ?? ""
+        gender: child?.gender || null
       })) || [],
     biographical_details: {
       is_married: data.isMarried || "Unmarried",
-      marriage_to_another_caste: data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage",
-      Gotra: data.spouseGotra ?? "",
-      Aakna: data.spouseAakna ?? "",
-      consider_second_marriage: data.considerSecondMarriage || false
+      marriage_to_another_caste: data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage"
     },
     personal_information: {
       full_name: data.name ?? "",
@@ -626,7 +693,40 @@ export const formatFormData = (data, displayPictureId = null) => {
     your_suggestions: {
       suggestions: data.suggestions ?? "",
     },
-    gahoi_code: generatedGahoiCode
+    gahoi_code: generatedGahoiCode,
+    marital_status: data.maritalStatus ?? "",
+    consider_second_marriage: data.considerSecondMarriage ?? false,
+    // previous_marriage_info: data.previousMarriage,
+
+    previous_marriage_info: {
+      current_status: data.previousMarriage?.current_status || "",
+      spouse_name: data.previousMarriage?.spouse_name || "",
+      marriage_date: formatDate(data.previousMarriage?.marriage_date),
+      termination_date: formatDate(data.previousMarriage?.termination_date),
+      termination_reason: data.previousMarriage?.termination_reason || "",
+      expectations: data.previousMarriage?.expectations || "",
+      current_living_with: data.previousMarriage?.current_living_with || "",
+      future_living_with: data.previousMarriage?.future_living_with || "",
+      children_living_details: data.previousMarriage?.children_living_details || "",
+      partner_age_preference: data.previousMarriage?.partner_age_preference || "",
+      partner_education_preference: data.previousMarriage?.partner_education_preference || "",
+      partner_type_preference: data.previousMarriage?.partner_type_preference || "",
+      location_preference: data.previousMarriage?.location_preference || "",
+      accept_partner_with_children: data.previousMarriage?.accept_partner_with_children || false,
+      is_kundli_available: data.previousMarriage?.is_kundli_available || false,
+      want_kundli_match: data.previousMarriage?.want_kundli_match || false,
+      aadhaar_front: data.previousMarriage?.aadhaar_front || null,
+      aadhaar_back: data.previousMarriage?.aadhaar_back || null,
+      payment_proof: data.previousMarriage?.payment_proof || null,
+      divorce_certificate: data.previousMarriage?.divorce_certificate || null,
+      kundli: data.previousMarriage?.kundli || null,
+      children: (data.previousMarriage?.children || []).map(child => ({
+        child_name: child?.child_name || "",
+        gender: child?.gender || "", 
+        age: child?.age ? parseInt(child.age, 10) : null,
+      }))
+    }
+    
   };
 };
 

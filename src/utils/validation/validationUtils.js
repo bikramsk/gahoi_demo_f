@@ -3,15 +3,23 @@ import { STATE_TO_ASSEMBLIES } from '../../constants/formConstants';
 
 // Validate a single field
 export const validateField = (name, value) => {
-  if (REQUIRED_FIELDS.includes(name) && !value) {
-    
-    const displayName = name
-      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-      .replace(/^./, str => str.toUpperCase()) 
-      .trim(); 
-    return `${displayName} is required`;
+  if (!value || (typeof value === 'string' && !value.trim())) {
+    let displayName;
+    switch (name) {
+      case 'local_body':
+        return 'Local Body is required';
+      case 'gramPanchayat':
+        return 'Gram Panchayat is required';
+      case 'city':
+        return 'Local Body is required';
+      default:
+        displayName = name
+          .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+          .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
+        return `${displayName} is required`;
+    }
   }
-  return '';
+  return null;
 };
 
 // Validate mobile number
