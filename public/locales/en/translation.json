@@ -1111,6 +1111,10 @@
       "title": "Join Us in This Noble Initiative",
       "tagline": "Building Bridges, Connecting Hearts",
       "note": "You can call the contact numbers for confirmation after submitting your registration"
+    },
+    "buttons": {
+      "registerNow": "Register Now",
+      "joinEvent": "Join the Event"
     }
   }
 } 
