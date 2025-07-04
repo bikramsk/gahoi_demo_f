@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../custom/LanguageSwitcher';
 
 const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://api.gahoishakti.in'
+  ? 'https://admin.gahoishakti.in'
   : 'http://localhost:1340';
 
 const Header = () => {

@@ -18,8 +18,10 @@ export const FORM_STEPS = [
       "state",
       "regionalAssembly",
       "localPanchayatName",
+      "localPanchayat",
+      "subLocalPanchayat",
       "city",
-     "gramPanchayat"
+      "gramPanchayat"
     ],
   },
   { 
@@ -54,7 +56,12 @@ export const REQUIRED_FIELDS = [
   "gramPanchayat",
   "localPanchayat",
   "subLocalPanchayat",
-  "workType"
+  "workType",
+  "gotra",
+  "aakna",
+  "regionalAssembly",
+  "localPanchayatName",
+  
 ];
 
 export const INITIAL_FORM_STATE = {

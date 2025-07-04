@@ -165,6 +165,16 @@ const UserProfile = () => {
           biographical_details: attrs.biographical_details || {},
           work_information: attrs.work_information || {},
           additional_details: attrs.additional_details || {},
+          regional_information: {
+            state: attrs.additional_details?.state,
+            district: attrs.additional_details?.district,
+            local_body: attrs.additional_details?.local_body,
+            gram_panchayat: attrs.additional_details?.gram_panchayat,
+            regional_assembly: attrs.additional_details?.regional_assembly,
+            local_panchayat_trust: attrs.additional_details?.local_panchayat_trust,
+            local_panchayat_name: attrs.additional_details?.local_panchayat_name,
+            sub_local_panchayat: attrs.additional_details?.sub_local_panchayat
+          },
           child_name: attrs.child_name || [],
           your_suggestions: attrs.your_suggestions || {},
           gahoi_code: attrs.gahoi_code || '',
@@ -259,6 +269,16 @@ const UserProfile = () => {
     biographical_details: {},
     work_information: {},
     additional_details: {},
+    regional_information: {
+      state: '',
+      district: '',
+      local_body: '',
+      gram_panchayat: '',
+      regional_assembly: '',
+      local_panchayat_trust: '',
+      local_panchayat_name: '',
+      sub_local_panchayat: ''
+    },
     child_name: [],
     your_suggestions: {},
     gahoi_code: '',
@@ -419,24 +439,25 @@ const UserProfile = () => {
             </div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <dl className="divide-y divide-gray-200">
-                {Object.entries(displayData.additional_details?.regional_information || {}).length > 0 ? (
-                  Object.entries(displayData.additional_details?.regional_information || {})
-                    .filter(([key]) => key !== 'id')
-                    .map(([key, value]) => (
-                      <div key={key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
-                        <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
-                          {key.split(/(?=[A-Z])/).join(' ')}
-                        </dt>
-                        <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                          {value?.toString() || 'N/A'}
-                        </dd>
-                      </div>
-                    ))
-                ) : (
-                  <div className="px-4 py-6 text-center text-gray-500">
-                    No regional information available
+                {[
+                  { key: 'state', label: 'State' },
+                  { key: 'district', label: 'District' },
+                  { key: 'local_body', label: 'Local Body' },
+                  { key: 'gram_panchayat', label: 'Gram Panchayat' },
+                  { key: 'regional_assembly', label: 'Regional Assembly' },
+                  { key: 'local_panchayat_trust', label: 'Local Panchayat Trust' },
+                  { key: 'local_panchayat_name', label: 'Local Panchayat Name' },
+                  { key: 'sub_local_panchayat', label: 'Sub Local Panchayat' }
+                ].map((field) => (
+                  <div key={field.key} className="px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-gray-50">
+                    <dt className="text-sm font-medium text-gray-500 mb-1 sm:mb-0">
+                      {field.label}
+                    </dt>
+                    <dd className="text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                      {userData?.regional_information?.[field.key]?.toString() || 'N/A'}
+                    </dd>
                   </div>
-                )}
+                ))}
               </dl>
             </div>
           </section>

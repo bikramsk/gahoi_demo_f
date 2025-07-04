@@ -88,35 +88,53 @@ const GahoiSammelanPage = () => {
                       <p className="text-gray-600">{t('gahoiSammelan.eventDetails.locationValue')}</p>
                     </div>
                   </div>
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="w-6 h-6 text-amber-600" />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{t('gahoiSammelan.eventDetails.lastDate')}</h3>
+                      <p className="text-lg font-semibold text-red-600">{t('gahoiSammelan.eventDetails.lastDateValue')}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <a 
+                      href="/login"
+                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-600 to-orange-500 text-white text-base font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 duration-200"
+                    >
+                      <Heart className="w-5 h-5 mr-2" />
+                      {t('gahoiSammelan.buttons.registerNow')}
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
                 <div className="space-y-6">
                   <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6">
                     <h3 className="font-semibold text-gray-800 mb-3">{t('gahoiSammelan.eventDetails.registrationFee')}</h3>
-                    <div className="space-y-2">
-                      <p className="text-2xl font-bold text-red-800">{t('gahoiSammelan.eventDetails.feeAmount')}</p>
-                      <p className="text-sm text-gray-600">{t('gahoiSammelan.eventDetails.perRegistration')}</p>
-                      <p className="text-sm text-gray-600">{t('gahoiSammelan.eventDetails.optionalFee')}</p>
+                    <div className="grid md:grid-cols-2 gap-6 items-center">
+                      <div className="space-y-2">
+                        <p className="text-2xl font-bold text-red-800">{t('gahoiSammelan.eventDetails.feeAmount')}</p>
+                        <p className="text-sm text-gray-600">{t('gahoiSammelan.eventDetails.perRegistration')}</p>
+                        <p className="text-sm text-gray-600">{t('gahoiSammelan.eventDetails.optionalFee')}</p>
+                      </div>
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="bg-white p-3 rounded-xl shadow-md">
+                          <img 
+                            src="/qrcode.webp" 
+                            alt="Payment QR Code" 
+                            className="w-48 h-48 object-contain"
+                          />
+                        </div>
+                        <div className="text-center">
+                          <p className="font-semibold text-gray-800">SWETA GUPTA</p>
+                          <p className="text-sm text-gray-600">Phone pay: 8251980900</p>
+                          <p className="text-sm text-gray-600">Google pay: 8251980900</p>
+                          <p className="text-sm text-gray-600">UPI: 8251980900@ybl</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm text-gray-500">{t('gahoiSammelan.eventDetails.lastDate')}</p>
-                    <p className="text-lg font-semibold text-red-600">{t('gahoiSammelan.eventDetails.lastDateValue')}</p>
-                  </div>
                 </div>
-              </div>
-            
-            {/* First Register Now Button */}
-            <div className="mt-8 text-center">
-              <a 
-                href="/login"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-red-600 to-orange-500 text-white text-lg font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 hover:scale-105 duration-200"
-              >
-                <Heart className="w-5 h-5 mr-2" />
-                {t('gahoiSammelan.buttons.registerNow')}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </a>
               </div>
             </div>
 

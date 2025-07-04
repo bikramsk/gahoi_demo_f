@@ -12,6 +12,18 @@ export const validateField = (name, value) => {
         return 'Gram Panchayat is required';
       case 'city':
         return 'Local Body is required';
+      case 'gotra':
+        return 'Please select your Gotra';
+      case 'aakna':
+        return 'Please select your Aakna';
+      case 'regionalAssembly':
+        return 'Please select your Regional Assembly';
+      case 'localPanchayatName':
+        return 'Please select your Local Panchayat Trust';
+      case 'localPanchayat':
+        return 'Please select your Local Panchayat';
+      case 'subLocalPanchayat':
+        return 'Please select your Sub Local Panchayat';
       default:
         displayName = name
           .replace(/([A-Z])/g, ' $1') // Add space before capital letters
@@ -127,26 +139,29 @@ export const validateWorkInformation = (workType, employmentType, industrySector
   return errors;
 };
 
-// Update validateStep to include work information validation
+
 export const validateStep = (step, formData) => {
   const errors = {};
   
   // Get fields for current step
   const currentStepFields = FORM_STEPS[step].fields;
   
-  // Check if state has regional assemblies
-  const hasRegionalAssemblies = formData.state && STATE_TO_ASSEMBLIES[formData.state];
+  // List of regional assembly related fields
+  const regionalAssemblyFields = [
+    'regionalAssembly', 
+    'localPanchayatName', 
+    'localPanchayat', 
+    'subLocalPanchayat'
+  ];
+
+
+  const regionalAssemblySelect = document.querySelector('select[name="regionalAssembly"]');
   
-  // Validate required fields for current step
+  const hasRegionalAssemblyOptions = regionalAssemblySelect && regionalAssemblySelect.options.length > 1;
+  
   currentStepFields.forEach(field => {
-    // Skip regional assembly related fields if state doesn't have assemblies
-    if (
-      !hasRegionalAssemblies && 
-      (field === 'regionalAssembly' || 
-       field === 'localPanchayatName' || 
-       field === 'localPanchayat' || 
-       field === 'subLocalPanchayat')
-    ) {
+    // Skip validation for regional assembly fields if no assembly options available
+    if (!hasRegionalAssemblyOptions && regionalAssemblyFields.includes(field)) {
       return;
     }
 
@@ -158,6 +173,8 @@ export const validateStep = (step, formData) => {
     }
   });
 
+  
+
   // Special validations for current step
   if (currentStepFields.includes('workType')) {
     const workErrors = validateWorkInformation(
@@ -168,8 +185,6 @@ export const validateStep = (step, formData) => {
     );
     Object.assign(errors, workErrors);
   }
-
-  
 
   return errors;
 }; 

@@ -19,7 +19,7 @@ const generateNationalityCode = (nationality) => nationality === 'Indian' ? '1' 
 const generateGahoiCode = (isGahoi) => isGahoi === 'Yes' || isGahoi === true ? '3' : '0';
 
 // Fixed code mappings for all values
-const FIXED_CODES = {
+export const FIXED_CODES = {
   // Regional Assembly codes 
   regionalAssembly: {
     "Chambal Regional Assembly": "01",
@@ -444,14 +444,53 @@ export const formatDate = (dateString) => {
 export const validateStep = (step, formData) => {
   const errors = {};
   
- 
   const currentStepFields = FORM_STEPS[step].fields;
   
-  const hasRegionalAssemblies = formData.state && STATE_TO_ASSEMBLIES[formData.state];
-  
- 
+  // Check if district has regional assemblies by calling getFilteredRegionalAssemblies
+  const hasRegionalAssemblies = formData.state && formData.district && 
+    (() => {
+      // For Uttar Pradesh
+      if (formData.state === "Uttar Pradesh") {
+        if (formData.district === "Mathura") return true;
+        if (formData.district === "Mahoba") return true;
+        if (formData.district === "Sultanpur") return true;
+        if (formData.district === "Lalitpur") return true;
+        if (formData.district === "Jhansi") return true;
+        if (["Jalaun", "Lucknow", "Kanpur Nagar", "Chitrakoot", "Banda", "Auraiya"].includes(formData.district)) return true;
+      }
+
+      // For Gujarat
+      if (formData.state === "Gujarat" && formData.district === "Ahmedabad") return true;
+
+      // For Madhya Pradesh
+      if (formData.state === "Madhya Pradesh") {
+        if (["Jabalpur", "Katni", "Rewa", "Narsinghpur", "Umariya", "Sagar", "Seoni", "Chhindwara", "Panna", "Hoshangabad", "Mandla", "Damoh", "Shahdol", "Dindori", "Guna"].includes(formData.district)) return true;
+        if (["Satna", "Shahdol", "Sidhi", "Chhatarpur", "Panna", "Rewa"].includes(formData.district)) return true;
+        if (["Shivpuri", "Rewa", "Satna", "Ashoknagar", "Guna"].includes(formData.district)) return true;
+        if (["Gwalior", "Bhind", "Datia", "Morena"].includes(formData.district)) return true;
+        if (["Indore", "Dewas", "Ujjain", "Bhopal", "Vidisha", "Raisen"].includes(formData.district)) return true;
+        if (["Tikamgarh"].includes(formData.district)) return true;
+      }
+
+      // For Delhi
+      if (formData.state === "Delhi" && formData.district === "Delhi") return true;
+
+      // For Bihar
+      if (formData.state === "Bihar" && formData.district === "Patna") return true;
+
+      // For Rajasthan
+      if (formData.state === "Rajasthan" && formData.district === "Jaipur") return true;
+
+      // For Chhattisgarh
+      if (formData.state === "Chhattisgarh" && ["Durg", "Rajnandgaon", "Dhamtari", "Raipur", "Bilaspur", "Bastar", "Koriya"].includes(formData.district)) return true;
+
+      // For Maharashtra
+      if (formData.state === "Maharashtra" && ["Nagpur", "Pune", "Amravati", "Mumbai", "Jalgaon"].includes(formData.district)) return true;
+
+      return false;
+    })();
+
   currentStepFields.forEach(field => {
-    
     if (
       !hasRegionalAssemblies && 
       (field === 'regionalAssembly' || 
@@ -525,25 +564,14 @@ export const validateStep = (step, formData) => {
   ) {
     const prev = formData.previousMarriage || {};
     const requiredPrevFields = [
-      'current_status',
       'spouse_name',
-      'marriage_date',
-      'termination_date',
-      'termination_reason',
-      'expectations',
-      'current_living_with',
-      'future_living_with',
-      'children_living_details',
-      'partner_age_preference',
-      'partner_education_preference',
-      'partner_type_preference',
-      'location_preference',
-      'accept_partner_with_children',
-      'is_kundli_available',
+      'spouse_gotra',
+      'spouse_akna',
+      'spouse_dob',
+      'children_living_with',
       'want_kundli_match',
-      'aadhaar_front',
-      'aadhaar_back',
-      'payment_proof',
+      'accept_partner_with_children',
+      'payment_proof'
     ];
 
     requiredPrevFields.forEach(field => {
@@ -556,34 +584,22 @@ export const validateStep = (step, formData) => {
       }
     });
 
-    // Children array validation
-    if (!prev.children || prev.children.length === 0) {
-      errors['previous_marriage.children'] = 'At least one child entry is required';
-    } else {
-      prev.children.forEach((child, idx) => {
-        if (!child.child_name || !child.age || !child.gender) {
-          errors[`previous_marriage.children.${idx}`] = 'Child name, age, and gender are required';
-        }
-      });
-    }
-
-    // File uploads (IDs)
-    ['aadhaar_front', 'aadhaar_back', 'payment_proof'].forEach(field => {
-      if (!prev[field]) {
-        errors[`previous_marriage.${field}`] = 'This document is required';
+    // Children array validation - only required if children_living_with is 'yes'
+    if (prev.children_living_with === 'yes') {
+      if (!prev.children || prev.children.length === 0) {
+        errors['previous_marriage.children'] = 'At least one child entry is required';
+      } else {
+        prev.children.forEach((child, idx) => {
+          if (!child.child_name || !child.age || !child.gender) {
+            errors[`previous_marriage.children.${idx}`] = 'Child name, age, and gender are required';
+          }
+        });
       }
-    });
-
-    // Divorce/Death certificate required based on currentStatus
-    if (prev.current_status === 'Divorced' && !prev.divorce_certificate) {
-      errors['previous_marriage.divorce_certificate'] = 'Divorce certificate is required';
     }
-    // if ((prev.current_status === 'Widow' || prev.current_status === 'Widower') && !prev.death_certificate) {
-    //   errors['previous_marriage.death_certificate'] = 'Death certificate is required';
-    // }
-    // Kundli required if is_kundli_available is true
-    if (prev.is_kundli_available === true && !prev.kundli) {
-      errors['previous_marriage.kundli'] = 'Kundli is required';
+
+    // Payment proof is required
+    if (!prev.payment_proof) {
+      errors['previous_marriage.payment_proof'] = 'Payment proof is required';
     }
   }
 
@@ -631,7 +647,7 @@ export const formatFormData = (data, displayPictureId = null) => {
     gram_panchayat: ""
   };
 
-  return {
+  const formattedData = {
     family_details: {
       father_name: data.familyDetails?.[0]?.name ?? "",
       father_mobile: data.familyDetails?.[0]?.mobileNumber ?? "",
@@ -659,13 +675,13 @@ export const formatFormData = (data, displayPictureId = null) => {
       .filter(member => member?.relation === "Child")
       .map((child) => ({ 
         child_name: child?.name ?? "",
-        // gender: child?.gender || null,
-        // phone_number: child?.mobileNumber ?? ""
         gender: child?.gender || null
       })) || [],
     biographical_details: {
       is_married: data.isMarried || "Unmarried",
-      marriage_to_another_caste: data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage"
+      marriage_to_another_caste: data.marriageCommunity ? 
+        (data.marriageCommunity === "other" ? "Married to Another Caste" : "Same Caste Marriage") 
+        : ""
     },
     personal_information: {
       full_name: data.name ?? "",
@@ -696,38 +712,28 @@ export const formatFormData = (data, displayPictureId = null) => {
     gahoi_code: generatedGahoiCode,
     marital_status: data.maritalStatus ?? "",
     consider_second_marriage: data.considerSecondMarriage ?? false,
-    // previous_marriage_info: data.previousMarriage,
+  };
 
-    previous_marriage_info: {
-      current_status: data.previousMarriage?.current_status || "",
+  // Only include previous_marriage_info if user is Widow/Widower, Divorced, or has explicitly opted for second marriage
+  if (data.isMarried === "Widow/Widower" || data.isMarried === "Divorced" || data.considerSecondMarriage === true) {
+    formattedData.previous_marriage_info = {
       spouse_name: data.previousMarriage?.spouse_name || "",
-      marriage_date: formatDate(data.previousMarriage?.marriage_date),
-      termination_date: formatDate(data.previousMarriage?.termination_date),
-      termination_reason: data.previousMarriage?.termination_reason || "",
-      expectations: data.previousMarriage?.expectations || "",
-      current_living_with: data.previousMarriage?.current_living_with || "",
-      future_living_with: data.previousMarriage?.future_living_with || "",
-      children_living_details: data.previousMarriage?.children_living_details || "",
-      partner_age_preference: data.previousMarriage?.partner_age_preference || "",
-      partner_education_preference: data.previousMarriage?.partner_education_preference || "",
-      partner_type_preference: data.previousMarriage?.partner_type_preference || "",
-      location_preference: data.previousMarriage?.location_preference || "",
-      accept_partner_with_children: data.previousMarriage?.accept_partner_with_children || false,
-      is_kundli_available: data.previousMarriage?.is_kundli_available || false,
-      want_kundli_match: data.previousMarriage?.want_kundli_match || false,
-      aadhaar_front: data.previousMarriage?.aadhaar_front || null,
-      aadhaar_back: data.previousMarriage?.aadhaar_back || null,
+      spouse_gotra: data.previousMarriage?.spouse_gotra || "",
+      spouse_akna: data.previousMarriage?.spouse_akna || "",
+      spouse_dob: formatDate(data.previousMarriage?.spouse_dob),
+      children_living_with: data.previousMarriage?.children_living_with === "yes" ? "yes" : "no",
+      want_kundli_match: data.previousMarriage?.want_kundli_match === true ? "yes" : "no",
+      accept_partner_with_children: data.previousMarriage?.accept_partner_with_children === true ? "yes" : "no",
       payment_proof: data.previousMarriage?.payment_proof || null,
-      divorce_certificate: data.previousMarriage?.divorce_certificate || null,
-      kundli: data.previousMarriage?.kundli || null,
       children: (data.previousMarriage?.children || []).map(child => ({
         child_name: child?.child_name || "",
         gender: child?.gender || "", 
         age: child?.age ? parseInt(child.age, 10) : null,
       }))
-    }
-    
-  };
+    };
+  }
+
+  return formattedData;
 };
 
 export const hasErrors = (errors) => {
