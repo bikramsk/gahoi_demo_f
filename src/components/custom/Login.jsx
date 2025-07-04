@@ -65,7 +65,7 @@ www.gahoishakti.in`;
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    console.log('Sending OTP to:', mobileNumber);
+    console.log('[DEBUG] Sending OTP - Mobile:', mobileNumber);
     const response = await fetch('https://api.gahoishakti.in/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
@@ -76,39 +76,34 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     });
 
     const data = await response.json();
-    console.log('OTP send response:', data);
+    console.log('[DEBUG] Send OTP Response:', data);
 
     if (!response.ok) {
-      throw new Error(data.message || data.error?.message || 'Failed to send OTP');
-    }
-
-    if (data.success === false) {
       throw new Error(data.message || 'Failed to send OTP');
     }
 
-    // Store mobile number in session for verification
+    // Store mobile number for verification
+    console.log('[DEBUG] Storing mobile number:', mobileNumber);
     sessionStorage.setItem('otpMobile', mobileNumber);
-
-    if (import.meta.env.MODE === 'development' && data.otp) {
-      console.log('Development OTP:', data.otp);
-      sessionStorage.setItem('currentOTP', data.otp);
-      sessionStorage.setItem('otpTimestamp', Date.now().toString());
-    }
 
     return data;
   } catch (error) {
-    console.error('Error in sendWhatsAppOTP:', error);
+    console.error('[DEBUG] Send OTP Error:', error);
     throw error;
   }
 };
 
 const verifyOTP = async (mobileNumber, otp) => {
   try {
-    console.log('Verifying OTP for:', mobileNumber);
-    
-    // Check if mobile number matches the one OTP was sent to
     const storedMobile = sessionStorage.getItem('otpMobile');
+    console.log('[DEBUG] Verify OTP - Stored Mobile:', storedMobile);
+    console.log('[DEBUG] Verify OTP - Current Mobile:', mobileNumber);
+    console.log('[DEBUG] Verify OTP - OTP:', otp);
+
     if (storedMobile !== mobileNumber) {
+      console.log('[DEBUG] Mobile number mismatch detected');
+      console.log('[DEBUG] Stored:', storedMobile);
+      console.log('[DEBUG] Current:', mobileNumber);
       throw new Error('Mobile number mismatch. Please request a new OTP.');
     }
 
@@ -125,25 +120,19 @@ const verifyOTP = async (mobileNumber, otp) => {
     });
 
     const data = await response.json();
-    console.log('OTP verification response:', data);
+    console.log('[DEBUG] Verify OTP Response:', data);
 
     if (!response.ok) {
-      throw new Error(data.error?.message || data.message || 'Failed to verify OTP');
-    }
-
-    if (data.success === false) {
-      throw new Error(data.message || 'Invalid OTP');
+      throw new Error(data.message || 'Failed to verify OTP');
     }
 
     // Clear OTP data after successful verification
-    sessionStorage.removeItem('currentOTP');
-    sessionStorage.removeItem('otpTimestamp');
     sessionStorage.removeItem('otpMobile');
     sessionStorage.setItem('otpVerified', 'true');
 
     return data;
   } catch (error) {
-    console.error('Error in verifyOTP:', error);
+    console.error('[DEBUG] Verify OTP Error:', error);
     throw error;
   }
 };
@@ -579,13 +568,14 @@ const Login = () => {
       } finally {
         setLoading(false);
       }
-    } else if (showOtpInput) {
-      // Verify OTP Flow
+    } else if (showOtpInput && !showMpinCreation) {
+      // Step 2: Verify OTP
       setLoading(true);
       try {
-        console.log('Starting OTP verification...');
+        console.log('[DEBUG] Starting OTP verification');
+        console.log('[DEBUG] Form Data:', formData);
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
-        console.log('OTP verification successful:', response);
+        console.log('[DEBUG] Verification successful:', response);
         
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);
@@ -602,11 +592,9 @@ const Login = () => {
             setShowMpinCreation(true);
             setCurrentStep(3);
           }
-        } else {
-          throw new Error('No JWT received after OTP verification');
         }
       } catch (error) {
-        console.error('OTP verification failed:', error);
+        console.error('[DEBUG] OTP verification failed:', error);
         setErrors({
           otp: error.message || 'Invalid OTP'
         });
