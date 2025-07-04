@@ -1067,38 +1067,85 @@
       },
       "previousMarriage": {
         "title": "Previous Marriage Information",
-        "marriageDate": "Marriage Date",
-        "children": "Number of Children",
-        "childrenDetails": "Children Details"
-      },
-      "partnerPreferences": {
-        "title": "Partner Preferences",
-        "ageRange": "Preferred Age Range",
-        "education": "Education Preference",
-        "occupation": "Occupation Preference",
-        "business": "Business",
-        "service": "Service",
-        "housewife": "Housewife",
-        "any": "Any",
-        "location": "Preferred Location",
-        "acceptChildren": "Would you accept a partner with children?"
-      },
-      "familyInfo": {
-        "title": "Family Information",
-        "fatherName": "Father's Name",
-        "motherName": "Mother's Name",
-        "siblingsInfo": "Siblings Information",
-        "siblingsPlaceholder": "Brother - Sister / Sister - Brother Information"
-      },
-      "documents": {
-        "title": "Required Documents",
-        "fullSizePhoto": "Full Size Photo",
-        "aadharCard": "Aadhar Card Copy",
-        "divorceOrDeath": "Divorce Decree / Death Certificate",
-        "kundali": "Kundali",
-        "dragDrop": "Drag files here or click to select",
-        "maxSize": "Maximum file size: 10MB",
-        "selectDocFirst": "Please select document type first"
+        "spouseName": {
+          "label": "Previous Spouse Name",
+          "placeholder": "Enter previous spouse name"
+        },
+        "gotra": {
+          "label": "Previous Spouse Gotra",
+          "placeholder": "Select previous spouse gotra"
+        },
+        "aakna": {
+          "label": "Previous Spouse Aakna",
+          "placeholder": "Select previous spouse aakna"
+        },
+        "dob": {
+          "label": "Previous Spouse Date of Birth",
+          "placeholder": "Select previous spouse date of birth"
+        },
+        "children": {
+          "title": "Children Information",
+          "addButton": "Add Child",
+          "removeButton": "Remove Child",
+          "name": {
+            "label": "Child Name",
+            "placeholder": "Enter child name"
+          },
+          "gender": {
+            "label": "Child Gender",
+            "placeholder": "Select child gender",
+            "options": {
+              "male": "Male",
+              "female": "Female",
+              "other": "Other"
+            }
+          },
+          "age": {
+            "label": "Child Age",
+            "placeholder": "Enter child age"
+          },
+          "livingWith": {
+            "label": "Child Living With",
+            "placeholder": "Select who the child lives with",
+            "options": {
+              "self": "Self",
+              "spouse": "Previous Spouse",
+              "other": "Other"
+            }
+          }
+        },
+        "preferences": {
+          "kundliMatch": {
+            "label": "Kundli Match Required",
+            "description": "Do you want kundli matching for your next marriage?"
+          },
+          "acceptChildren": {
+            "label": "Accept Children",
+            "description": "Are you willing to accept a partner with children?"
+          }
+        },
+        "documents": {
+          "title": "Required Documents",
+          "deathCertificate": {
+            "label": "Death Certificate",
+            "description": "Upload death certificate if spouse is deceased"
+          },
+          "divorcePapers": {
+            "label": "Divorce Papers",
+            "description": "Upload divorce papers if divorced"
+          }
+        },
+        "validation": {
+          "spouseNameRequired": "Previous spouse name is required",
+          "gotraRequired": "Previous spouse gotra is required",
+          "aaknaRequired": "Previous spouse aakna is required",
+          "dobRequired": "Previous spouse date of birth is required",
+          "childNameRequired": "Child name is required",
+          "childGenderRequired": "Child gender is required",
+          "childAgeRequired": "Child age is required",
+          "childLivingWithRequired": "Please specify who the child lives with",
+          "documentsRequired": "Please upload required documents"
+        }
       },
       "consent": {
         "title": "Consent Form",

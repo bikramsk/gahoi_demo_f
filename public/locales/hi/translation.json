@@ -1214,23 +1214,87 @@
         "title": "पता की जानकारी",
         "currentAddress": "वर्तमान पता"
       },
-"previousMarriage": {
-        "title": "पूर्व विवाह की जानकारी",
-        "marriageDate": "विवाह की तिथि",
-        "children": "बच्चों की संख्या",
-        "childrenDetails": "बच्चों का विवरण"
-      },
-      "partnerPreferences": {
-        "title": "जीवनसाथी की प्राथमिकताएं",
-        "ageRange": "आयु सीमा",
-        "education": "शैक्षणिक योग्यता",
-        "occupation": "व्यवसाय",
-        "location": "पसंदीदा स्थान",
-        "business": "व्यवसाय",
-        "service": "नौकरी",
-        "housewife": "गृहिणी",
-        "any": "कोई भी",
-        "acceptChildren": "क्या आप बच्चों वाले जीवनसाथी को स्वीकार करेंगे?"
+      "previousMarriage": {
+        "title": "पिछली शादी की जानकारी",
+        "spouseName": {
+          "label": "पूर्व पति/पत्नी का नाम",
+          "placeholder": "पूर्व पति/पत्नी का नाम दर्ज करें"
+        },
+        "gotra": {
+          "label": "पूर्व पति/पत्नी का गोत्र",
+          "placeholder": "पूर्व पति/पत्नी का गोत्र चुनें"
+        },
+        "aakna": {
+          "label": "पूर्व पति/पत्नी का आंकना",
+          "placeholder": "पूर्व पति/पत्नी का आंकना चुनें"
+        },
+        "dob": {
+          "label": "पूर्व पति/पत्नी की जन्म तिथि",
+          "placeholder": "पूर्व पति/पत्नी की जन्म तिथि चुनें"
+        },
+        "children": {
+          "title": "बच्चों की जानकारी",
+          "addButton": "बच्चा जोड़ें",
+          "removeButton": "बच्चा हटाएं",
+          "name": {
+            "label": "बच्चे का नाम",
+            "placeholder": "बच्चे का नाम दर्ज करें"
+          },
+          "gender": {
+            "label": "बच्चे का लिंग",
+            "placeholder": "बच्चे का लिंग चुनें",
+            "options": {
+              "male": "पुरुष",
+              "female": "महिला",
+              "other": "अन्य"
+            }
+          },
+          "age": {
+            "label": "बच्चे की उम्र",
+            "placeholder": "बच्चे की उम्र दर्ज करें"
+          },
+          "livingWith": {
+            "label": "बच्चा किसके साथ रहता है",
+            "placeholder": "बच्चा किसके साथ रहता है चुनें",
+            "options": {
+              "self": "स्वयं",
+              "spouse": "पूर्व पति/पत्नी",
+              "other": "अन्य"
+            }
+          }
+        },
+        "preferences": {
+          "kundliMatch": {
+            "label": "कुंडली मिलान आवश्यक",
+            "description": "क्या आप अगली शादी के लिए कुंडली मिलान चाहते हैं?"
+          },
+          "acceptChildren": {
+            "label": "बच्चों को स्वीकार करें",
+            "description": "क्या आप बच्चों वाले जीवनसाथी को स्वीकार करेंगे?"
+          }
+        },
+        "documents": {
+          "title": "आवश्यक दस्तावेज",
+          "deathCertificate": {
+            "label": "मृत्यु प्रमाण पत्र",
+            "description": "यदि पति/पत्नी की मृत्यु हो गई है तो मृत्यु प्रमाण पत्र अपलोड करें"
+          },
+          "divorcePapers": {
+            "label": "तलाक के कागजात",
+            "description": "यदि तलाक हुआ है तो तलाक के कागजात अपलोड करें"
+          }
+        },
+        "validation": {
+          "spouseNameRequired": "पूर्व पति/पत्नी का नाम आवश्यक है",
+          "gotraRequired": "पूर्व पति/पत्नी का गोत्र आवश्यक है",
+          "aaknaRequired": "पूर्व पति/पत्नी का आंकना आवश्यक है",
+          "dobRequired": "पूर्व पति/पत्नी की जन्म तिथि आवश्यक है",
+          "childNameRequired": "बच्चे का नाम आवश्यक है",
+          "childGenderRequired": "बच्चे का लिंग आवश्यक है",
+          "childAgeRequired": "बच्चे की उम्र आवश्यक है",
+          "childLivingWithRequired": "कृपया बताएं कि बच्चा किसके साथ रहता है",
+          "documentsRequired": "कृपया आवश्यक दस्तावेज अपलोड करें"
+        }
       },
       "familyInfo": {
         "title": "परिवार की जानकारी",
