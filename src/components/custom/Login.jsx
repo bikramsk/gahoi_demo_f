@@ -65,51 +65,58 @@ www.gahoishakti.in`;
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
+    console.log('Sending OTP to:', mobileNumber);
     const response = await fetch('https://api.gahoishakti.in/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({ mobileNumber })
     });
 
     const data = await response.json();
+    console.log('OTP send response:', data);
+
     if (!response.ok) {
+      throw new Error(data.message || data.error?.message || 'Failed to send OTP');
+    }
+
+    if (data.success === false) {
       throw new Error(data.message || 'Failed to send OTP');
     }
 
-    // Send reminder message 
-    const otpReminderTimeout = setTimeout(async () => {
-      const otpVerified = sessionStorage.getItem('otpVerified');
-      if (!otpVerified) {
-        
-        await sendReminderMessage(mobileNumber);
-      }
-    }, 5 * 60 * 1000); // 5 minutes
-
-    // Clear timeout if component unmounts
-    window.addEventListener('beforeunload', () => clearTimeout(otpReminderTimeout));
+    // Store mobile number in session for verification
+    sessionStorage.setItem('otpMobile', mobileNumber);
 
     if (import.meta.env.MODE === 'development' && data.otp) {
       console.log('Development OTP:', data.otp);
       sessionStorage.setItem('currentOTP', data.otp);
       sessionStorage.setItem('otpTimestamp', Date.now().toString());
-      sessionStorage.setItem('otpMobile', mobileNumber);
     }
 
     return data;
   } catch (error) {
-    console.error('Error sending OTP:', error);
+    console.error('Error in sendWhatsAppOTP:', error);
     throw error;
   }
 };
 
 const verifyOTP = async (mobileNumber, otp) => {
   try {
+    console.log('Verifying OTP for:', mobileNumber);
+    
+    // Check if mobile number matches the one OTP was sent to
+    const storedMobile = sessionStorage.getItem('otpMobile');
+    if (storedMobile !== mobileNumber) {
+      throw new Error('Mobile number mismatch. Please request a new OTP.');
+    }
+
     const response = await fetch('https://api.gahoishakti.in/api/verify-otp', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
         mobileNumber,
@@ -118,29 +125,25 @@ const verifyOTP = async (mobileNumber, otp) => {
     });
 
     const data = await response.json();
+    console.log('OTP verification response:', data);
+
     if (!response.ok) {
       throw new Error(data.error?.message || data.message || 'Failed to verify OTP');
     }
 
-    // Mark OTP as verified
-    sessionStorage.setItem('otpVerified', 'true');
+    if (data.success === false) {
+      throw new Error(data.message || 'Invalid OTP');
+    }
 
-    // Clear OTP data
+    // Clear OTP data after successful verification
     sessionStorage.removeItem('currentOTP');
     sessionStorage.removeItem('otpTimestamp');
     sessionStorage.removeItem('otpMobile');
-
-    // Set a timeout to check if MPIN was created
-    setTimeout(async () => {
-      const mpinCreated = localStorage.getItem('mpinCreated');
-      if (!mpinCreated) {
-        await sendReminderMessage(mobileNumber);
-      }
-    }, 10 * 60 * 1000); // 10 minutes
+    sessionStorage.setItem('otpVerified', 'true');
 
     return data;
   } catch (error) {
-    console.error('Error verifying OTP:', error);
+    console.error('Error in verifyOTP:', error);
     throw error;
   }
 };
@@ -580,7 +583,10 @@ const Login = () => {
       // Verify OTP Flow
       setLoading(true);
       try {
+        console.log('Starting OTP verification...');
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
+        console.log('OTP verification successful:', response);
+        
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
@@ -596,8 +602,11 @@ const Login = () => {
             setShowMpinCreation(true);
             setCurrentStep(3);
           }
+        } else {
+          throw new Error('No JWT received after OTP verification');
         }
       } catch (error) {
+        console.error('OTP verification failed:', error);
         setErrors({
           otp: error.message || 'Invalid OTP'
         });
@@ -1083,671 +1092,3 @@ const Login = () => {
 };
 
 export default Login;
-//       newErrors.mobileNumber = t('login.errors.mobileRequired');
-//     } else if (formData.mobileNumber.length !== 10) {
-//       newErrors.mobileNumber = t('login.errors.mobileLength');
-//     }
-
-//     // Validate name only for new users after mobile verification
-//     if (!userExists && formData.mobileNumber.length === 10 && !showOtpInput) {
-//       if (!formData.name || !formData.name.trim()) {
-//         newErrors.name = t('login.errors.nameRequired') || 'Please enter your name';
-//       }
-//     }
-
-//     if (hasMpin && showMpinInput) {
-//       if (!formData.mpin) {
-//         newErrors.mpin = t('login.errors.mpinRequired');
-//       } else if (formData.mpin.length !== 4) {
-//         newErrors.mpin = t('login.errors.mpinLength');
-//       }
-//     } else if (showOtpInput) {
-//       if (!formData.otp) {
-//         newErrors.otp = t('login.errors.otpRequired');
-//       } else if (formData.otp.length !== 4) {
-//         newErrors.otp = t('login.errors.otpLength');
-//       }
-//     }
-
-//     setErrors(newErrors);
-//     return Object.keys(newErrors).length === 0;
-//   };
-
-//   const validateMpin = () => {
-//     const newErrors = {};
-    
-//     if (!mpinData.mpin) {
-//       newErrors.mpin = t('login.errors.mpinRequired');
-//     } else if (mpinData.mpin.length !== 4) {
-//       newErrors.mpin = t('login.errors.mpinLength');
-//     }
-
-//     if (!mpinData.confirmMpin) {
-//       newErrors.confirmMpin = t('login.errors.confirmMpinRequired');
-//     } else if (mpinData.confirmMpin !== mpinData.mpin) {
-//       newErrors.confirmMpin = t('login.errors.mpinMismatch');
-//     }
-
-//     setErrors(newErrors);
-//     return Object.keys(newErrors).length === 0;
-//   };
-
-//   const createMpin = async (mpin) => {
-//     try {
-//       const mobileNumber = formData.mobileNumber;
-//       const response = await fetch(`${API_BASE}/api/create-mpin`, {
-//         method: 'POST',
-//         headers: {
-//           'Accept': 'application/json',
-//           'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({
-//           mobileNumber,
-//           mpin
-//         })
-//       });
-
-//       if (!response.ok) {
-//         throw new Error('Failed to create MPIN');
-//       }
-
-//       // Mark MPIN as created
-//       localStorage.setItem('mpinCreated', 'true');
-
-//       // Send reminder message 
-//       const registrationReminderTimeout = setTimeout(async () => {
-//         try {
-//           console.log('Checking registration status...');
-//           const token = localStorage.getItem('token');
-//           const registrationResponse = await fetch(
-//             `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`,
-//             {
-//               headers: {
-//                 'Authorization': `Bearer ${token}`,
-//                 'Accept': 'application/json'
-//               }
-//             }
-//           );
-
-//           const data = await registrationResponse.json();
-//           if (!data.data || data.data.length === 0) {
-           
-//             await sendReminderMessage(mobileNumber);
-//           }
-//         } catch (error) {
-//           console.error('Error checking registration status:', error);
-//         }
-//       }, 15 * 60 * 1000); // 15 minutes
-
-//       // Clear timeout if component unmounts
-//       window.addEventListener('beforeunload', () => clearTimeout(registrationReminderTimeout));
-
-//       return await response.json();
-//     } catch (error) {
-//       console.error('Error creating MPIN:', error);
-//       throw error;
-//     }
-//   };
-
-//   // Add countdown timer effect
-//   useEffect(() => {
-//     let timer;
-//     if (countdown > 0) {
-//       timer = setInterval(() => {
-//         setCountdown(prev => prev - 1);
-//       }, 1000);
-//     }
-//     return () => clearInterval(timer);
-//   }, [countdown]);
-
-//   // Modified handleSubmit to include MPIN creation
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setSubmitted(true);
-//     setErrors({});
-
-//     if (!validateForm()) return;
-
-//     // Existing User Flow - MPIN Login
-//     if (userExists && hasMpin) {
-//       setLoading(true);
-//       try {
-//         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
-//         console.log('MPIN verification response:', response);
-        
-//         if (response.jwt) {
-          
-//           localStorage.setItem('token', `Bearer ${response.jwt}`);
-//           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          
-//           // Redirect to homepage 
-//           console.log('MPIN verified, redirecting to homepage');
-//           navigate('/', { replace: true });
-//           return;
-//         }
-//       } catch (error) {
-//         console.error('Login error:', error);
-//         setErrors({
-//           mpin: error.message || 'Invalid MPIN'
-//         });
-//       } finally {
-//         setLoading(false);
-//       }
-//       return;
-//     }
-
-//     // New User Flow
-//     if (!showOtpInput) {
-//       // Step 1: Send WhatsApp OTP
-//       setLoading(true);
-//       try {
-//         const result = await sendWhatsAppOTP(formData.mobileNumber);
-//         if (result.success !== false) {
-//           setShowOtpInput(true);
-//           setOtpSent(true);
-//           setCurrentStep(2);
-//           setCountdown(30);
-//           setErrors({});
-//         }
-//       } catch (error) {
-//         setErrors({
-//           mobileNumber: error.message || 'Failed to send OTP'
-//         });
-//       } finally {
-//         setLoading(false);
-//       }
-//     } else if (showOtpInput && !showMpinCreation) {
-//       // Step 2: Verify OTP
-//       setLoading(true);
-//       try {
-//         const response = await verifyOTP(formData.mobileNumber, formData.otp);
-//         if (response.jwt) {
-//           localStorage.setItem('token', `Bearer ${response.jwt}`);
-//           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-//           // New user must create MPIN
-//           setShowMpinCreation(true);
-//           setCurrentStep(3);
-//         }
-//       } catch (error) {
-//         setErrors({
-//           otp: error.message || 'Invalid OTP'
-//         });
-//       } finally {
-//         setLoading(false);
-//       }
-//     } else if (showMpinCreation) {
-//       // Step 3: Create MPIN and complete registration
-//       if (validateMpin()) {
-//         setLoading(true);
-//         try {
-//           await createMpin(mpinData.mpin);
-//           navigate('/registration', { 
-//             state: { 
-//               mobileNumber: formData.mobileNumber,
-//               fromLogin: true,
-//               processSteps: processSteps 
-//             } 
-//           });
-//         } catch (error) {
-//           setErrors({
-//             mpin: error.message || 'Failed to create MPIN'
-//           });
-//         } finally {
-//           setLoading(false);
-//         }
-//       }
-//     }
-//   };
-
-//   // Updated resend OTP function
-//   const handleResendOtp = async () => {
-//     if (countdown > 0 || loading) return;
-    
-//     setLoading(true);
-//     setErrors({});
-    
-//     try {
-//       const result = await sendWhatsAppOTP(formData.mobileNumber);
-      
-//       if (result.success !== false && (result.success || result.data || result.message)) {
-//         setCountdown(30);
-//         setFormData(prev => ({ ...prev, otp: '' }));
-//         setErrors({});
-//       } else {
-//         throw new Error(result.message || 'Failed to resend OTP');
-//       }
-//     } catch (error) {
-//       console.error('Error resending OTP:', error);
-//       setErrors({ 
-//         otp: error.message || t('login.errors.otpSendFailed') || 'Failed to resend OTP'
-//       });
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleAuthModeChange = (mode) => {
-//     setAuthMode(mode);
-//     setShowOtpInput(false);
-//     setShowMpinInput(false);
-//     setOtpSent(false);
-//     setCurrentStep(1);
-//     setFormData(prev => ({ ...prev, otp: '', mpin: '' }));
-//     setErrors({});
-//   };
-
-//   const hasError = (fieldName) => {
-//     return submitted && errors[fieldName];
-//   };
-
-//   // Update processSteps when currentStep changes
-//   useEffect(() => {
-//     const updatedSteps = processSteps.map((step, index) => ({
-//       ...step,
-//       completed: index + 1 < currentStep
-//     }));
-//     setProcessSteps(updatedSteps);
-//   }, [currentStep]);
-
-//   // Add switch to OTP option
-//   const switchToOTP = () => {
-//     setShowMpinInput(false);
-//     setShowOtpInput(false);
-//     setFormData(prev => ({ ...prev, mpin: '', otp: '' }));
-//     setErrors({});
-//     setAuthMode('otp');
-//     setHasMpin(false);  // Reset MPIN flag to allow OTP flow
-//   };
-
-//   return (
-//     <div 
-//       className="min-h-screen py-4 sm:py-6 px-2 sm:px-4 flex items-center justify-center relative"
-//       style={
-//         {
-//           backgroundImage: 'url("/decorative-bg.webp")',
-//           backgroundSize: 'cover',
-//           backgroundRepeat: 'no-repeat',
-//           backgroundPosition: 'center',
-//           backgroundColor: '#1e293b',
-         
-//         }
-//       }
-//     >
-//       <Helmet>
-//         <title>{t('login.pageTitle')}</title>
-//       </Helmet>
-
-//       {/* Overlay */}
-//       <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 to-slate-800/70"></div>
-      
-//       {/* Back to Home */}
-//       <button 
-//         onClick={() => navigate('/')}
-//         className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-red-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-red-800 transition-colors duration-200 z-20 flex items-center text-xs sm:text-sm"
-//       >
-//         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-//           <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-//         </svg>
-//         {t('login.backToHome')}
-//       </button>
-
-//       <div className="w-full max-w-4xl mx-auto flex flex-col md:flex-row rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl overflow-hidden mt-10 md:mt-4 sm:mt-8 border border-2 border-[#DE7D37] relative z-10">
-//         {/* Left section */}
-//         <div className="bg-red-800 text-white p-4 sm:p-6 flex flex-col items-center justify-center w-full md:w-1/3">
-//           <div className="w-full flex flex-col justify-center items-center h-full py-2 sm:py-4">
-//             <div className="p-2 sm:p-4 rounded-xl inline-block">
-//             {/* <img src={pageData.logoUrl} alt={t('login.logoAlt')} className="w-32 sm:w-40 md:w-48 h-auto drop-shadow-lg" loading="lazy" /> */}
-//               <img 
-//                 src={pageData.logoUrl || '/logo.png'} 
-//                 alt={t('login.logoAlt')} 
-//                 className="w-32 sm:w-40 md:w-48 h-auto drop-shadow-lg" 
-//                 loading="lazy"
-//                 onError={(e) => {
-//                   e.target.onerror = null;
-//                   e.target.src = '/logo.png';
-//                 }}
-//               />
-//             </div>
-//             <h2 className="text-white text-base sm:text-xl font-semibold text-center mt-2 sm:mt-1">{t('login.welcomeMessage')}</h2>
-//             <p className="text-white/80 text-center mt-1 sm:mt-2 text-xs">{t('login.slogan')}</p>
-//           </div>
-//         </div>
-        
-//         {/* Right section - login form */}
-//         <div className="bg-white p-4 sm:p-6 w-full md:w-2/3">
-//           <div className="max-w-lg mx-auto">
-//             <div className="flex items-center justify-center mb-2 sm:mb-4">
-//               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 sm:h-7 w-5 sm:w-7 text-red-700 mr-2" viewBox="0 0 20 20" fill="currentColor">
-//                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
-//               </svg>
-//               <h1 className="text-lg sm:text-xl font-bold text-gray-800">{t('login.title')}</h1>
-//             </div>
-            
-//             {/* Progress Tracker */}
-//             <div className="w-full bg-gray-200 h-1.5 sm:h-2 mt-2 sm:mt-3 mb-3 sm:mb-4 rounded-full overflow-hidden">
-//               <div 
-//                 className="bg-red-700 h-1.5 sm:h-2 transition-all duration-500 ease-in-out"
-//                 style={{ width: `${(currentStep / processSteps.length) * 100}%` }}
-//               ></div>
-//             </div>
-            
-//             <div className="flex justify-between px-1 sm:px-2 text-xs mb-3 sm:mb-5">
-//               {processSteps.map((step, index) => (
-//                 <div 
-//                   key={step.id} 
-//                   className={`flex flex-col items-center ${
-//                     step.completed ? 'text-red-700' : 
-//                     (index + 1 === currentStep ? 'text-red-600' : 'text-gray-400')
-//                   }`}
-//                 >
-//                   <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center mb-1 ${
-//                     step.completed ? 'bg-red-700 text-white' : 
-//                     (index + 1 === currentStep ? 'bg-red-200 text-red-700 border-2 border-red-700' : 'bg-gray-300 text-gray-500')
-//                   }`}>
-//                     {step.completed ? (
-//                       <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2 sm:h-3 sm:w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-//                       </svg>
-//                     ) : (
-//                       step.id
-//                     )}
-//                   </div>
-//                   <span className="text-center text-[10px] sm:text-xs">{t(step.name)}</span>
-//                 </div>
-//               ))}
-//             </div>
-            
-//             <div className="bg-white p-3 sm:p-5 rounded-lg shadow-sm border border-gray-100">
-//               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-//                 {/* Authentication Mode Selection */}
-//                 {userExists && userHasMPIN && !showOtpInput && !showMpinInput && (
-//                   <div className="bg-slate-50 p-2 sm:p-3 rounded-lg border border-slate-200">
-//                     <div className="flex justify-center space-x-4">
-//                       <label className="inline-flex items-center">
-//                         <input
-//                           type="radio"
-//                           className="form-radio h-3 w-3 sm:h-4 sm:w-4 text-red-700"
-//                           name="authType"
-//                           value="mpin"
-//                           checked={authMode === 'mpin'}
-//                           onChange={() => handleAuthModeChange('mpin')}
-//                         />
-//                         <span className="ml-2 text-gray-700 font-medium text-xs sm:text-sm">{t('login.mpinAuth')}</span>
-//                       </label>
-//                       <label className="inline-flex items-center">
-//                         <input
-//                           type="radio"
-//                           className="form-radio h-3 w-3 sm:h-4 sm:w-4 text-red-700"
-//                           name="authType"
-//                           value="otp"
-//                           checked={authMode === 'otp'}
-//                           onChange={() => handleAuthModeChange('otp')}
-//                         />
-//                         <span className="ml-2 text-gray-700 font-medium text-xs sm:text-sm">{t('login.otpAuth')}</span>
-//                       </label>
-//                     </div>
-//                   </div>
-//                 )}
-
-//                 {/* Single auth mode display for new users */}
-//                 {(!userExists || !userHasMPIN) && (
-//                   <div className="bg-slate-50 p-2 sm:p-3 rounded-lg flex justify-center border border-slate-200">
-//                     <label className="inline-flex items-center">
-//                       <input
-//                         type="radio"
-//                         className="form-radio h-3 w-3 sm:h-4 sm:w-4 text-red-700"
-//                         name="authType"
-//                         value="otp"
-//                         checked={true}
-//                         readOnly
-//                       />
-//                       <span className="ml-2 text-gray-700 font-medium text-xs sm:text-sm">{t('login.otpAuth')}</span>
-//                     </label>
-//                   </div>
-//                 )}
-                
-//                 {/* Mobile Number */}
-//                 <div className="space-y-1 sm:space-y-2">
-//                   <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
-//                     <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">
-//                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-//                     </svg>
-//                     {t('login.mobileNumber')}
-//                   </label>
-//                   <input
-//                     type="tel"
-//                     name="mobileNumber"
-//                     value={formData.mobileNumber}
-//                     onChange={handleInputChange}
-//                     className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 text-sm ${
-//                       hasError('mobileNumber') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-//                     }`}
-//                     pattern="[0-9]*"
-//                     inputMode="numeric"
-//                     maxLength={10}
-//                     placeholder={t('login.mobilePlaceholder')}
-//                     disabled={showOtpInput || loading}
-//                   />
-//                   {hasError('mobileNumber') && (
-//                     <p className="text-red-500 text-[10px] sm:text-xs">{errors.mobileNumber}</p>
-//                   )}
-//                 </div>
-
-//                 {/* Name Input - Only show after mobile verification for new users */}
-//                 {!isCheckingUser && !userExists && formData.mobileNumber.length === 10 && !showOtpInput && (
-//                   <div className="space-y-1 sm:space-y-2">
-//                     <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
-//                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">
-//                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-//                       </svg>
-//                       {t('login.fullName')}
-//                     </label>
-//                     <input
-//                       type="text"
-//                       name="name"
-//                       value={formData.name}
-//                       onChange={handleInputChange}
-//                       className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 text-sm ${
-//                         hasError('name') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-//                       }`}
-//                       placeholder={t('login.namePlaceholder')}
-//                       disabled={loading}
-//                     />
-//                     {hasError('name') && (
-//                       <p className="text-red-500 text-[10px] sm:text-xs">{errors.name}</p>
-//                     )}
-//                   </div>
-//                 )}
-
-//                 {/* MPIN Input for Existing Users */}
-//                 {hasMpin && showMpinInput && (
-//                   <div className="space-y-2">
-//                     <div className="flex justify-between items-center">
-//                       <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
-//                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">
-//                           <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-//                         </svg>
-//                         {t('login.enterMpin')}
-//                       </label>
-//                       <button
-//                         type="button"
-//                         onClick={switchToOTP}
-//                         className="text-xs text-red-700 hover:text-red-800 hover:underline"
-//                       >
-//                         {t('login.useWhatsAppOtp')}
-//                       </button>
-//                     </div>
-//                     <input
-//                       type="password"
-//                       name="mpin"
-//                       value={formData.mpin}
-//                       onChange={handleMpinInput}
-//                       className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 text-sm text-center tracking-widest ${
-//                         hasError('mpin') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-//                       }`}
-//                       pattern="[0-9]*"
-//                       inputMode="numeric"
-//                       maxLength={4}
-//                       placeholder={t('login.mpinPlaceholder')}
-//                       autoComplete="current-password"
-//                     />
-//                     {hasError('mpin') && (
-//                       <p className="text-red-500 text-[10px] sm:text-xs">{errors.mpin}</p>
-//                     )}
-//                   </div>
-//                 )}
-
-//                 {/* OTP Input */}
-//                 {showOtpInput && (
-//                   <div className="space-y-2 sm:space-y-3">
-//                     <div className="flex justify-between items-center">
-//                       <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
-//                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">
-//                           <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-//                         </svg>
-//                         {t('login.enterOtp')}
-//                       </label>
-//                       {otpSent && (
-//                         <div className="flex space-x-2 items-center">
-//                           <button
-//                             type="button"
-//                             onClick={handleResendOtp}
-//                             disabled={loading || countdown > 0}
-//                             className={`text-[10px] sm:text-xs font-medium ${
-//                               countdown > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-red-700 hover:text-red-800 hover:underline'
-//                             }`}
-//                           >
-//                             {countdown > 0 ? `${t('login.resendOtp')} (${countdown}s)` : t('login.resendOtp')}
-//                           </button>
-//                         </div>
-//                       )}
-//                     </div>
-//                     <input
-//                       type="tel"
-//                       name="otp"
-//                       value={formData.otp}
-//                       onChange={handleOtpChange}
-//                       className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 text-sm text-center tracking-widest ${
-//                         hasError('otp') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-//                       }`}
-//                       pattern="[0-9]*"
-//                       inputMode="numeric"
-//                       maxLength={4}
-//                       placeholder={t('login.otpPlaceholder')}
-//                       disabled={loading}
-//                       autoComplete="one-time-code"
-//                     />
-//                     {hasError('otp') && (
-//                       <p className="text-red-500 text-[10px] sm:text-xs">{errors.otp}</p>
-//                     )}
-//                     {otpSent && !errors.otp && (
-//                       <p className="text-[10px] sm:text-xs text-gray-600">
-//                         {t('login.otpSentMessage')} 
-//                         {/* <span className="font-medium">WhatsApp</span> */}
-//                       </p>
-//                     )}
-//                   </div>
-//                 )}
-
-//                 {/* MPIN Creation Form */}
-//                 {showMpinCreation && (
-//                   <div className="space-y-3">
-//                     <div className="space-y-1">
-//                       <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
-//                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-red-700" viewBox="0 0 20 20" fill="currentColor">
-//                           <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-//                         </svg>
-//                         {t('login.setupMpin')}
-//                       </label>
-//                       <input
-//                         type="password"
-//                         name="mpin"
-//                         value={mpinData.mpin}
-//                         onChange={handleMpinChange}
-//                         className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 text-sm text-center tracking-widest ${
-//                           hasError('mpin') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-//                         }`}
-//                         pattern="[0-9]*"
-//                         inputMode="numeric"
-//                         maxLength={4}
-//                         placeholder={t('login.newMpinPlaceholder')}
-//                         autoComplete="new-password"
-//                       />
-//                       {hasError('mpin') && (
-//                         <p className="text-red-500 text-[10px] sm:text-xs">{errors.mpin}</p>
-//                       )}
-//                     </div>
-
-//                     <div className="space-y-1">
-//                       <label className="text-xs sm:text-sm font-medium text-gray-700 flex items-center">
-//                         {t('login.confirmMpin')}
-//                       </label>
-//                       <input
-//                         type="password"
-//                         name="confirmMpin"
-//                         value={mpinData.confirmMpin}
-//                         onChange={handleMpinChange}
-//                         className={`w-full px-2 sm:px-3 py-1.5 sm:py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 text-sm text-center tracking-widest ${
-//                           hasError('confirmMpin') ? 'border-red-500 bg-red-50' : 'border-gray-300'
-//                         }`}
-//                         pattern="[0-9]*"
-//                         inputMode="numeric"
-//                         maxLength={4}
-//                         placeholder={t('login.confirmMpinPlaceholder')}
-//                         autoComplete="new-password"
-//                       />
-//                       {hasError('confirmMpin') && (
-//                         <p className="text-red-500 text-[10px] sm:text-xs">{errors.confirmMpin}</p>
-//                       )}
-//                     </div>
-//                   </div>
-//                 )}
-
-//                 {/* Submit Button */}
-//                 <div className="flex items-center justify-between pt-1">
-//                   <button 
-//                     type="submit" 
-//                     disabled={loading || (formData.mobileNumber.length !== 10 && !showOtpInput && !showMpinCreation && !showMpinInput)}
-//                     className={`w-full bg-red-700 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 font-medium text-xs sm:text-sm flex items-center justify-center ${
-//                       loading || (formData.mobileNumber.length !== 10 && !showOtpInput && !showMpinCreation && !showMpinInput) ? 'opacity-75 cursor-not-allowed' : ''
-//                     }`}
-//                   >
-//                     {loading && (
-//                       <svg className="animate-spin -ml-1 mr-2 h-3 w-3 sm:h-4 sm:w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-//                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-//                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-//                       </svg>
-//                     )}
-//                     {loading ? (
-//                       showMpinCreation ? t('login.setting') || 'Setting MPIN...' :
-//                       showOtpInput ? t('login.verifying') || 'Verifying...' : 
-//                       t('login.sending') || 'Sending...'
-//                     ) : (
-//                       showMpinCreation ? t('login.setMpin') || 'Set MPIN' :
-//                       showOtpInput ? t('login.verifyOtp') || 'Verify OTP' :
-//                       showMpinInput ? t('common.submit') || 'Submit' :
-//                       t('login.sendOtp') || 'Next'
-//                     )}
-//                   </button>
-//                 </div>
-//               </form>
-//             </div>
-            
-//             <div
-//               className="text-center mt-3 sm:mt-4 text-[10px] sm:text-xs text-gray-600"
-//               dangerouslySetInnerHTML={{
-//                 __html: t('login.termsAgreement')
-//                   .replace('Terms of Service', `<a href="/" class="text-red-700">${t('login.termsOfService')}</a>`)
-//                   .replace('Privacy Policy', `<a href="/privacy-policy" class="text-red-700">${t('login.privacyPolicy')}</a>`)
-//                   .replace('सेवा की शर्तों', `<a href="/" class="text-red-700">${t('login.termsOfService')}</a>`)
-//                   .replace('गोपनीयता नीति', `<a href="/privacy-policy" class="text-red-700">${t('login.privacyPolicy')}</a>`)
-//               }}
-//             />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Login;
