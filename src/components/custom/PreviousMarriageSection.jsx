@@ -2,8 +2,8 @@ import React from 'react';
 import { FIXED_CODES } from '../../utils/form/formUtils';
 
 const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://admin.gahoishakti.in'
-  : 'http://localhost:1340';
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1337';
 
 
 const GAHOI_GOTRAS = [

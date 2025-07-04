@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../custom/LanguageSwitcher';
 
 const API_BASE = import.meta.env.MODE === 'production' 
-  ? 'https://admin.gahoishakti.in'
-  : 'http://localhost:1340';
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1337';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
