@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { getLoginPageData } from "../../data/loader";
-import Swal from 'sweetalert2';
 
 
 const API_BASE = import.meta.env.MODE === 'production' 
@@ -94,6 +93,81 @@ const sendWhatsAppOTP = async (mobileNumber) => {
   }
 };
 
+const verifyOTP = async (mobileNumber, otp) => {
+  try {
+    const storedMobile = sessionStorage.getItem('otpMobile');
+
+    if (storedMobile !== mobileNumber) {
+    
+      throw new Error('Mobile number mismatch. Please request a new OTP.');
+    }
+
+    const response = await fetch('https://api.gahoishakti.in/api/verify-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        mobileNumber,
+        otp
+      })
+    });
+
+    const data = await response.json();
+ 
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to verify OTP');
+    }
+
+    // Clear OTP data after successful verification
+    sessionStorage.removeItem('otpMobile');
+    sessionStorage.setItem('otpVerified', 'true');
+
+    return data;
+  } catch (error) {
+    console.error('[DEBUG] Verify OTP Error:', error);
+    throw error;
+  }
+};
+
+// MPIN verification
+const verifyMPIN = async (mobileNumber, mpin) => {
+  try {
+    const response = await fetch(`${API_BASE}/api/verify-mpin`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        mobileNumber: mobileNumber,
+        mpin: mpin
+      })
+    });
+
+    const responseText = await response.text();
+    if (!response.ok) {
+      let errorMessage = 'MPIN verification failed';
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorData.error?.message || errorMessage;
+      } catch {
+        errorMessage = responseText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = JSON.parse(responseText);
+    return data;
+  } catch (error) {
+    console.error('Error verifying MPIN:', error);
+    throw error;
+  }
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -147,21 +221,12 @@ const Login = () => {
   ]);
   const [currentStep, setCurrentStep] = useState(1);
   const [countdown, setCountdown] = useState(0);
+  const [showMpinCreation, setShowMpinCreation] = useState(false);
   const [mpinData, setMpinData] = useState({
     mpin: '',
     confirmMpin: ''
   });
   const [isCheckingUser, setIsCheckingUser] = useState(false);
-
-  // Check for saved registration on mount
-  useEffect(() => {
-    const savedFormData = localStorage.getItem('registrationFormData');
-    const savedStep = localStorage.getItem('registrationCurrentStep');
-    if (savedFormData && savedStep) {
-      // We'll handle this in the verifyOTP success callback
-      console.log('Found saved registration data');
-    }
-  }, []);
 
   React.useEffect(() => {
     const loadPageData = async () => {
@@ -444,136 +509,7 @@ const Login = () => {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // Define verifyOTP inside the component where it's used
-  const verifyOTP = async () => {
-    try {
-      const response = await fetch(`${API_BASE}/api/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ 
-          mobileNumber: formData.mobileNumber, 
-          otp: formData.otp 
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to verify OTP');
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        // Update process steps
-        const updatedSteps = processSteps.map(step => {
-          if (step.id <= 2) {
-            return { ...step, completed: true };
-          }
-          return step;
-        });
-        setProcessSteps(updatedSteps);
-
-        // Store verified mobile number
-        localStorage.setItem('verifiedMobile', formData.mobileNumber);
-        
-        // Check for saved registration data
-        const savedFormData = localStorage.getItem('registrationFormData');
-        const savedStep = localStorage.getItem('registrationCurrentStep');
-        
-        if (savedFormData && savedStep) {
-          // Show resume registration dialog
-          const result = await Swal.fire({
-            title: t('login.otpVerified'),
-            text: t('login.savedRegistrationFound'),
-            icon: 'success',
-            showCancelButton: true,
-            confirmButtonText: t('login.resumeRegistration'),
-            cancelButtonText: t('login.startNew'),
-            confirmButtonColor: '#FD7D01',
-            cancelButtonColor: '#6B7280',
-          });
-
-          if (result.isConfirmed) {
-            navigate('/registration', { 
-              state: { 
-                fromLogin: true,
-                mobileNumber: formData.mobileNumber,
-                processSteps: updatedSteps,
-                resumeRegistration: true
-              }
-            });
-          } else {
-            // Clear saved data and start new registration
-            localStorage.removeItem('registrationFormData');
-            localStorage.removeItem('registrationCurrentStep');
-            navigate('/registration', { 
-              state: { 
-                fromLogin: true,
-                mobileNumber: formData.mobileNumber,
-                processSteps: updatedSteps
-              }
-            });
-          }
-        } else {
-          // No saved data, proceed to new registration
-          navigate('/registration', { 
-            state: { 
-              fromLogin: true,
-              mobileNumber: formData.mobileNumber,
-              processSteps: updatedSteps
-            }
-          });
-        }
-      } else {
-        throw new Error(t('login.invalidOtp'));
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      throw error;
-    }
-  };
-
-  // MPIN verification
-  const verifyMPIN = async (mobileNumber, mpin) => {
-    try {
-      const response = await fetch(`${API_BASE}/api/verify-mpin`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          mobileNumber: mobileNumber,
-          mpin: mpin
-        })
-      });
-
-      const responseText = await response.text();
-      if (!response.ok) {
-        let errorMessage = 'MPIN verification failed';
-        try {
-          const errorData = JSON.parse(responseText);
-          errorMessage = errorData.message || errorData.error?.message || errorMessage;
-        } catch {
-          errorMessage = responseText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-
-      const data = JSON.parse(responseText);
-      return data;
-    } catch (error) {
-      console.error('Error verifying MPIN:', error);
-      throw error;
-    }
-  };
-
+  // Modified handleSubmit to include MPIN creation
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
@@ -586,9 +522,14 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
+      
+        
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
+          
+          // Redirect to homepage 
+        
           navigate('/', { replace: true });
           return;
         }
@@ -603,7 +544,7 @@ const Login = () => {
       return;
     }
 
-    // Send OTP Flow
+    // Send OTP Flow (both new users and existing users choosing OTP)
     if (!showOtpInput) {
       setLoading(true);
       try {
@@ -622,11 +563,30 @@ const Login = () => {
       } finally {
         setLoading(false);
       }
-    } else {
-      // Verify OTP
+    } else if (showOtpInput && !showMpinCreation) {
+      // Step 2: Verify OTP
       setLoading(true);
       try {
-        await verifyOTP();
+    
+        const response = await verifyOTP(formData.mobileNumber, formData.otp);
+     
+        
+        if (response.jwt) {
+          localStorage.setItem('token', `Bearer ${response.jwt}`);
+          localStorage.setItem('verifiedMobile', formData.mobileNumber);
+          
+          // If user exists, redirect to home page
+          if (userExists) {
+            navigate('/', { replace: true });
+            return;
+          }
+          
+          // For new users, show MPIN creation
+          if (!userExists) {
+            setShowMpinCreation(true);
+            setCurrentStep(3);
+          }
+        }
       } catch (error) {
         console.error('[DEBUG] OTP verification failed:', error);
         setErrors({
@@ -634,6 +594,29 @@ const Login = () => {
         });
       } finally {
         setLoading(false);
+      }
+    } else if (showMpinCreation) {
+      // MPIN creation for new users - No need to check user existence again
+      if (validateMpin()) {
+        setLoading(true);
+        try {
+          await createMpin(mpinData.mpin);
+          // After MPIN creation, redirect to registration
+          navigate('/registration', { 
+            state: { 
+              mobileNumber: formData.mobileNumber,
+              fromLogin: true,
+              processSteps: processSteps 
+            } 
+          });
+        } catch (error) {
+          console.error('MPIN creation error:', error);
+          setErrors({
+            mpin: error.message || 'Failed to create MPIN'
+          });
+        } finally {
+          setLoading(false);
+        }
       }
     }
   };
@@ -698,17 +681,6 @@ const Login = () => {
     // Don't reset hasMpin since the user still has a MPIN
     // setHasMpin(false);  // Remove this line
   };
-
-  // Add function to handle resume registration
-  const handleResumeRegistration = useCallback(() => {
-    navigate('/registration', { 
-      state: { 
-        fromLogin: true,
-        mobileNumber: formData.mobileNumber,
-        processSteps: processSteps
-      }
-    });
-  }, [navigate, formData.mobileNumber, processSteps]);
 
   return (
     <div 
