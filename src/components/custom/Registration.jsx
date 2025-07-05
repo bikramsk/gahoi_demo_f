@@ -311,7 +311,7 @@ const RegistrationForm = () => {
                 }
                 setShowResumeDialog(false);
               }}
-              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             >
               {t('registration.resumeDialog.resume', 'Resume')}
             </button>
@@ -1576,10 +1576,7 @@ const RegistrationForm = () => {
         displayPictureId
       );
 
-+     console.log('Payload to Strapi:', strapiData);
-
       const response = await fetch(
-        // `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/registration-pages`,
         `${API_BASE}/api/registration-pages`,
         {
           method: "POST",

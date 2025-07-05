@@ -257,7 +257,7 @@ const UserProfile = () => {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-        <span>Failed to load profile</span>
+        <span>Log out and log in again to complete your profile</span>
       </div>
     );
   }
