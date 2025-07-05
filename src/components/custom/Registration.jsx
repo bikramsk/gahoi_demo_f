@@ -253,11 +253,13 @@ const RegistrationForm = () => {
   
   const saveProgress = useCallback((data) => {
     try {
-      sessionStorage.setItem('registrationProgress', JSON.stringify({
-        formData: data,
+      const progressData = {
+        formData: { ...data },  // Create a copy of the data
         lastSaved: new Date().toISOString(),
-        currentStep: currentStep
-      }));
+        currentStep
+      };
+      console.log('Saving progress:', progressData);  // Debug log
+      sessionStorage.setItem('registrationProgress', JSON.stringify(progressData));
     } catch (error) {
       console.error('Error saving progress:', error);
     }
@@ -273,7 +275,11 @@ const RegistrationForm = () => {
         const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
         
         if (hoursDiff < 24) {
-          return { formData, currentStep };
+          console.log('Loading progress:', { formData, currentStep });  // Debug log
+          return {
+            formData: { ...INITIAL_FORM_DATA, ...formData },  // Merge with initial data
+            currentStep
+          };
         } else {
           sessionStorage.removeItem('registrationProgress');
         }
@@ -305,8 +311,16 @@ const RegistrationForm = () => {
             <button
               onClick={() => {
                 const savedProgress = loadProgress();
+                console.log('Resume clicked, savedProgress:', savedProgress);  // Debug log
                 if (savedProgress) {
-                  setFormData(savedProgress.formData);
+                  const formDataToSet = {
+                    ...savedProgress.formData,
+                    // Preserve mobile number from login if it exists
+                    mobile_number: location.state?.mobileNumber || savedProgress.formData.mobile_number
+                  };
+                  console.log('Setting form data to:', formDataToSet);  // Debug log
+                  console.log('Setting current step to:', savedProgress.currentStep);  // Debug log
+                  setFormData(formDataToSet);
                   setCurrentStep(savedProgress.currentStep);
                 }
                 setShowResumeDialog(false);
@@ -374,7 +388,9 @@ const RegistrationForm = () => {
   }, [loadProgress]);
   
   useEffect(() => {
-    if (formData !== INITIAL_FORM_DATA) {
+    // Only save if we have some actual data (not just the initial state)
+    if (Object.keys(formData).some(key => formData[key] !== INITIAL_FORM_DATA[key])) {
+      console.log('Saving progress with data:', formData);  // Debug log
       saveProgress(formData);
     }
   }, [formData, saveProgress]);
@@ -1778,6 +1794,6225 @@ const RegistrationForm = () => {
                     <path
                       fillRule="evenodd"
                       d="M14.243 5.757a6 6 0 10-9.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.email')}
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("email")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  placeholder={t('registration.personalInfo.emailPlaceholder')}
+                />
+                {hasError("email") && (
+                  <p className="text-red-500 text-xs">{errors.email}</p>
+                )}
+              </div>
+
+              <div className="space-y-3 md:col-span-2">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.gender')}
+                </label>
+                <div className="flex items-center space-x-8 px-4 py-2.5 border border-gray-300 rounded-lg bg-white">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={formData.gender === "male"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.male')}</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={formData.gender === "female"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.female')}</span>
+                  </label>
+                </div>
+
+                {hasError("gender") && (
+                  <p className="text-red-500 text-xs">{errors.gender}</p>
+                )}
+              </div>
+
+              {/* Nationality field */}
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.nationality')}
+                  {hasError("nationality") && (
+                    <span className="ml-2 text-xs text-red-500">*Required</span>
+                  )}
+                </label>
+                <div
+                  className={`flex items-center space-x-8 px-4 py-2.5 border rounded-lg ${
+                    hasError("nationality")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nationality"
+                      value="Indian"
+                      checked={formData.nationality === "Indian"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          nationality: e.target.value,
+                        })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.indian')}</span>
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nationality"
+                      value="Non-Indian"
+                      checked={formData.nationality === "Non-Indian"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          nationality: e.target.value,
+                        })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                    {t('registration.personalInfo.nonIndian')}
+                    </span>
+                  </label>
+                </div>
+                {hasError("nationality") && (
+                  <p className="text-red-500 text-xs">{errors.nationality}</p>
+                )}
+              </div>
+
+              {/* Gahoi Community field */}
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.isGahoi')}
+                </label>
+                <div
+                  className={`flex items-center space-x-8 px-4 py-2.5 border rounded-lg ${
+                    hasError("isGahoi")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isGahoi"
+                      value="Yes"
+                      checked={formData.isGahoi === "Yes"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isGahoi: e.target.value })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.yes')}</span>
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isGahoi"
+                      value="No"
+                      checked={formData.isGahoi === "No"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isGahoi: e.target.value })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.no')}</span>
+                  </label>
+                </div>
+                {hasError("isGahoi") && (
+                  <p className="text-red-500 text-xs">{errors.isGahoi}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Blood Group */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium flex text-gray-700">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+import React, { useState, useEffect, useCallback, useMemo } from "react";import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import PhotoUpload from "./PhotoUpload";
+import {
+  STATE_TO_ASSEMBLIES,
+  INDUSTRY_SECTORS,
+  BUSINESS_SIZES,
+  WORK_TYPES,
+  EMPLOYMENT_TYPES,
+  HANDICAP_OPTIONS,
+  BLOOD_GROUPS,
+  INITIAL_FAMILY_MEMBERS,
+  MAX_CHILDREN,
+  MAX_SIBLINGS,
+  MARITAL_STATUS_OPTIONS,
+  EDUCATION_OPTIONS,
+  OCCUPATION_OPTIONS,
+  SIBLING_RELATION_OPTIONS,
+  FORM_STEPS,
+  PROCESS_STEPS,
+  INITIAL_FORM_DATA,
+} from "../../constants/formConstants";
+import {
+  validateStep,
+  formatFormData,
+  hasErrors,
+} from "../../utils/form/formUtils";
+import {
+  STATES,
+  STATE_TO_DISTRICTS,
+  DISTRICT_TO_CITIES,
+  ASHOKNAGAR_GRAM_PANCHAYATS,
+  ASHOKNAGAR_LOCAL_BODIES,
+  ALIRAJPUR_LOCAL_BODIES,
+  ALIRAJPUR_GRAM_PANCHAYATS,
+  ANUPPUR_LOCAL_BODIES,
+  ANUPPUR_GRAM_PANCHAYATS,
+  BALAGHAT_LOCAL_BODIES,
+  BALAGHAT_GRAM_PANCHAYATS,
+  BARWANI_LOCAL_BODIES,
+  BARWANI_GRAM_PANCHAYATS,
+  BETUL_LOCAL_BODIES,
+  BETUL_GRAM_PANCHAYATS,
+  BHIND_LOCAL_BODIES,
+  BHIND_GRAM_PANCHAYATS,
+  BHOPAL_LOCAL_BODIES,
+  BHOPAL_GRAM_PANCHAYATS,
+  BURHANPUR_LOCAL_BODIES,
+  BURHANPUR_GRAM_PANCHAYATS,
+  CHHATARPUR_LOCAL_BODIES,
+  CHHATARPUR_GRAM_PANCHAYATS,
+  CHHINDWARA_LOCAL_BODIES,
+  CHHINDWARA_GRAM_PANCHAYATS,
+  DAMOH_LOCAL_BODIES,
+  DAMOH_GRAM_PANCHAYATS,
+  DATIA_LOCAL_BODIES,
+  DATIA_GRAM_PANCHAYATS,
+  DEWAS_LOCAL_BODIES,
+  DEWAS_GRAM_PANCHAYATS,
+  DHAR_LOCAL_BODIES,
+  DHAR_GRAM_PANCHAYATS,
+  DINDORI_LOCAL_BODIES,
+  DINDORI_GRAM_PANCHAYATS,
+  GUNA_LOCAL_BODIES,
+  GUNA_GRAM_PANCHAYATS,
+  GWALIOR_LOCAL_BODIES,
+  GWALIOR_GRAM_PANCHAYATS,
+  HARDA_LOCAL_BODIES,
+  HARDA_GRAM_PANCHAYATS,
+  INDORE_LOCAL_BODIES,
+  INDORE_GRAM_PANCHAYATS,
+  JABALPUR_LOCAL_BODIES,
+  JABALPUR_GRAM_PANCHAYATS,
+  JHABUA_LOCAL_BODIES,
+  JHABUA_GRAM_PANCHAYATS,
+  KATNI_LOCAL_BODIES,
+  KATNI_GRAM_PANCHAYATS,
+  KHANDWA_LOCAL_BODIES,
+  KHANDWA_GRAM_PANCHAYATS,
+  KHARGONE_LOCAL_BODIES,
+  KHARGONE_GRAM_PANCHAYATS,
+  MANDLA_LOCAL_BODIES,
+  MANDLA_GRAM_PANCHAYATS,
+  MANDSAUR_LOCAL_BODIES,
+  MANDSAUR_GRAM_PANCHAYATS,
+  MORENA_LOCAL_BODIES,
+  MORENA_GRAM_PANCHAYATS,
+  NARSINGHPUR_LOCAL_BODIES,
+  NARSINGHPUR_GRAM_PANCHAYATS,
+  NEEMUCH_LOCAL_BODIES,
+  NEEMUCH_GRAM_PANCHAYATS,
+  PANNA_LOCAL_BODIES,
+  PANNA_GRAM_PANCHAYATS,
+  RAISEN_LOCAL_BODIES,
+  RAISEN_GRAM_PANCHAYATS,
+  RAJGARH_LOCAL_BODIES,
+  RAJGARH_GRAM_PANCHAYATS,
+  RATLAM_LOCAL_BODIES,
+  RATLAM_GRAM_PANCHAYATS,
+  REWA_LOCAL_BODIES,
+  REWA_GRAM_PANCHAYATS,
+  SAGAR_LOCAL_BODIES,
+  SAGAR_GRAM_PANCHAYATS,
+  SATNA_LOCAL_BODIES,
+  SATNA_GRAM_PANCHAYATS,
+  SEHORE_LOCAL_BODIES,
+  SEHORE_GRAM_PANCHAYATS,
+  SEONI_LOCAL_BODIES,
+  SEONI_GRAM_PANCHAYATS,
+  SHAHDOL_LOCAL_BODIES,
+  SHAHDOL_GRAM_PANCHAYATS,
+  SHAJAPUR_LOCAL_BODIES,
+  SHAJAPUR_GRAM_PANCHAYATS,
+  SHEOPUR_LOCAL_BODIES,
+  SHEOPUR_GRAM_PANCHAYATS,
+  SHIVPURI_LOCAL_BODIES,
+  SHIVPURI_GRAM_PANCHAYATS,
+  SIDHI_LOCAL_BODIES,
+  SIDHI_GRAM_PANCHAYATS,
+  SINGRAULI_LOCAL_BODIES,
+  SINGRAULI_GRAM_PANCHAYATS,
+  TIKAMGARH_LOCAL_BODIES,
+  TIKAMGARH_GRAM_PANCHAYATS,
+  UJJAIN_LOCAL_BODIES,
+  UJJAIN_GRAM_PANCHAYATS,
+  UMARIYA_LOCAL_BODIES,
+  UMARIYA_GRAM_PANCHAYATS,
+  VIDISHA_LOCAL_BODIES,
+  VIDISHA_GRAM_PANCHAYATS,
+} from "../../constants/locationData";
+import ReactDOM from "react-dom";
+import PreviousMarriageSection from './PreviousMarriageSection';
+
+const API_BASE = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1340';
+
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+
+export const CHAURASI_PANCHAYAT_NAMES = [
+  "Gahoi Vaishya Panchayat",
+  "Shri Gahoi Vaishya Sabha",
+  "Gahoi Vaishya Samaj",
+];
+
+const LOCAL_PANCHAYATS = {
+  "Chambal Regional Assembly": ["Morena", "Bhind", "Gwalior"],
+  "Central Malwa Regional Assembly": ["Indore", "Dewas", "Ujjain", "Bhopal", "Vidisha", "Raisen"],
+  "Mahakaushal Regional Assembly": ["Jabalpur", "Katni", "Rewa", ""],
+  "Vindhya Regional Assembly": ["Satna", "Shahdol", "Sidhi", "Chhatarpur", "Panna", "Rewa"],
+  "Bundelkhand Regional Assembly": ["Sagar", "Damoh", "Chhatarpur"],
+  "Chaurasi Regional Assembly": ["Bhopal", "Vidisha", "Raisen"],
+  "Southern Regional Assembly": ["Pune", "Mumbai", "Nagpur", "Amravati", "Chalisgaon", "Dhuliya"]
+};
+
+const SUB_LOCAL_PANCHAYATS = {
+  Pune: ["Pune", "Pimpri-Chinchwad", "Khadki", "Hadapsar"],
+  Mumbai: ["South Mumbai", "Andheri", "Borivali", "Thane", "Navi Mumbai"],
+  Nagpur: ["Nagpur", "Kamptee", "Hingna"],
+  Amravati: ["Amravati", "Badnera", "Achalpur"],
+  Chalisgaon: ["Chalisgaon"],
+  Dhuliya: ["Dhuliya"],
+  Morena: ["Morena", "Ambah", "Porsa"],
+  Bhind: ["Bhind", "Ater", "Lahar", "Daboh", "Tharet", "Mihona", "Aswar", "Lahar", "Gohad", "Machhand", "Raun"],
+  Gwalior: ["Gwalior", "Dabra","Madhavganj",
+        "Khasgi Bazaar",
+        "Daulatganj",
+        "Kampoo",
+        "Lohia Bazaar",
+        "Phalka Bazaar",
+        "Lohamandi",
+        "Bahodapur",
+        "Naka Chandravadni",
+        "Harishankarpuram",
+        "Thatipur",
+        "Morar",
+        "Dabra",
+        "Pichhore Dabra",
+        "Behat"],
+  Patna: ["Patna"],
+  Durg: ["Durg"],
+  Rajnandgaon: ["Rajnandgaon"],
+  Dhamtari: ["Dhamtari"],
+  Raipur: ["Raipur"],
+  Bilaspur: ["Bilaspur"],
+  Bastar: ["Bastar"],
+  Koriya: ["Koriya"],
+  Jhansi: [
+    "Garautha", "Barua Sagar", "Simriddha", "Tahrauli", "Gursarai", "Bamor",
+    "Poonchh", "Erich", "Bhel Simrawali", "Babina Cantt", "Bangra Uldan Ranipur",
+    "Mauranipur", "Baragaon", "Ranipur", "Jhansi", "Samthar", "Archara", "Moth"
+  ],
+  Tikamgarh: [
+    "Tikamgarh", "Baldeogarh", "Jatara", "Palera", "Niwari", "Prithvipur",
+    "Orchha", "Badagaon", "Mohangarh", "Digoda", "Lidhora", "Khargapur"
+  ],
+  Datia: [
+    "Sewdha", "Chhoti Badoni", "Datia", "Indergarh", "Badhara Sopan",
+    "Unnao Balaji", "Bhander", "Salon B"
+  ],
+  Jaipur: ["Jaipur"],
+  Indore: ["Indore"],
+  Ujjain: ["Ujjain"],
+  Bhopal: ["Bhopal", "Berasia"],
+  Vidisha: ["Vidisha"],
+  Raisen: ["Begamganj"],
+  Sultanpur: ["Visani"],
+  Ahmedabad: ["Gandhinagar"],
+};
+
+const CHAURASI_LOCAL_PANCHAYAT_MAPPING = {
+  "Gahoi Vaishya Panchayat": ["Shivpuri", "Ashok Nagar", "Guna", "Ahmedabad"],
+  "Shri Gahoi Vaishya Sabha": ["Shivpuri"],
+  "Gahoi Vaishya Samaj": ["Ashok Nagar"],
+};
+
+const CHAURASI_SUB_LOCAL_PANCHAYAT_MAPPING = {
+  "Gahoi Vaishya Panchayat": {
+    Shivpuri: [
+      "Shivpuri",
+      "Malhawani",
+      "Pipara",
+      "Semri",
+      "Bamore Damaroun",
+      "Manpura",
+      "Pichhore",
+    ],
+    "Ashok Nagar": ["Ashok Nagar", "Bamore Kala"],
+    Guna: ["Guna"],
+    Ahmedabad: ["Gandhi Nagar"],
+  },
+  "Shri Gahoi Vaishya Sabha": {
+    Shivpuri: ["Karera", "Bhonti"],
+  },
+  "Gahoi Vaishya Samaj": {
+    "Ashok Nagar": ["Dinara", "Guna"],
+  },
+};
+
+const GUJARAT_CHAURASI_MAPPING = {
+  "Gandhinagar": {
+    assembly: "Chaurasi Regional Assembly",
+    localPanchayatName: "Gahoi Vaishya Panchayat",
+    localPanchayat: "Ahmedabad",
+    subLocalPanchayat: "Gandhi Nagar"
+  }
+};
+
+const RegistrationForm = () => {
+  const location = useLocation();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+  
+  const saveProgress = useCallback((data) => {
+    try {
+      sessionStorage.setItem('registrationProgress', JSON.stringify({
+        formData: data,
+        lastSaved: new Date().toISOString(),
+        currentStep: currentStep
+      }));
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  }, [currentStep]);
+  
+  const loadProgress = useCallback(() => {
+    try {
+      const saved = sessionStorage.getItem('registrationProgress');
+      if (saved) {
+        const { formData, lastSaved, currentStep } = JSON.parse(saved);
+        const savedDate = new Date(lastSaved);
+        const now = new Date();
+        const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24) {
+          return { formData, currentStep };
+        } else {
+          sessionStorage.removeItem('registrationProgress');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading progress:', error);
+      return null;
+    }
+  }, []);
+  const ResumeDialog = () => {
+    if (!showResumeDialog) return null;
+  
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+          <h3 className="text-lg font-semibold mb-4">{t('registration.resumeDialog.title', 'Resume Registration?')}</h3>
+          <p className="mb-6">{t('registration.resumeDialog.message', 'We found your previously saved progress. Would you like to continue where you left off?')}</p>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={() => {
+                setShowResumeDialog(false);
+                clearProgress();
+              }}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              {t('registration.resumeDialog.startNew', 'Start New')}
+            </button>
+            <button
+              onClick={() => {
+                const savedProgress = loadProgress();
+                console.log('Resume clicked, savedProgress:', savedProgress);  // Debug log
+                if (savedProgress) {
+                  const formDataToSet = {
+                    ...savedProgress.formData,
+                    // Preserve mobile number from login if it exists
+                    mobile_number: location.state?.mobileNumber || savedProgress.formData.mobile_number
+                  };
+                  console.log('Setting form data to:', formDataToSet);  // Debug log
+                  console.log('Setting current step to:', savedProgress.currentStep);  // Debug log
+                  setFormData(formDataToSet);
+                  setCurrentStep(savedProgress.currentStep);
+                }
+                setShowResumeDialog(false);
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              {t('registration.resumeDialog.resume', 'Resume')}
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  };
+  
+  const clearProgress = useCallback(() => {
+    try {
+      sessionStorage.removeItem('registrationProgress');
+    } catch (error) {
+      console.error('Error clearing progress:', error);
+    }
+  }, []);
+
+
+
+  const [formData, setFormData] = useState(() => {
+    const initialData = {
+      ...INITIAL_FORM_DATA,
+      workCategory: "professional",
+      workType: "Professional",
+       employmentType: ""
+    };
+    
+    // Only set mobile number if it exists in location state
+    if (location.state?.mobileNumber) {
+      initialData.mobile_number = location.state.mobileNumber;
+      console.log("Initial mobile number set:", location.state.mobileNumber);
+    }
+    
+    return initialData;
+  });
+  
+  const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
+  const [progress, setProgress] = useState(50);
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
+
+  // Handle location state only once 
+  useEffect(() => {
+    if (location.state?.mobileNumber) {
+      console.log("Initializing form with mobile number:", location.state.mobileNumber);
+      setFormData(prevData => ({
+        ...prevData,
+        mobile_number: location.state.mobileNumber
+      }));
+    }
+  }, []); 
+  useEffect(() => {
+    const savedProgress = loadProgress();
+    if (savedProgress) {
+      setShowResumeDialog(true);
+    }
+  }, [loadProgress]);
+  
+  useEffect(() => {
+    // Only save if we have some actual data (not just the initial state)
+    if (Object.keys(formData).some(key => formData[key] !== INITIAL_FORM_DATA[key])) {
+      console.log('Saving progress with data:', formData);  // Debug log
+      saveProgress(formData);
+    }
+  }, [formData, saveProgress]);
+
+  const indianCities = [
+    "Ahmedabad",
+    "Amravati",
+    "Ashok Nagar",
+    "Auraiya",
+    "Baikunthpur",
+    "Banda",
+    "Bhind",
+    "Bilaspur",
+    "Bhopal",
+    "Chalisgaon",
+    "Chhatarpur",
+    "Chhindwara",
+    "Datia",
+    "Delhi",
+    "Dhamtari",
+    "Dhuliya",
+    "Dindori",
+    "Durg",
+    "Ghasan",
+    "Guna",
+    "Gwalior",
+    "Hata",
+    "Hoshangabad",
+    "Indore",
+    "Jabalpur",
+    "Jagdalpur",
+    "Jaipur",
+    "Jalaun",
+    "Jhansi",
+    "Kanpur",
+    "Karvi",
+    "Katni",
+    "Lalitpur",
+    "Lucknow",
+    "Mahoba",
+    "Mandla",
+    "Mathura",
+    "Morena",
+    "Mumbai",
+    "Nagpur",
+    "Narsinghpur",
+    "Other",
+    "Panna",
+    "Patna City",
+    "Pune",
+    "Raisen",
+    "Raipur",
+    "Rajnandgaon",
+    "Rewa",
+    "Sagar",
+    "Satna",
+    "Seoni",
+    "Shahdol",
+    "Shivpuri",
+    "Sultanpur",
+    "Tikamgarh",
+    "Ujjain",
+    "Umariya",
+    "Vidisha",
+  ];
+
+  const handleImageSelect = (file) => {
+    setFormData((prev) => ({
+      ...prev,
+      display_picture: file,
+    }));
+  };
+
+
+  useEffect(() => {
+    const header = document.querySelector("header");
+    const footer = document.querySelector("footer");
+    const nav = document.querySelector("nav");
+
+    if (header) header.style.display = "none";
+    if (footer) footer.style.display = "none";
+    if (nav) nav.style.display = "none";
+
+    document.body.classList.add("fullscreen-form");
+
+    return () => {
+      if (header) header.style.display = "";
+      if (footer) footer.style.display = "";
+      if (nav) nav.style.display = "";
+      document.body.classList.remove("fullscreen-form");
+    };
+  }, []);
+
+  // Optimize form steps by using constants
+  const formSteps = useMemo(() => FORM_STEPS, []);
+
+  useEffect(() => {
+    if (location.state?.fromLogin) {
+      if (location.state?.processSteps) {
+        setProcessSteps(location.state.processSteps);
+      }
+
+      // If mobile number is verified, we can start from the form
+      if (location.state?.mobileNumber) {
+        setFormData((prev) => ({
+          ...prev,
+          mobileNumber: location.state.mobileNumber,
+        }));
+      }
+    }
+  }, [location.state]);
+
+  
+  useEffect(() => {
+    const completedSteps = processSteps.filter((step) => step.completed).length;
+    const totalSteps = processSteps.length;
+    setProgress(Math.round((completedSteps / totalSteps) * 100));
+  }, [processSteps]);
+
+
+  useEffect(() => {
+    const registrationProgress = currentStep / (formSteps.length - 1);
+
+   
+    const updatedSteps = [...processSteps];
+    updatedSteps[2].completed = registrationProgress > 0;
+    setProcessSteps(updatedSteps);
+  }, [currentStep, formSteps.length, processSteps]);
+
+  // map Gotra to Aakna
+  const gotraAaknaMap = {
+    "Vasar/Vastil/Vasal": [
+      "Rusiya",
+      "Arusiya",
+      "Behre",
+      "Bahre",
+      "Pahariya",
+      "Reja",
+      "Mar",
+      "Amar",
+      "Mor",
+      "Sethiya",
+      "Damele",
+      "Kathal",
+      "Kathil",
+      "Marele",
+      "Nahar",
+      "Naar",
+      "KareKhemau",
+      "Raghare",
+      "Bagar",
+      "Tudha",
+      "Sah",
+      "Saav",
+      "Dangan ke",
+      "Seth (Mau ke/Paliya ke/Khakshis ke/Mahuta ke/Bhaghoi ke)",
+      "Kasav",
+      "Khaira",
+      "Sarawgi (Mau ke)",
+      "Sahdele",
+      "Sadele",
+      "Changele",
+      "Chungele",
+      "Mungele",
+      "Dhoosar",
+      "Dadraya",
+      "Patodiya",
+      "Patodi",
+      "Paterha",
+      "Jhanjhar",
+      "Kharaya",
+      "Baraya",
+      "Kunayar",
+      "Purpuriya",
+      "Puranpuriya",
+      "Kajar",
+      "Kshankshar",
+    ],
+
+    Gol: [
+      "Andhi",
+      "Baderiya",
+      "Bamoriya",
+      "Bardiya",
+      "Bed",
+      "Bhagoriya",
+      "Bijpuriya",
+      "Bilaiya",
+      "Chiroliya",
+      "Tarsolliya",
+      "Trisolliya",
+      "Kharaya",
+      "Jakonya",
+      "Jauriya",
+      "Joliya",
+      "Jalaounya",
+      "Kanthariya",
+      "Itoriya",
+      "Itodiya",
+      "Katare",
+      "Kurele",
+      "Vilaiya",
+      "Nigoti",
+      "Nignotiya",
+      "Soni",
+      "Rawat",
+      "Sarawagi",
+      "Brijpuriya",
+      "Sijariya",
+      "Gandhi",
+      "Bamoriya",
+      "Amoriya",
+      "Dohariya Devaraha",
+      "Devadhiya",
+      "Chungele",
+      "Seth (Rora ke)",
+      "Mungele",
+      "Mangole",
+      "Kurothiya",
+      "Khaira",
+      "Bhagorya",
+      "Maunya",
+      "Hadyal",
+      "Digoriya",
+      "Dhingauriya",
+      "Jaar",
+      "Patwari",
+      "Gandhi",
+    ],
+
+    "Gangal / Gagil": [
+      "Geda",
+      "Chapra",
+      "Chupara",
+      "Rawat",
+      "Nogaraiya",
+      "Jhudele/Kshurele",
+      "Nisunge/Nisuri",
+      "Seth (Nolha ke)",
+      "Dangre",
+      "Barele",
+      "Barol",
+      "Nolha/Nilha",
+      "Mihi ke Kunwar",
+      "Saab/Sahu",
+    ],
+
+    "Badal / Waghil / Bandal": [
+      "Chauda",
+      "Chodha",
+      "Chouda",
+      "Soni",
+      "Kharya/Khairya",
+      "Seth (Kathori, Karoli ke)",
+      "Patraiya/Paterha",
+      "Barha/Barehe",
+      "Hathnoria/Hathnotiya",
+      "Damorha",
+      "Lakhatkiya",
+      "Paharu",
+      "Dagarhiha",
+      "Kuretiya/Kuraithiya",
+      "Gugoriya/Ugoriya",
+      "Jugoriya",
+      "Sulganiya/Sulghaniya",
+      "Amroha",
+      "Dadam",
+      "Sawla",
+      "Wageriya",
+    ],
+
+    "Kocchal / Kochil": [
+      "Neekhra",
+      "Indurkhiya",
+      "Kastwar",
+      "Kurele",
+      "Misurha/Masaurya",
+      "Sawla/Saula/Chawla",
+      "Viswari",
+      "Pahariya",
+      "Piparsania",
+      "Dadarya",
+      "Nachhola",
+      "Baronya",
+      "Binaurya",
+      "Kharya/Khara",
+      "Iksade",
+      "Sulganiya/Sulghaniya",
+      "Kanjoulya",
+      "Nigoti (Nigotiya)",
+      "Rawat",
+      "Seth",
+      "Soni",
+    ],
+
+    Jaital: [
+      "Baderia",
+      "Kathal/Kathil",
+      "Nagariya",
+      "Rikholya/Lakhourya",
+      "Seth (Bareth ke)",
+      "Shikoly/Sokorya/Shipoulya",
+      "Lahariya",
+      "Sirojiya",
+    ],
+
+    Vachhil: [
+      "Kuchiya/Kuchha",
+      "Tikraya/Tapakle",
+      "Damele",
+      "Barsainya",
+      "Tapa",
+      "Kanakne",
+      "Matele/Mahtele",
+      "Hunka",
+      "Seth (Nawgaon/Negua ke)",
+      "Badonya",
+      "Gandhi",
+      "Rikholya",
+      "Dhanoriya",
+      "Itoriya/Itodiya",
+      "Sakeray/Sakahere",
+      "Soni",
+      "Khadsariya/Kharsadiya",
+      "Badhiya",
+      "Vinaurya",
+      "Sirsoniya/Risoniya",
+      "Shikoly/Sokorya/Shipoulya",
+      "Khangat",
+      "Katare",
+      "Sarawgi (Mau ke)",
+      "Chungele",
+    ],
+
+    Kachhil: [
+      "Chapra/Chupara",
+      "Tusele",
+      "Piparsaniya",
+      "Seth (Padri ke)",
+      "Dhusar",
+      "Bhondiya (Bhondu)",
+      "Amaulya/Amauriya",
+      "Jhudele/Jhad",
+      "Rawat",
+      "Katare",
+    ],
+
+    Bhaal: [
+      "Kudraya",
+      "Khard",
+      "Suhane/Sohane",
+      "Dengre/Dagre",
+      "Teetbilasi/Teetbirasi",
+      "Ghura",
+      "Khangat",
+      "Bajrang Gadiya",
+      "Naina/Nehna",
+      "Pachnole/Pachraulya",
+      "Sah/Saav",
+      "Seth (Chandaiya ke)",
+      "Chandaiya/Chandraseniya",
+      "Jhudele/Jurele/Jhood",
+    ],
+
+    Kohil: ["Kandele", "Lohiya/Loiya", "Shaav/Shah (Unnao ke)", "Jhuke/Jhunk"],
+
+    Kasiv: [
+      "Asoo",
+      "Asoopi",
+      "Asooti",
+      "Khantal",
+      "Beder",
+      "Badil",
+      "Baidal",
+      "Sudipa",
+      "Asudipa",
+      "Deepa/Teepa",
+    ],
+
+    Kasav: [
+      "Asoo",
+      "Asoopi",
+      "Asooti",
+      "Khantal",
+      "Beder",
+      "Badil",
+      "Baidal",
+      "Sudipa",
+      "Asudipa",
+      "Deepa/Teepa",
+    ],
+    Single: [],
+  };
+
+  //  Aakna options based on selected Gotra
+  const getAaknaOptions = () => {
+    return formData.gotra ? gotraAaknaMap[formData.gotra] || [] : [];
+  };
+
+  const pincodeData = {
+    // Delhi
+    110: {
+      state: "Delhi",
+      city: "Delhi",
+      districts: {
+        "110001-110012": "Central Delhi",
+        "110013-110019": "East Delhi",
+        "110020-110029": "New Delhi",
+        "110030-110039": "North Delhi",
+        "110040-110049": "South Delhi",
+        "110050-110059": "West Delhi",
+        "110060-110069": "North East Delhi",
+        "110070-110079": "South West Delhi",
+        "110080-110089": "North West Delhi",
+        "110090-110099": "Shahdara",
+      },
+    },
+    // Madhya Pradesh - Gwalior
+    474: {
+      state: "Madhya Pradesh",
+      city: "Gwalior",
+      districts: {
+        474015: "Thatipur",
+        474020: "Sithouli",
+      },
+    },
+    475: {
+      state: "Madhya Pradesh",
+      city: "Gwalior",
+      districts: {
+        475001: "Dabra",
+        475110: "Morar",
+        475661: "Datia",
+        475686: "Seondha",
+        475675: "Indergarh",
+      },
+    },
+    477: {
+      state: "Madhya Pradesh",
+      city: "Bhind",
+      districts: {
+        477001: "Bhind",
+        477116: "Ater",
+        477441: "Mehgaon",
+        477333: "Gohad",
+      },
+    },
+    476: {
+      state: "Madhya Pradesh",
+      city: "Morena",
+      districts: {
+        476001: "Morena",
+        476221: "Ambah",
+        476554: "Porsa",
+        476115: "Joura",
+      },
+    },
+    // Rajasthan - Jaipur
+    302: {
+      state: "Rajasthan",
+      city: "Jaipur",
+      districts: {
+        "302001-302039": "Jaipur",
+      },
+    },
+    303: {
+      state: "Rajasthan",
+      city: "Jaipur",
+      districts: {
+        303001: "Chomu",
+        303103: "Jobner",
+        303702: "Dudu",
+      },
+    },
+    // Uttar Pradesh
+    285: {
+      state: "Uttar Pradesh",
+      city: "Jalaun",
+      districts: {
+        285123: "Jalaun",
+        285001: "Orai",
+        285130: "Kalpi",
+      },
+    },
+    226: {
+      state: "Uttar Pradesh",
+      city: "Lucknow",
+      districts: {
+        "226001-226031": "Lucknow",
+        226010: "Gomti Nagar",
+        226012: "Alambagh",
+      },
+    },
+    227: {
+      state: "Uttar Pradesh",
+      city: "Lucknow",
+      districts: {
+        227105: "Malihabad",
+      },
+    },
+    208: {
+      state: "Uttar Pradesh",
+      city: "Kanpur",
+      districts: {
+        "208001-208027": "Kanpur",
+      },
+    },
+    209: {
+      state: "Uttar Pradesh",
+      city: "Kanpur",
+      districts: {
+        209214: "Rural Kanpur Areas",
+      },
+    },
+    210: {
+      state: "Uttar Pradesh",
+      districts: {
+        210205: "Karvi",
+        210001: "Banda",
+        210120: "Naraini",
+      },
+    },
+    206: {
+      state: "Uttar Pradesh",
+      city: "Auraiya",
+      districts: {
+        206122: "Auraiya",
+        206128: "Phaphund",
+      },
+    },
+    284: {
+      state: "Uttar Pradesh",
+      city: "Jhansi",
+      districts: {
+        "284001-284003": "Jhansi",
+      },
+    },
+    // Madhya Pradesh
+    472: {
+      state: "Madhya Pradesh",
+      city: "Tikamgarh",
+      districts: {
+        472001: "Tikamgarh",
+        472339: "Jatara",
+      },
+    },
+    473: {
+      state: "Madhya Pradesh",
+      districts: {
+        473551: "Shivpuri",
+        473331: "Ashok Nagar",
+        473001: "Guna",
+      },
+    },
+    // Gujarat - Ahmedabad
+    380: {
+      state: "Gujarat",
+      city: "Ahmedabad",
+      districts: {
+        "380001-382470": "Ahmedabad",
+      },
+    },
+    // Madhya Pradesh - More Cities
+    452: {
+      state: "Madhya Pradesh",
+      city: "Indore",
+      districts: {
+        "452001-452020": "Indore",
+      },
+    },
+    456: {
+      state: "Madhya Pradesh",
+      city: "Ujjain",
+      districts: {
+        "456001-456668": "Ujjain",
+      },
+    },
+    462: {
+      state: "Madhya Pradesh",
+      city: "Bhopal",
+      districts: {
+        "462001-462047": "Bhopal",
+      },
+    },
+    464: {
+      state: "Madhya Pradesh",
+      districts: {
+        464001: "Vidisha",
+        464551: "Raisen",
+      },
+    },
+    487: {
+      state: "Madhya Pradesh",
+      city: "Narsinghpur",
+      districts: {
+        487001: "Narsinghpur",
+      },
+    },
+    482: {
+      state: "Madhya Pradesh",
+      city: "Jabalpur",
+      districts: {
+        "482001-482008": "Jabalpur",
+      },
+    },
+    484: {
+      state: "Madhya Pradesh",
+      districts: {
+        484661: "Umariya",
+        484001: "Shahdol",
+      },
+    },
+    470: {
+      state: "Madhya Pradesh",
+      districts: {
+        470001: "Sagar",
+        470775: "Hata",
+      },
+    },
+    480: {
+      state: "Madhya Pradesh",
+      districts: {
+        480661: "Seoni",
+        480001: "Chhindwara",
+      },
+    },
+    483: {
+      state: "Madhya Pradesh",
+      city: "Katni",
+      districts: {
+        483501: "Katni",
+      },
+    },
+    488: {
+      state: "Madhya Pradesh",
+      city: "Panna",
+      districts: {
+        488001: "Panna",
+      },
+    },
+    461: {
+      state: "Madhya Pradesh",
+      city: "Hoshangabad",
+      districts: {
+        461001: "Hoshangabad",
+      },
+    },
+    481: {
+      state: "Madhya Pradesh",
+      districts: {
+        481661: "Mandla",
+        481880: "Dindori",
+      },
+    },
+    // Uttar Pradesh
+    228: {
+      state: "Uttar Pradesh",
+      city: "Sultanpur",
+      districts: {
+        228001: "Sultanpur",
+      },
+    },
+    471: {
+      state: "Madhya Pradesh",
+      city: "Chhatarpur",
+      districts: {
+        471001: "Chhatarpur",
+      },
+    },
+    485: {
+      state: "Madhya Pradesh",
+      city: "Satna",
+      districts: {
+        485001: "Satna",
+      },
+    },
+    800: {
+      state: "Bihar",
+      city: "Patna City",
+      districts: {
+        800008: "Patna",
+      },
+    },
+    486: {
+      state: "Madhya Pradesh",
+      city: "Rewa",
+      districts: {
+        486001: "Rewa",
+      },
+    },
+    // Chhattisgarh Cities
+    491: {
+      state: "Chhattisgarh",
+      districts: {
+        491001: "Durg",
+        491441: "Rajnandgaon",
+      },
+    },
+    493: {
+      state: "Chhattisgarh",
+      city: "Dhamtari",
+      districts: {
+        493773: "Dhamtari",
+      },
+    },
+    492: {
+      state: "Chhattisgarh",
+      city: "Raipur",
+      districts: {
+        "492001-492099": "Raipur",
+      },
+    },
+    495: {
+      state: "Chhattisgarh",
+      city: "Bilaspur",
+      districts: {
+        495001: "Bilaspur",
+      },
+    },
+    494: {
+      state: "Chhattisgarh",
+      city: "Jagdalpur",
+      districts: {
+        494001: "Jagdalpur",
+      },
+    },
+    497: {
+      state: "Chhattisgarh",
+      city: "Baikunthpur",
+      districts: {
+        497335: "Baikunthpur",
+      },
+    },
+    // Maharashtra Cities
+    440: {
+      state: "Maharashtra",
+      city: "Nagpur",
+      districts: {
+        "440001-440037": "Nagpur",
+      },
+    },
+    424: {
+      state: "Maharashtra",
+      city: "Chalisgaon",
+      districts: {
+        424101: "Chalisgaon",
+      },
+    },
+    411: {
+      state: "Maharashtra",
+      city: "Pune",
+      districts: {
+        "411001-411062": "Pune",
+      },
+    },
+    444: {
+      state: "Maharashtra",
+      city: "Amravati",
+      districts: {
+        444601: "Amravati",
+        444602: "Amravati",
+        444603: "Amravati",
+      },
+    },
+    400: {
+      state: "Maharashtra",
+      city: "Mumbai",
+      districts: {
+        "400001-400104": "Mumbai",
+      },
+    },
+    281: {
+      state: "Uttar Pradesh",
+      city: "Mathura",
+      districts: {
+        281001: "Mathura",
+      },
+    },
+  };
+  // Memoized helper functions
+  const memoizedGetLocationFromPincode = (pincode) => {
+    if (!pincode || pincode.length !== 6) return null;
+
+    const areaCode = pincode.substring(0, 3);
+    const location = pincodeData[areaCode];
+
+    if (!location) return null;
+
+    const numericPincode = parseInt(pincode);
+    let district = null;
+    let city = location.city;
+
+    // Find matching district based on pincode range
+    for (const [range, districtName] of Object.entries(location.districts)) {
+      const [start, end] = range.split("-").map((p) => parseInt(p));
+      if (!end) {
+        // Single pincode match
+        if (parseInt(range) === numericPincode) {
+          district = districtName;
+          // If city isn't set at the area code level, try to determine from district name
+          if (!city) {
+            city = districtName.replace(" City", "").replace(" Town", "");
+          }
+          break;
+        }
+      } else {
+        // Pincode range match
+        if (numericPincode >= start && numericPincode <= end) {
+          district = districtName;
+          break;
+        }
+      }
+    }
+
+    return {
+      state: location.state,
+      city: city,
+      district: district,
+    };
+  };
+
+  const extractPincodeFromAddress = (address) => {
+    const pincodeMatch = address.match(/\b\d{6}\b/);
+    return pincodeMatch ? pincodeMatch[0] : null;
+  };
+
+  // Optimize handlers with useCallback
+  const handleInputChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+
+      if (name === "mobileNumber" && !/^\d*$/.test(value)) {
+        return;
+      }
+
+      setFormData((prev) => {
+        const newData = { ...prev, [name]: value };
+
+        // Auto-update dependent fields
+        if (name === "localPanchayat") {
+          newData.subLocalPanchayat = "";
+        } else if (name === "regionalAssembly") {
+          newData.localPanchayatName = "";
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        } else if (name === "localPanchayatName") {
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        } else if (name === "gotra") {
+          newData.aakna = "";
+        } else if (name === "isMarried") {
+          // Reset considerSecondMarriage when marital status changes
+          newData.considerSecondMarriage = false;
+          if (value !== "Married") {
+            newData.marriageDate = "";
+          }
+        } else if (name === "state") {
+          // Reset all regional assembly related fields when state changes
+          newData.regionalAssembly = "";
+          newData.localPanchayatName = "";
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        }
+
+        return newData;
+      });
+
+      // Clear field error
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+    },
+    [errors]
+  );
+
+
+
+  const sendWhatsAppInvite = useCallback(async (mobileNumber) => {
+    try {
+      const formData = new URLSearchParams();
+      formData.append('number', mobileNumber);
+      formData.append('message', `Hi! You're invited to join us at Gahoishakti. Click here to log in and get started: https://www.gahoishakti.in/login`);
+  
+       const res = await fetch('https://api.gahoishakti.in/api/whatsapp/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+  
+      const contentType = res.headers.get("content-type");
+  
+      if (!contentType || !contentType.includes("application/json")) {
+        const raw = await res.text();
+        console.error('Unexpected response:', raw);
+        return;
+      }
+  
+      const data = await res.json();
+  
+      if (!data.status) {
+        console.error('Failed to send:', data.message || 'Unknown error');
+      } else {
+        console.log('WhatsApp invite sent successfully');
+      }
+    } catch (err) {
+      console.error('Error sending WhatsApp message:', err);
+    }
+  }, []);
+  
+  
+  const handleFamilyDetailChange = useCallback(
+    (index, field, value) => {
+      // Allow only digits for the mobile number
+      if (field === "mobileNumber" && !/^\d*$/.test(value)) {
+        return;
+      }
+  
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: prev.familyDetails.map((member, i) =>
+          i === index ? { ...member, [field]: value } : member
+        ),
+      }));
+  
+      // Clear any existing error on this field if present
+      if (errors[`familyDetails.${index}.${field}`]) {
+        setErrors((prev) => ({
+          ...prev,
+          [`familyDetails.${index}.${field}`]: "",
+        }));
+      }
+  
+      // Trigger WhatsApp invite only when mobile number reaches 10 digits exactly
+      if (field === "mobileNumber" && value.length === 10) {
+        sendWhatsAppInvite(value);
+      }
+    },
+    [errors, sendWhatsAppInvite]
+  );
+  
+  
+  
+  
+  
+
+  // Optimize add child function
+  const addChild = useCallback(() => {
+    if (
+      formData.familyDetails.filter((member) => member.relation === "Child")
+        .length < MAX_CHILDREN
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: [
+          ...prev.familyDetails,
+          { relation: "Child", name: "", mobileNumber: "", gender: "" },
+        ],
+      }));
+    }
+  }, [formData.familyDetails]);
+
+  // Add a function to add sibling
+  const addSibling = useCallback(() => {
+    if (
+      formData.familyDetails.filter((member) => member.relation === "Sibling")
+        .length < MAX_SIBLINGS
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: [
+          ...prev.familyDetails,
+          {
+            relation: "Sibling",
+            name: "",
+            mobileNumber: "",
+            gender: "",
+            age: "",
+            occupation: "",
+            education: "",
+            maritalStatus: "",
+            isDependent: false,
+          },
+        ],
+      }));
+    }
+  }, [formData.familyDetails]);
+
+  // Add remove functions
+  const removeChild = useCallback((indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyDetails: prev.familyDetails.filter(
+        (_, index) => index !== indexToRemove
+      ),
+    }));
+  }, []);
+
+  const removeSibling = useCallback((indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyDetails: prev.familyDetails.filter(
+        (_, index) => index !== indexToRemove
+      ),
+    }));
+  }, []);
+
+  // Update validateCurrentStep function
+  const validateCurrentStep = useCallback(() => {
+    const newErrors = validateStep(currentStep, formData);
+    setErrors(newErrors);
+    return !hasErrors(newErrors);
+  }, [currentStep, formData]);
+
+  // Function to check if email exists in Strapi backend
+  const checkEmailExists = async (email) => {
+    try {
+      const baseUrl = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+      const url = `${baseUrl}/api/registration-pages?filters[personal_information][email_address]=${encodeURIComponent(email)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check email existence');
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length > 0;
+
+    } catch (error) {
+      console.error('Error checking email existence:', error);
+      throw error;
+    }
+  };
+
+  // Function to check if mobile number exists in Strapi backend
+  const checkMobileExists = async (mobileNumber) => {
+    try {
+      const baseUrl = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+      const url = `${baseUrl}/api/registration-pages?filters[personal_information][mobile_number]=${encodeURIComponent(mobileNumber)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check mobile number existence');
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length > 0;
+
+    } catch (error) {
+      console.error('Error checking mobile number existence:', error);
+      throw error;
+    }
+  };
+
+  // Update handleNext to include mobile number check
+  const handleNext = async () => {
+    setSubmitted(true);
+    setLoading(true);
+    
+    try {
+      // Only validate email and mobile on the first step
+      if (currentStep === 0) {
+        // Check email duplication
+        if (formData.email) {
+          const emailExists = await checkEmailExists(formData.email);
+          if (emailExists) {
+            setErrors(prev => ({
+              ...prev,
+              email: "This email address is already registered. Please use a different email."
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Check mobile number duplication only if not coming from login
+        if (!location.state?.fromLogin && formData.mobileNumber) {
+          const mobileExists = await checkMobileExists(formData.mobileNumber);
+          if (mobileExists) {
+            setErrors(prev => ({
+              ...prev,
+              mobileNumber: "This mobile number is already registered. Please use a different number."
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      
+      // Rest of the handleNext function stays the same...
+      if (currentStep === formSteps.length - 1) {
+        if (!formData.confirmAccuracy) {
+          setSubmitted(true);
+          setLoading(false);
+          return;
+        }
+        handleSubmit();
+        return;
+      }
+      
+      if (validateCurrentStep()) {
+        setCurrentStep(currentStep + 1);
+        setSubmitted(false);
+        window.scrollTo(0, 0);
+      } else {
+        const firstErrorField = document.querySelector(".error-field");
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    } catch (error) {
+      console.error("Error in handleNext:", error);
+      setErrors(prev => ({
+        ...prev,
+        [currentStep === 0 ? 'mobileNumber' : 'email']: "Unable to verify. Please try again."
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      setSubmitted(false);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const uploadImage = async (file) => {
+    if (!file) return null;
+
+    const formData = new FormData();
+    formData.append("files", file);
+
+    try {
+      console.log("Uploading image...");
+      const response = await fetch(
+        `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Upload failed:", response.status);
+        return null;
+      }
+
+      const result = await response.json();
+      console.log("Image upload response:", result);
+
+      if (result && result.length > 0) {
+        const uploadedImage = result[0];
+        return uploadedImage.id;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const displayPictureId = formData.display_picture
+        ? await uploadImage(formData.display_picture)
+        : null;
+
+      const strapiData = formatFormData(
+        {
+          ...formData,
+          gotraList: Object.keys(gotraAaknaMap),
+          aaknaList: getAaknaOptions(),
+          localPanchayatList: formData.regionalAssembly
+            ? LOCAL_PANCHAYATS[formData.regionalAssembly] || []
+            : [],
+          subLocalPanchayatList: formData.localPanchayat
+            ? SUB_LOCAL_PANCHAYATS[formData.localPanchayat] || []
+            : [],
+        },
+        displayPictureId
+      );
+
+      const response = await fetch(
+        `${API_BASE}/api/registration-pages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: strapiData }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error:", errorData);
+        throw new Error(
+          errorData.error?.message ||
+            errorData.error?.details?.errors?.[0]?.message ||
+            "Failed to submit form"
+        );
+      }
+
+      const result = await response.json();
+      console.log("Form submitted successfully:", result);
+
+      // Extract gahoi code from the response
+      const gahoiCode = result.data?.attributes?.gahoi_code || strapiData.gahoi_code;
+      
+      if (!gahoiCode) {
+        throw new Error("Gahoi code not found in response");
+      }
+  // Clear progress after successful submission
+  clearProgress();
+      
+      showSuccessMessage(gahoiCode);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert(`Failed to submit form: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Separate function for showing success message
+  const showSuccessMessage = (gahoiCode) => {
+    const successPopup = document.createElement("div");
+    successPopup.className =
+      "fixed inset-0 flex items-center justify-center z-50";
+    successPopup.innerHTML = `
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4 relative z-10 border-2 border-[#FD7D01]">
+        <div class="text-center">
+          <div class="flex justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#FD7D01]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Success!</h2>
+          <p class="text-gray-600 mb-2">Registration successful!</p>
+          <p class="text-gray-600 mb-2">Your Gahoi code is:</p>
+          <p class="text-xl font-bold text-[#FD7D01] mb-6">${gahoiCode}</p>
+          <div class="w-full bg-gray-200 h-2 rounded-full mt-4">
+            <div class="bg-[#FD7D01] h-2 rounded-full" style="width: 0%; transition: width 2s ease-in-out;" id="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(successPopup);
+    const progressBar = document.getElementById("progress-bar");
+
+    // Send WhatsApp message
+    const sendWhatsAppMessage = async () => {
+      try {
+        const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
+        const numberWithCountryCode = mobileNumber.startsWith('91') ? mobileNumber : `91${mobileNumber}`;
+        
+        
+        const response = await fetch('https://api.gahoishakti.in/api/send-sms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            number: numberWithCountryCode,
+            message: `Thank you for registering with Gahoi Shakti! Your Gahoi code is: ${gahoiCode}`,
+          }),
+        });
+
+        const data = await response.json();
+        console.log('WhatsApp API Response (via backend):', data);
+
+        if (!data.status) {
+          console.warn('WhatsApp API reported failure:', data.message);
+        }
+      } catch (error) {
+        console.error('Error sending WhatsApp message via backend:', error);
+      }
+    };
+
+    // Send WhatsApp message immediately
+    sendWhatsAppMessage();
+
+    setTimeout(() => {
+      progressBar.style.width = "100%";
+    }, 100);
+
+    setTimeout(() => {
+      document.body.removeChild(successPopup);
+      window.location.href = "/";
+    }, 6500);
+  };
+
+  const hasError = (fieldName) => {
+    return submitted && errors[fieldName];
+  };
+
+  const hasFamilyError = (index, field) => {
+    return submitted && errors[`familyDetails.${index}.${field}`];
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Existing fields */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.name')}
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("name")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  placeholder={t('registration.personalInfo.namePlaceholder')}
+                />
+                {renderError("name")}
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                  </svg>
+                  {t('registration.personalInfo.mobile')}
+                </label>
+                <input
+                  type="tel"
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("mobileNumber")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder= {t('registration.personalInfo.mobilePlaceholder')}
+                  disabled={location.state?.fromLogin}
+                />
+                {hasError("mobileNumber") && (
+                  <p className="text-red-500 text-xs">{errors.mobileNumber}</p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.email')}
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("email")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  placeholder={t('registration.personalInfo.emailPlaceholder')}
+                />
+                {hasError("email") && (
+                  <p className="text-red-500 text-xs">{errors.email}</p>
+                )}
+              </div>
+
+              <div className="space-y-3 md:col-span-2">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.gender')}
+                </label>
+                <div className="flex items-center space-x-8 px-4 py-2.5 border border-gray-300 rounded-lg bg-white">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={formData.gender === "male"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.male')}</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={formData.gender === "female"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.female')}</span>
+                  </label>
+                </div>
+
+                {hasError("gender") && (
+                  <p className="text-red-500 text-xs">{errors.gender}</p>
+                )}
+              </div>
+
+              {/* Nationality field */}
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.nationality')}
+                  {hasError("nationality") && (
+                    <span className="ml-2 text-xs text-red-500">*Required</span>
+                  )}
+                </label>
+                <div
+                  className={`flex items-center space-x-8 px-4 py-2.5 border rounded-lg ${
+                    hasError("nationality")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nationality"
+                      value="Indian"
+                      checked={formData.nationality === "Indian"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          nationality: e.target.value,
+                        })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.indian')}</span>
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nationality"
+                      value="Non-Indian"
+                      checked={formData.nationality === "Non-Indian"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          nationality: e.target.value,
+                        })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                    {t('registration.personalInfo.nonIndian')}
+                    </span>
+                  </label>
+                </div>
+                {hasError("nationality") && (
+                  <p className="text-red-500 text-xs">{errors.nationality}</p>
+                )}
+              </div>
+
+              {/* Gahoi Community field */}
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.isGahoi')}
+                </label>
+                <div
+                  className={`flex items-center space-x-8 px-4 py-2.5 border rounded-lg ${
+                    hasError("isGahoi")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isGahoi"
+                      value="Yes"
+                      checked={formData.isGahoi === "Yes"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isGahoi: e.target.value })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.yes')}</span>
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isGahoi"
+                      value="No"
+                      checked={formData.isGahoi === "No"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isGahoi: e.target.value })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.no')}</span>
+                  </label>
+                </div>
+                {hasError("isGahoi") && (
+                  <p className="text-red-500 text-xs">{errors.isGahoi}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Blood Group */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium flex text-gray-700">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 2a1 1 0 00-1 1v1h1a1 1 0 000 2H6v1a1 1 0 00-2 0V6H3a1 1 0 000-2h1V3a1 1 0 00-1-1zm0 10a1 1 0 000 2h8a1 1 0 100-2H6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.bloodGroup')}
+                </label>
+                <select
+                  name="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("bloodGroup")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <option value="">{t('registration.personalInfo.selectBloodGroup')}</option>
+                  {BLOOD_GROUPS.map((group) => (
+                    <option key={group} value={group}>
+                      {group}
+                    </option>
+                  ))}
+                </select>
+                {hasError("bloodGroup") && (
+                  <p className="text-red-500 text-xs">
+                    Please select your blood group
+                  </p>
+                )}
+              </div>
+
+              {/* Birth Date */}
+              <div className="space-y-3">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.dob')}
+                </label>
+                <input
+                  type="date"
+                  name="birthDate"
+                  value={formData.birthDate}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("birthDate")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                />
+                {hasError("birthDate") && (
+                  <p className="text-red-500 text-xs">{errors.birthDate}</p>
+                )}
+              </div>
+
+              {/* Marriage Date */}
+              <div className="space-y-3">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.dom')}
+                </label>
+                <input
+                  type="date"
+                  name="marriageDate"
+                  value={formData.marriageDate}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 border-gray-300"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.highestEducation')}
+                </label>
+                <input
+                  type="text"
+                  name="education"
+                  value={formData.education}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("education")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  placeholder= {t('registration.personalInfo.highestEducationPlaceholder')}
+                />
+                {hasError("education") && (
+                  <p className="text-red-500 text-xs">{errors.education}</p>
+                )}
+              </div>
+
+              {/* Gotra */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.gotra')}
+                </label>
+                <select
+                  name="gotra"
+                  value={formData.gotra}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("gotra")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <option value=""> {t('registration.personalInfo.selectGotra')}</option>
+                  {[
+                    "Vasar/Vastil/Vasal",
+                    "Gol",
+                    "Gangal / Gagil",
+                    "Badal / Waghil / Bandal",
+                    "Kocchal / Kochil",
+                    "Jaital",
+                    "Vachhil",
+                    "Kachhil",
+                    "Bhaal",
+                    "Kohil",
+                    "Kasiv",
+                    "Kasav",
+                    "Single",
+                  ].map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                {hasError("gotra") && (
+                  <p className="text-red-500 text-xs mt-2 ml-1">
+                    {errors.gotra}
+                  </p>
+                )}
+              </div>
+
+              {/* Aakna */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                  </svg>
+                  {t('registration.personalInfo.aakna')}
+                </label>
+                <select
+                  name="aakna"
+                  value={formData.aakna}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("aakna")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                  disabled={!formData.gotra}
+                >
+                  <option value="">{t('registration.personalInfo.selectAakna')}</option>
+                  {getAaknaOptions().map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                {hasError("aakna") && (
+                  <p className="text-red-500 text-xs mt-2 ml-1">
+                    {errors.aakna}
+                  </p>
+                )}
+                {!formData.gotra && (
+                  <p className="text-gray-500 text-xs mt-2 ml-1 italic">
+                    {t('registration.personalInfo.selectGotraFirst')}
+                  </p>
+                )}
+              </div>
+
+              {/* Regional Information Section */}
+              {renderRegionalInformation()}
+            </div>
+          </div>
+        );
+
+import React, { useState, useEffect, useCallback, useMemo } from "react";import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import PhotoUpload from "./PhotoUpload";
+import {
+  STATE_TO_ASSEMBLIES,
+  INDUSTRY_SECTORS,
+  BUSINESS_SIZES,
+  WORK_TYPES,
+  EMPLOYMENT_TYPES,
+  HANDICAP_OPTIONS,
+  BLOOD_GROUPS,
+  INITIAL_FAMILY_MEMBERS,
+  MAX_CHILDREN,
+  MAX_SIBLINGS,
+  MARITAL_STATUS_OPTIONS,
+  EDUCATION_OPTIONS,
+  OCCUPATION_OPTIONS,
+  SIBLING_RELATION_OPTIONS,
+  FORM_STEPS,
+  PROCESS_STEPS,
+  INITIAL_FORM_DATA,
+} from "../../constants/formConstants";
+import {
+  validateStep,
+  formatFormData,
+  hasErrors,
+} from "../../utils/form/formUtils";
+import {
+  STATES,
+  STATE_TO_DISTRICTS,
+  DISTRICT_TO_CITIES,
+  ASHOKNAGAR_GRAM_PANCHAYATS,
+  ASHOKNAGAR_LOCAL_BODIES,
+  ALIRAJPUR_LOCAL_BODIES,
+  ALIRAJPUR_GRAM_PANCHAYATS,
+  ANUPPUR_LOCAL_BODIES,
+  ANUPPUR_GRAM_PANCHAYATS,
+  BALAGHAT_LOCAL_BODIES,
+  BALAGHAT_GRAM_PANCHAYATS,
+  BARWANI_LOCAL_BODIES,
+  BARWANI_GRAM_PANCHAYATS,
+  BETUL_LOCAL_BODIES,
+  BETUL_GRAM_PANCHAYATS,
+  BHIND_LOCAL_BODIES,
+  BHIND_GRAM_PANCHAYATS,
+  BHOPAL_LOCAL_BODIES,
+  BHOPAL_GRAM_PANCHAYATS,
+  BURHANPUR_LOCAL_BODIES,
+  BURHANPUR_GRAM_PANCHAYATS,
+  CHHATARPUR_LOCAL_BODIES,
+  CHHATARPUR_GRAM_PANCHAYATS,
+  CHHINDWARA_LOCAL_BODIES,
+  CHHINDWARA_GRAM_PANCHAYATS,
+  DAMOH_LOCAL_BODIES,
+  DAMOH_GRAM_PANCHAYATS,
+  DATIA_LOCAL_BODIES,
+  DATIA_GRAM_PANCHAYATS,
+  DEWAS_LOCAL_BODIES,
+  DEWAS_GRAM_PANCHAYATS,
+  DHAR_LOCAL_BODIES,
+  DHAR_GRAM_PANCHAYATS,
+  DINDORI_LOCAL_BODIES,
+  DINDORI_GRAM_PANCHAYATS,
+  GUNA_LOCAL_BODIES,
+  GUNA_GRAM_PANCHAYATS,
+  GWALIOR_LOCAL_BODIES,
+  GWALIOR_GRAM_PANCHAYATS,
+  HARDA_LOCAL_BODIES,
+  HARDA_GRAM_PANCHAYATS,
+  INDORE_LOCAL_BODIES,
+  INDORE_GRAM_PANCHAYATS,
+  JABALPUR_LOCAL_BODIES,
+  JABALPUR_GRAM_PANCHAYATS,
+  JHABUA_LOCAL_BODIES,
+  JHABUA_GRAM_PANCHAYATS,
+  KATNI_LOCAL_BODIES,
+  KATNI_GRAM_PANCHAYATS,
+  KHANDWA_LOCAL_BODIES,
+  KHANDWA_GRAM_PANCHAYATS,
+  KHARGONE_LOCAL_BODIES,
+  KHARGONE_GRAM_PANCHAYATS,
+  MANDLA_LOCAL_BODIES,
+  MANDLA_GRAM_PANCHAYATS,
+  MANDSAUR_LOCAL_BODIES,
+  MANDSAUR_GRAM_PANCHAYATS,
+  MORENA_LOCAL_BODIES,
+  MORENA_GRAM_PANCHAYATS,
+  NARSINGHPUR_LOCAL_BODIES,
+  NARSINGHPUR_GRAM_PANCHAYATS,
+  NEEMUCH_LOCAL_BODIES,
+  NEEMUCH_GRAM_PANCHAYATS,
+  PANNA_LOCAL_BODIES,
+  PANNA_GRAM_PANCHAYATS,
+  RAISEN_LOCAL_BODIES,
+  RAISEN_GRAM_PANCHAYATS,
+  RAJGARH_LOCAL_BODIES,
+  RAJGARH_GRAM_PANCHAYATS,
+  RATLAM_LOCAL_BODIES,
+  RATLAM_GRAM_PANCHAYATS,
+  REWA_LOCAL_BODIES,
+  REWA_GRAM_PANCHAYATS,
+  SAGAR_LOCAL_BODIES,
+  SAGAR_GRAM_PANCHAYATS,
+  SATNA_LOCAL_BODIES,
+  SATNA_GRAM_PANCHAYATS,
+  SEHORE_LOCAL_BODIES,
+  SEHORE_GRAM_PANCHAYATS,
+  SEONI_LOCAL_BODIES,
+  SEONI_GRAM_PANCHAYATS,
+  SHAHDOL_LOCAL_BODIES,
+  SHAHDOL_GRAM_PANCHAYATS,
+  SHAJAPUR_LOCAL_BODIES,
+  SHAJAPUR_GRAM_PANCHAYATS,
+  SHEOPUR_LOCAL_BODIES,
+  SHEOPUR_GRAM_PANCHAYATS,
+  SHIVPURI_LOCAL_BODIES,
+  SHIVPURI_GRAM_PANCHAYATS,
+  SIDHI_LOCAL_BODIES,
+  SIDHI_GRAM_PANCHAYATS,
+  SINGRAULI_LOCAL_BODIES,
+  SINGRAULI_GRAM_PANCHAYATS,
+  TIKAMGARH_LOCAL_BODIES,
+  TIKAMGARH_GRAM_PANCHAYATS,
+  UJJAIN_LOCAL_BODIES,
+  UJJAIN_GRAM_PANCHAYATS,
+  UMARIYA_LOCAL_BODIES,
+  UMARIYA_GRAM_PANCHAYATS,
+  VIDISHA_LOCAL_BODIES,
+  VIDISHA_GRAM_PANCHAYATS,
+} from "../../constants/locationData";
+import ReactDOM from "react-dom";
+import PreviousMarriageSection from './PreviousMarriageSection';
+
+const API_BASE = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1340';
+
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+
+export const CHAURASI_PANCHAYAT_NAMES = [
+  "Gahoi Vaishya Panchayat",
+  "Shri Gahoi Vaishya Sabha",
+  "Gahoi Vaishya Samaj",
+];
+
+const LOCAL_PANCHAYATS = {
+  "Chambal Regional Assembly": ["Morena", "Bhind", "Gwalior"],
+  "Central Malwa Regional Assembly": ["Indore", "Dewas", "Ujjain", "Bhopal", "Vidisha", "Raisen"],
+  "Mahakaushal Regional Assembly": ["Jabalpur", "Katni", "Rewa", ""],
+  "Vindhya Regional Assembly": ["Satna", "Shahdol", "Sidhi", "Chhatarpur", "Panna", "Rewa"],
+  "Bundelkhand Regional Assembly": ["Sagar", "Damoh", "Chhatarpur"],
+  "Chaurasi Regional Assembly": ["Bhopal", "Vidisha", "Raisen"],
+  "Southern Regional Assembly": ["Pune", "Mumbai", "Nagpur", "Amravati", "Chalisgaon", "Dhuliya"]
+};
+
+const SUB_LOCAL_PANCHAYATS = {
+  Pune: ["Pune", "Pimpri-Chinchwad", "Khadki", "Hadapsar"],
+  Mumbai: ["South Mumbai", "Andheri", "Borivali", "Thane", "Navi Mumbai"],
+  Nagpur: ["Nagpur", "Kamptee", "Hingna"],
+  Amravati: ["Amravati", "Badnera", "Achalpur"],
+  Chalisgaon: ["Chalisgaon"],
+  Dhuliya: ["Dhuliya"],
+  Morena: ["Morena", "Ambah", "Porsa"],
+  Bhind: ["Bhind", "Ater", "Lahar", "Daboh", "Tharet", "Mihona", "Aswar", "Lahar", "Gohad", "Machhand", "Raun"],
+  Gwalior: ["Gwalior", "Dabra","Madhavganj",
+        "Khasgi Bazaar",
+        "Daulatganj",
+        "Kampoo",
+        "Lohia Bazaar",
+        "Phalka Bazaar",
+        "Lohamandi",
+        "Bahodapur",
+        "Naka Chandravadni",
+        "Harishankarpuram",
+        "Thatipur",
+        "Morar",
+        "Dabra",
+        "Pichhore Dabra",
+        "Behat"],
+  Patna: ["Patna"],
+  Durg: ["Durg"],
+  Rajnandgaon: ["Rajnandgaon"],
+  Dhamtari: ["Dhamtari"],
+  Raipur: ["Raipur"],
+  Bilaspur: ["Bilaspur"],
+  Bastar: ["Bastar"],
+  Koriya: ["Koriya"],
+  Jhansi: [
+    "Garautha", "Barua Sagar", "Simriddha", "Tahrauli", "Gursarai", "Bamor",
+    "Poonchh", "Erich", "Bhel Simrawali", "Babina Cantt", "Bangra Uldan Ranipur",
+    "Mauranipur", "Baragaon", "Ranipur", "Jhansi", "Samthar", "Archara", "Moth"
+  ],
+  Tikamgarh: [
+    "Tikamgarh", "Baldeogarh", "Jatara", "Palera", "Niwari", "Prithvipur",
+    "Orchha", "Badagaon", "Mohangarh", "Digoda", "Lidhora", "Khargapur"
+  ],
+  Datia: [
+    "Sewdha", "Chhoti Badoni", "Datia", "Indergarh", "Badhara Sopan",
+    "Unnao Balaji", "Bhander", "Salon B"
+  ],
+  Jaipur: ["Jaipur"],
+  Indore: ["Indore"],
+  Ujjain: ["Ujjain"],
+  Bhopal: ["Bhopal", "Berasia"],
+  Vidisha: ["Vidisha"],
+  Raisen: ["Begamganj"],
+  Sultanpur: ["Visani"],
+  Ahmedabad: ["Gandhinagar"],
+};
+
+const CHAURASI_LOCAL_PANCHAYAT_MAPPING = {
+  "Gahoi Vaishya Panchayat": ["Shivpuri", "Ashok Nagar", "Guna", "Ahmedabad"],
+  "Shri Gahoi Vaishya Sabha": ["Shivpuri"],
+  "Gahoi Vaishya Samaj": ["Ashok Nagar"],
+};
+
+const CHAURASI_SUB_LOCAL_PANCHAYAT_MAPPING = {
+  "Gahoi Vaishya Panchayat": {
+    Shivpuri: [
+      "Shivpuri",
+      "Malhawani",
+      "Pipara",
+      "Semri",
+      "Bamore Damaroun",
+      "Manpura",
+      "Pichhore",
+    ],
+    "Ashok Nagar": ["Ashok Nagar", "Bamore Kala"],
+    Guna: ["Guna"],
+    Ahmedabad: ["Gandhi Nagar"],
+  },
+  "Shri Gahoi Vaishya Sabha": {
+    Shivpuri: ["Karera", "Bhonti"],
+  },
+  "Gahoi Vaishya Samaj": {
+    "Ashok Nagar": ["Dinara", "Guna"],
+  },
+};
+
+const GUJARAT_CHAURASI_MAPPING = {
+  "Gandhinagar": {
+    assembly: "Chaurasi Regional Assembly",
+    localPanchayatName: "Gahoi Vaishya Panchayat",
+    localPanchayat: "Ahmedabad",
+    subLocalPanchayat: "Gandhi Nagar"
+  }
+};
+
+const RegistrationForm = () => {
+  const location = useLocation();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+  
+  const saveProgress = useCallback((data) => {
+    try {
+      const progressData = {
+        formData: { ...data },  // Create a copy of the data
+        lastSaved: new Date().toISOString(),
+        currentStep
+      };
+      console.log('Saving progress:', progressData);  // Debug log
+      sessionStorage.setItem('registrationProgress', JSON.stringify(progressData));
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  }, [currentStep]);
+  
+  const loadProgress = useCallback(() => {
+    try {
+      const saved = sessionStorage.getItem('registrationProgress');
+      if (saved) {
+        const { formData, lastSaved, currentStep } = JSON.parse(saved);
+        const savedDate = new Date(lastSaved);
+        const now = new Date();
+        const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24) {
+          console.log('Loading progress:', { formData, currentStep });  // Debug log
+          return {
+            formData: { ...INITIAL_FORM_DATA, ...formData },  // Merge with initial data
+            currentStep
+          };
+        } else {
+          sessionStorage.removeItem('registrationProgress');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading progress:', error);
+      return null;
+    }
+  }, []);
+  const ResumeDialog = () => {
+    if (!showResumeDialog) return null;
+  
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+          <h3 className="text-lg font-semibold mb-4">{t('registration.resumeDialog.title', 'Resume Registration?')}</h3>
+          <p className="mb-6">{t('registration.resumeDialog.message', 'We found your previously saved progress. Would you like to continue where you left off?')}</p>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={() => {
+                setShowResumeDialog(false);
+                clearProgress();
+              }}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              {t('registration.resumeDialog.startNew', 'Start New')}
+            </button>
+            <button
+              onClick={() => {
+                const savedProgress = loadProgress();
+                console.log('Resume clicked, savedProgress:', savedProgress);  // Debug log
+                if (savedProgress) {
+                  console.log('Setting form data to:', savedProgress.formData);  // Debug log
+                  console.log('Setting current step to:', savedProgress.currentStep);  // Debug log
+                  setFormData(savedProgress.formData);
+                  setCurrentStep(savedProgress.currentStep);
+                }
+                setShowResumeDialog(false);
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              {t('registration.resumeDialog.resume', 'Resume')}
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  };
+  
+  const clearProgress = useCallback(() => {
+    try {
+      sessionStorage.removeItem('registrationProgress');
+    } catch (error) {
+      console.error('Error clearing progress:', error);
+    }
+  }, []);
+
+
+
+  const [formData, setFormData] = useState(() => {
+    const initialData = {
+      ...INITIAL_FORM_DATA,
+      workCategory: "professional",
+      workType: "Professional",
+       employmentType: ""
+    };
+    
+    // Only set mobile number if it exists in location state
+    if (location.state?.mobileNumber) {
+      initialData.mobile_number = location.state.mobileNumber;
+      console.log("Initial mobile number set:", location.state.mobileNumber);
+    }
+    
+    return initialData;
+  });
+  
+  const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
+  const [progress, setProgress] = useState(50);
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
+
+  // Handle location state only once 
+  useEffect(() => {
+    if (location.state?.mobileNumber) {
+      console.log("Initializing form with mobile number:", location.state.mobileNumber);
+      setFormData(prevData => ({
+        ...prevData,
+        mobile_number: location.state.mobileNumber
+      }));
+    }
+  }, []); 
+  useEffect(() => {
+    const savedProgress = loadProgress();
+    if (savedProgress) {
+      setShowResumeDialog(true);
+    }
+  }, [loadProgress]);
+  
+  useEffect(() => {
+    // Only save if we have some actual data (not just the initial state)
+    if (Object.keys(formData).some(key => formData[key] !== INITIAL_FORM_DATA[key])) {
+      console.log('Saving progress with data:', formData);  // Debug log
+      saveProgress(formData);
+    }
+  }, [formData, saveProgress]);
+
+  const indianCities = [
+    "Ahmedabad",
+    "Amravati",
+    "Ashok Nagar",
+    "Auraiya",
+    "Baikunthpur",
+    "Banda",
+    "Bhind",
+    "Bilaspur",
+    "Bhopal",
+    "Chalisgaon",
+    "Chhatarpur",
+    "Chhindwara",
+    "Datia",
+    "Delhi",
+    "Dhamtari",
+    "Dhuliya",
+    "Dindori",
+    "Durg",
+    "Ghasan",
+    "Guna",
+    "Gwalior",
+    "Hata",
+    "Hoshangabad",
+    "Indore",
+    "Jabalpur",
+    "Jagdalpur",
+    "Jaipur",
+    "Jalaun",
+    "Jhansi",
+    "Kanpur",
+    "Karvi",
+    "Katni",
+    "Lalitpur",
+    "Lucknow",
+    "Mahoba",
+    "Mandla",
+    "Mathura",
+    "Morena",
+    "Mumbai",
+    "Nagpur",
+    "Narsinghpur",
+    "Other",
+    "Panna",
+    "Patna City",
+    "Pune",
+    "Raisen",
+    "Raipur",
+    "Rajnandgaon",
+    "Rewa",
+    "Sagar",
+    "Satna",
+    "Seoni",
+    "Shahdol",
+    "Shivpuri",
+    "Sultanpur",
+    "Tikamgarh",
+    "Ujjain",
+    "Umariya",
+    "Vidisha",
+  ];
+
+  const handleImageSelect = (file) => {
+    setFormData((prev) => ({
+      ...prev,
+      display_picture: file,
+    }));
+  };
+
+
+  useEffect(() => {
+    const header = document.querySelector("header");
+    const footer = document.querySelector("footer");
+    const nav = document.querySelector("nav");
+
+    if (header) header.style.display = "none";
+    if (footer) footer.style.display = "none";
+    if (nav) nav.style.display = "none";
+
+    document.body.classList.add("fullscreen-form");
+
+    return () => {
+      if (header) header.style.display = "";
+      if (footer) footer.style.display = "";
+      if (nav) nav.style.display = "";
+      document.body.classList.remove("fullscreen-form");
+    };
+  }, []);
+
+  // Optimize form steps by using constants
+  const formSteps = useMemo(() => FORM_STEPS, []);
+
+  useEffect(() => {
+    if (location.state?.fromLogin) {
+      if (location.state?.processSteps) {
+        setProcessSteps(location.state.processSteps);
+      }
+
+      // If mobile number is verified, we can start from the form
+      if (location.state?.mobileNumber) {
+        setFormData((prev) => ({
+          ...prev,
+          mobileNumber: location.state.mobileNumber,
+        }));
+      }
+    }
+  }, [location.state]);
+
+  
+  useEffect(() => {
+    const completedSteps = processSteps.filter((step) => step.completed).length;
+    const totalSteps = processSteps.length;
+    setProgress(Math.round((completedSteps / totalSteps) * 100));
+  }, [processSteps]);
+
+
+  useEffect(() => {
+    const registrationProgress = currentStep / (formSteps.length - 1);
+
+   
+    const updatedSteps = [...processSteps];
+    updatedSteps[2].completed = registrationProgress > 0;
+    setProcessSteps(updatedSteps);
+  }, [currentStep, formSteps.length, processSteps]);
+
+  // map Gotra to Aakna
+  const gotraAaknaMap = {
+    "Vasar/Vastil/Vasal": [
+      "Rusiya",
+      "Arusiya",
+      "Behre",
+      "Bahre",
+      "Pahariya",
+      "Reja",
+      "Mar",
+      "Amar",
+      "Mor",
+      "Sethiya",
+      "Damele",
+      "Kathal",
+      "Kathil",
+      "Marele",
+      "Nahar",
+      "Naar",
+      "KareKhemau",
+      "Raghare",
+      "Bagar",
+      "Tudha",
+      "Sah",
+      "Saav",
+      "Dangan ke",
+      "Seth (Mau ke/Paliya ke/Khakshis ke/Mahuta ke/Bhaghoi ke)",
+      "Kasav",
+      "Khaira",
+      "Sarawgi (Mau ke)",
+      "Sahdele",
+      "Sadele",
+      "Changele",
+      "Chungele",
+      "Mungele",
+      "Dhoosar",
+      "Dadraya",
+      "Patodiya",
+      "Patodi",
+      "Paterha",
+      "Jhanjhar",
+      "Kharaya",
+      "Baraya",
+      "Kunayar",
+      "Purpuriya",
+      "Puranpuriya",
+      "Kajar",
+      "Kshankshar",
+    ],
+
+    Gol: [
+      "Andhi",
+      "Baderiya",
+      "Bamoriya",
+      "Bardiya",
+      "Bed",
+      "Bhagoriya",
+      "Bijpuriya",
+      "Bilaiya",
+      "Chiroliya",
+      "Tarsolliya",
+      "Trisolliya",
+      "Kharaya",
+      "Jakonya",
+      "Jauriya",
+      "Joliya",
+      "Jalaounya",
+      "Kanthariya",
+      "Itoriya",
+      "Itodiya",
+      "Katare",
+      "Kurele",
+      "Vilaiya",
+      "Nigoti",
+      "Nignotiya",
+      "Soni",
+      "Rawat",
+      "Sarawagi",
+      "Brijpuriya",
+      "Sijariya",
+      "Gandhi",
+      "Bamoriya",
+      "Amoriya",
+      "Dohariya Devaraha",
+      "Devadhiya",
+      "Chungele",
+      "Seth (Rora ke)",
+      "Mungele",
+      "Mangole",
+      "Kurothiya",
+      "Khaira",
+      "Bhagorya",
+      "Maunya",
+      "Hadyal",
+      "Digoriya",
+      "Dhingauriya",
+      "Jaar",
+      "Patwari",
+      "Gandhi",
+    ],
+
+    "Gangal / Gagil": [
+      "Geda",
+      "Chapra",
+      "Chupara",
+      "Rawat",
+      "Nogaraiya",
+      "Jhudele/Kshurele",
+      "Nisunge/Nisuri",
+      "Seth (Nolha ke)",
+      "Dangre",
+      "Barele",
+      "Barol",
+      "Nolha/Nilha",
+      "Mihi ke Kunwar",
+      "Saab/Sahu",
+    ],
+
+    "Badal / Waghil / Bandal": [
+      "Chauda",
+      "Chodha",
+      "Chouda",
+      "Soni",
+      "Kharya/Khairya",
+      "Seth (Kathori, Karoli ke)",
+      "Patraiya/Paterha",
+      "Barha/Barehe",
+      "Hathnoria/Hathnotiya",
+      "Damorha",
+      "Lakhatkiya",
+      "Paharu",
+      "Dagarhiha",
+      "Kuretiya/Kuraithiya",
+      "Gugoriya/Ugoriya",
+      "Jugoriya",
+      "Sulganiya/Sulghaniya",
+      "Amroha",
+      "Dadam",
+      "Sawla",
+      "Wageriya",
+    ],
+
+    "Kocchal / Kochil": [
+      "Neekhra",
+      "Indurkhiya",
+      "Kastwar",
+      "Kurele",
+      "Misurha/Masaurya",
+      "Sawla/Saula/Chawla",
+      "Viswari",
+      "Pahariya",
+      "Piparsania",
+      "Dadarya",
+      "Nachhola",
+      "Baronya",
+      "Binaurya",
+      "Kharya/Khara",
+      "Iksade",
+      "Sulganiya/Sulghaniya",
+      "Kanjoulya",
+      "Nigoti (Nigotiya)",
+      "Rawat",
+      "Seth",
+      "Soni",
+    ],
+
+    Jaital: [
+      "Baderia",
+      "Kathal/Kathil",
+      "Nagariya",
+      "Rikholya/Lakhourya",
+      "Seth (Bareth ke)",
+      "Shikoly/Sokorya/Shipoulya",
+      "Lahariya",
+      "Sirojiya",
+    ],
+
+    Vachhil: [
+      "Kuchiya/Kuchha",
+      "Tikraya/Tapakle",
+      "Damele",
+      "Barsainya",
+      "Tapa",
+      "Kanakne",
+      "Matele/Mahtele",
+      "Hunka",
+      "Seth (Nawgaon/Negua ke)",
+      "Badonya",
+      "Gandhi",
+      "Rikholya",
+      "Dhanoriya",
+      "Itoriya/Itodiya",
+      "Sakeray/Sakahere",
+      "Soni",
+      "Khadsariya/Kharsadiya",
+      "Badhiya",
+      "Vinaurya",
+      "Sirsoniya/Risoniya",
+      "Shikoly/Sokorya/Shipoulya",
+      "Khangat",
+      "Katare",
+      "Sarawgi (Mau ke)",
+      "Chungele",
+    ],
+
+    Kachhil: [
+      "Chapra/Chupara",
+      "Tusele",
+      "Piparsaniya",
+      "Seth (Padri ke)",
+      "Dhusar",
+      "Bhondiya (Bhondu)",
+      "Amaulya/Amauriya",
+      "Jhudele/Jhad",
+      "Rawat",
+      "Katare",
+    ],
+
+    Bhaal: [
+      "Kudraya",
+      "Khard",
+      "Suhane/Sohane",
+      "Dengre/Dagre",
+      "Teetbilasi/Teetbirasi",
+      "Ghura",
+      "Khangat",
+      "Bajrang Gadiya",
+      "Naina/Nehna",
+      "Pachnole/Pachraulya",
+      "Sah/Saav",
+      "Seth (Chandaiya ke)",
+      "Chandaiya/Chandraseniya",
+      "Jhudele/Jurele/Jhood",
+    ],
+
+    Kohil: ["Kandele", "Lohiya/Loiya", "Shaav/Shah (Unnao ke)", "Jhuke/Jhunk"],
+
+    Kasiv: [
+      "Asoo",
+      "Asoopi",
+      "Asooti",
+      "Khantal",
+      "Beder",
+      "Badil",
+      "Baidal",
+      "Sudipa",
+      "Asudipa",
+      "Deepa/Teepa",
+    ],
+
+    Kasav: [
+      "Asoo",
+      "Asoopi",
+      "Asooti",
+      "Khantal",
+      "Beder",
+      "Badil",
+      "Baidal",
+      "Sudipa",
+      "Asudipa",
+      "Deepa/Teepa",
+    ],
+    Single: [],
+  };
+
+  //  Aakna options based on selected Gotra
+  const getAaknaOptions = () => {
+    return formData.gotra ? gotraAaknaMap[formData.gotra] || [] : [];
+  };
+
+  const pincodeData = {
+    // Delhi
+    110: {
+      state: "Delhi",
+      city: "Delhi",
+      districts: {
+        "110001-110012": "Central Delhi",
+        "110013-110019": "East Delhi",
+        "110020-110029": "New Delhi",
+        "110030-110039": "North Delhi",
+        "110040-110049": "South Delhi",
+        "110050-110059": "West Delhi",
+        "110060-110069": "North East Delhi",
+        "110070-110079": "South West Delhi",
+        "110080-110089": "North West Delhi",
+        "110090-110099": "Shahdara",
+      },
+    },
+    // Madhya Pradesh - Gwalior
+    474: {
+      state: "Madhya Pradesh",
+      city: "Gwalior",
+      districts: {
+        474015: "Thatipur",
+        474020: "Sithouli",
+      },
+    },
+    475: {
+      state: "Madhya Pradesh",
+      city: "Gwalior",
+      districts: {
+        475001: "Dabra",
+        475110: "Morar",
+        475661: "Datia",
+        475686: "Seondha",
+        475675: "Indergarh",
+      },
+    },
+    477: {
+      state: "Madhya Pradesh",
+      city: "Bhind",
+      districts: {
+        477001: "Bhind",
+        477116: "Ater",
+        477441: "Mehgaon",
+        477333: "Gohad",
+      },
+    },
+    476: {
+      state: "Madhya Pradesh",
+      city: "Morena",
+      districts: {
+        476001: "Morena",
+        476221: "Ambah",
+        476554: "Porsa",
+        476115: "Joura",
+      },
+    },
+    // Rajasthan - Jaipur
+    302: {
+      state: "Rajasthan",
+      city: "Jaipur",
+      districts: {
+        "302001-302039": "Jaipur",
+      },
+    },
+    303: {
+      state: "Rajasthan",
+      city: "Jaipur",
+      districts: {
+        303001: "Chomu",
+        303103: "Jobner",
+        303702: "Dudu",
+      },
+    },
+    // Uttar Pradesh
+    285: {
+      state: "Uttar Pradesh",
+      city: "Jalaun",
+      districts: {
+        285123: "Jalaun",
+        285001: "Orai",
+        285130: "Kalpi",
+      },
+    },
+    226: {
+      state: "Uttar Pradesh",
+      city: "Lucknow",
+      districts: {
+        "226001-226031": "Lucknow",
+        226010: "Gomti Nagar",
+        226012: "Alambagh",
+      },
+    },
+    227: {
+      state: "Uttar Pradesh",
+      city: "Lucknow",
+      districts: {
+        227105: "Malihabad",
+      },
+    },
+    208: {
+      state: "Uttar Pradesh",
+      city: "Kanpur",
+      districts: {
+        "208001-208027": "Kanpur",
+      },
+    },
+    209: {
+      state: "Uttar Pradesh",
+      city: "Kanpur",
+      districts: {
+        209214: "Rural Kanpur Areas",
+      },
+    },
+    210: {
+      state: "Uttar Pradesh",
+      districts: {
+        210205: "Karvi",
+        210001: "Banda",
+        210120: "Naraini",
+      },
+    },
+    206: {
+      state: "Uttar Pradesh",
+      city: "Auraiya",
+      districts: {
+        206122: "Auraiya",
+        206128: "Phaphund",
+      },
+    },
+    284: {
+      state: "Uttar Pradesh",
+      city: "Jhansi",
+      districts: {
+        "284001-284003": "Jhansi",
+      },
+    },
+    // Madhya Pradesh
+    472: {
+      state: "Madhya Pradesh",
+      city: "Tikamgarh",
+      districts: {
+        472001: "Tikamgarh",
+        472339: "Jatara",
+      },
+    },
+    473: {
+      state: "Madhya Pradesh",
+      districts: {
+        473551: "Shivpuri",
+        473331: "Ashok Nagar",
+        473001: "Guna",
+      },
+    },
+    // Gujarat - Ahmedabad
+    380: {
+      state: "Gujarat",
+      city: "Ahmedabad",
+      districts: {
+        "380001-382470": "Ahmedabad",
+      },
+    },
+    // Madhya Pradesh - More Cities
+    452: {
+      state: "Madhya Pradesh",
+      city: "Indore",
+      districts: {
+        "452001-452020": "Indore",
+      },
+    },
+    456: {
+      state: "Madhya Pradesh",
+      city: "Ujjain",
+      districts: {
+        "456001-456668": "Ujjain",
+      },
+    },
+    462: {
+      state: "Madhya Pradesh",
+      city: "Bhopal",
+      districts: {
+        "462001-462047": "Bhopal",
+      },
+    },
+    464: {
+      state: "Madhya Pradesh",
+      districts: {
+        464001: "Vidisha",
+        464551: "Raisen",
+      },
+    },
+    487: {
+      state: "Madhya Pradesh",
+      city: "Narsinghpur",
+      districts: {
+        487001: "Narsinghpur",
+      },
+    },
+    482: {
+      state: "Madhya Pradesh",
+      city: "Jabalpur",
+      districts: {
+        "482001-482008": "Jabalpur",
+      },
+    },
+    484: {
+      state: "Madhya Pradesh",
+      districts: {
+        484661: "Umariya",
+        484001: "Shahdol",
+      },
+    },
+    470: {
+      state: "Madhya Pradesh",
+      districts: {
+        470001: "Sagar",
+        470775: "Hata",
+      },
+    },
+    480: {
+      state: "Madhya Pradesh",
+      districts: {
+        480661: "Seoni",
+        480001: "Chhindwara",
+      },
+    },
+    483: {
+      state: "Madhya Pradesh",
+      city: "Katni",
+      districts: {
+        483501: "Katni",
+      },
+    },
+    488: {
+      state: "Madhya Pradesh",
+      city: "Panna",
+      districts: {
+        488001: "Panna",
+      },
+    },
+    461: {
+      state: "Madhya Pradesh",
+      city: "Hoshangabad",
+      districts: {
+        461001: "Hoshangabad",
+      },
+    },
+    481: {
+      state: "Madhya Pradesh",
+      districts: {
+        481661: "Mandla",
+        481880: "Dindori",
+      },
+    },
+    // Uttar Pradesh
+    228: {
+      state: "Uttar Pradesh",
+      city: "Sultanpur",
+      districts: {
+        228001: "Sultanpur",
+      },
+    },
+    471: {
+      state: "Madhya Pradesh",
+      city: "Chhatarpur",
+      districts: {
+        471001: "Chhatarpur",
+      },
+    },
+    485: {
+      state: "Madhya Pradesh",
+      city: "Satna",
+      districts: {
+        485001: "Satna",
+      },
+    },
+    800: {
+      state: "Bihar",
+      city: "Patna City",
+      districts: {
+        800008: "Patna",
+      },
+    },
+    486: {
+      state: "Madhya Pradesh",
+      city: "Rewa",
+      districts: {
+        486001: "Rewa",
+      },
+    },
+    // Chhattisgarh Cities
+    491: {
+      state: "Chhattisgarh",
+      districts: {
+        491001: "Durg",
+        491441: "Rajnandgaon",
+      },
+    },
+    493: {
+      state: "Chhattisgarh",
+      city: "Dhamtari",
+      districts: {
+        493773: "Dhamtari",
+      },
+    },
+    492: {
+      state: "Chhattisgarh",
+      city: "Raipur",
+      districts: {
+        "492001-492099": "Raipur",
+      },
+    },
+    495: {
+      state: "Chhattisgarh",
+      city: "Bilaspur",
+      districts: {
+        495001: "Bilaspur",
+      },
+    },
+    494: {
+      state: "Chhattisgarh",
+      city: "Jagdalpur",
+      districts: {
+        494001: "Jagdalpur",
+      },
+    },
+    497: {
+      state: "Chhattisgarh",
+      city: "Baikunthpur",
+      districts: {
+        497335: "Baikunthpur",
+      },
+    },
+    // Maharashtra Cities
+    440: {
+      state: "Maharashtra",
+      city: "Nagpur",
+      districts: {
+        "440001-440037": "Nagpur",
+      },
+    },
+    424: {
+      state: "Maharashtra",
+      city: "Chalisgaon",
+      districts: {
+        424101: "Chalisgaon",
+      },
+    },
+    411: {
+      state: "Maharashtra",
+      city: "Pune",
+      districts: {
+        "411001-411062": "Pune",
+      },
+    },
+    444: {
+      state: "Maharashtra",
+      city: "Amravati",
+      districts: {
+        444601: "Amravati",
+        444602: "Amravati",
+        444603: "Amravati",
+      },
+    },
+    400: {
+      state: "Maharashtra",
+      city: "Mumbai",
+      districts: {
+        "400001-400104": "Mumbai",
+      },
+    },
+    281: {
+      state: "Uttar Pradesh",
+      city: "Mathura",
+      districts: {
+        281001: "Mathura",
+      },
+    },
+  };
+  // Memoized helper functions
+  const memoizedGetLocationFromPincode = (pincode) => {
+    if (!pincode || pincode.length !== 6) return null;
+
+    const areaCode = pincode.substring(0, 3);
+    const location = pincodeData[areaCode];
+
+    if (!location) return null;
+
+    const numericPincode = parseInt(pincode);
+    let district = null;
+    let city = location.city;
+
+    // Find matching district based on pincode range
+    for (const [range, districtName] of Object.entries(location.districts)) {
+      const [start, end] = range.split("-").map((p) => parseInt(p));
+      if (!end) {
+        // Single pincode match
+        if (parseInt(range) === numericPincode) {
+          district = districtName;
+          // If city isn't set at the area code level, try to determine from district name
+          if (!city) {
+            city = districtName.replace(" City", "").replace(" Town", "");
+          }
+          break;
+        }
+      } else {
+        // Pincode range match
+        if (numericPincode >= start && numericPincode <= end) {
+          district = districtName;
+          break;
+        }
+      }
+    }
+
+    return {
+      state: location.state,
+      city: city,
+      district: district,
+    };
+  };
+
+  const extractPincodeFromAddress = (address) => {
+    const pincodeMatch = address.match(/\b\d{6}\b/);
+    return pincodeMatch ? pincodeMatch[0] : null;
+  };
+
+  // Optimize handlers with useCallback
+  const handleInputChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+
+      if (name === "mobileNumber" && !/^\d*$/.test(value)) {
+        return;
+      }
+
+      setFormData((prev) => {
+        const newData = { ...prev, [name]: value };
+
+        // Auto-update dependent fields
+        if (name === "localPanchayat") {
+          newData.subLocalPanchayat = "";
+        } else if (name === "regionalAssembly") {
+          newData.localPanchayatName = "";
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        } else if (name === "localPanchayatName") {
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        } else if (name === "gotra") {
+          newData.aakna = "";
+        } else if (name === "isMarried") {
+          // Reset considerSecondMarriage when marital status changes
+          newData.considerSecondMarriage = false;
+          if (value !== "Married") {
+            newData.marriageDate = "";
+          }
+        } else if (name === "state") {
+          // Reset all regional assembly related fields when state changes
+          newData.regionalAssembly = "";
+          newData.localPanchayatName = "";
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        }
+
+        return newData;
+      });
+
+      // Clear field error
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+    },
+    [errors]
+  );
+
+
+
+  const sendWhatsAppInvite = useCallback(async (mobileNumber) => {
+    try {
+      const formData = new URLSearchParams();
+      formData.append('number', mobileNumber);
+      formData.append('message', `Hi! You're invited to join us at Gahoishakti. Click here to log in and get started: https://www.gahoishakti.in/login`);
+  
+       const res = await fetch('https://api.gahoishakti.in/api/whatsapp/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+  
+      const contentType = res.headers.get("content-type");
+  
+      if (!contentType || !contentType.includes("application/json")) {
+        const raw = await res.text();
+        console.error('Unexpected response:', raw);
+        return;
+      }
+  
+      const data = await res.json();
+  
+      if (!data.status) {
+        console.error('Failed to send:', data.message || 'Unknown error');
+      } else {
+        console.log('WhatsApp invite sent successfully');
+      }
+    } catch (err) {
+      console.error('Error sending WhatsApp message:', err);
+    }
+  }, []);
+  
+  
+  const handleFamilyDetailChange = useCallback(
+    (index, field, value) => {
+      // Allow only digits for the mobile number
+      if (field === "mobileNumber" && !/^\d*$/.test(value)) {
+        return;
+      }
+  
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: prev.familyDetails.map((member, i) =>
+          i === index ? { ...member, [field]: value } : member
+        ),
+      }));
+  
+      // Clear any existing error on this field if present
+      if (errors[`familyDetails.${index}.${field}`]) {
+        setErrors((prev) => ({
+          ...prev,
+          [`familyDetails.${index}.${field}`]: "",
+        }));
+      }
+  
+      // Trigger WhatsApp invite only when mobile number reaches 10 digits exactly
+      if (field === "mobileNumber" && value.length === 10) {
+        sendWhatsAppInvite(value);
+      }
+    },
+    [errors, sendWhatsAppInvite]
+  );
+  
+  
+  
+  
+  
+
+  // Optimize add child function
+  const addChild = useCallback(() => {
+    if (
+      formData.familyDetails.filter((member) => member.relation === "Child")
+        .length < MAX_CHILDREN
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: [
+          ...prev.familyDetails,
+          { relation: "Child", name: "", mobileNumber: "", gender: "" },
+        ],
+      }));
+    }
+  }, [formData.familyDetails]);
+
+  // Add a function to add sibling
+  const addSibling = useCallback(() => {
+    if (
+      formData.familyDetails.filter((member) => member.relation === "Sibling")
+        .length < MAX_SIBLINGS
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: [
+          ...prev.familyDetails,
+          {
+            relation: "Sibling",
+            name: "",
+            mobileNumber: "",
+            gender: "",
+            age: "",
+            occupation: "",
+            education: "",
+            maritalStatus: "",
+            isDependent: false,
+          },
+        ],
+      }));
+    }
+  }, [formData.familyDetails]);
+
+  // Add remove functions
+  const removeChild = useCallback((indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyDetails: prev.familyDetails.filter(
+        (_, index) => index !== indexToRemove
+      ),
+    }));
+  }, []);
+
+  const removeSibling = useCallback((indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyDetails: prev.familyDetails.filter(
+        (_, index) => index !== indexToRemove
+      ),
+    }));
+  }, []);
+
+  // Update validateCurrentStep function
+  const validateCurrentStep = useCallback(() => {
+    const newErrors = validateStep(currentStep, formData);
+    setErrors(newErrors);
+    return !hasErrors(newErrors);
+  }, [currentStep, formData]);
+
+  // Function to check if email exists in Strapi backend
+  const checkEmailExists = async (email) => {
+    try {
+      const baseUrl = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+      const url = `${baseUrl}/api/registration-pages?filters[personal_information][email_address]=${encodeURIComponent(email)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check email existence');
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length > 0;
+
+    } catch (error) {
+      console.error('Error checking email existence:', error);
+      throw error;
+    }
+  };
+
+  // Function to check if mobile number exists in Strapi backend
+  const checkMobileExists = async (mobileNumber) => {
+    try {
+      const baseUrl = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+      const url = `${baseUrl}/api/registration-pages?filters[personal_information][mobile_number]=${encodeURIComponent(mobileNumber)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check mobile number existence');
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length > 0;
+
+    } catch (error) {
+      console.error('Error checking mobile number existence:', error);
+      throw error;
+    }
+  };
+
+  // Update handleNext to include mobile number check
+  const handleNext = async () => {
+    setSubmitted(true);
+    setLoading(true);
+    
+    try {
+      // Only validate email and mobile on the first step
+      if (currentStep === 0) {
+        // Check email duplication
+        if (formData.email) {
+          const emailExists = await checkEmailExists(formData.email);
+          if (emailExists) {
+            setErrors(prev => ({
+              ...prev,
+              email: "This email address is already registered. Please use a different email."
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Check mobile number duplication only if not coming from login
+        if (!location.state?.fromLogin && formData.mobileNumber) {
+          const mobileExists = await checkMobileExists(formData.mobileNumber);
+          if (mobileExists) {
+            setErrors(prev => ({
+              ...prev,
+              mobileNumber: "This mobile number is already registered. Please use a different number."
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      
+      // Rest of the handleNext function stays the same...
+      if (currentStep === formSteps.length - 1) {
+        if (!formData.confirmAccuracy) {
+          setSubmitted(true);
+          setLoading(false);
+          return;
+        }
+        handleSubmit();
+        return;
+      }
+      
+      if (validateCurrentStep()) {
+        setCurrentStep(currentStep + 1);
+        setSubmitted(false);
+        window.scrollTo(0, 0);
+      } else {
+        const firstErrorField = document.querySelector(".error-field");
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    } catch (error) {
+      console.error("Error in handleNext:", error);
+      setErrors(prev => ({
+        ...prev,
+        [currentStep === 0 ? 'mobileNumber' : 'email']: "Unable to verify. Please try again."
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      setSubmitted(false);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const uploadImage = async (file) => {
+    if (!file) return null;
+
+    const formData = new FormData();
+    formData.append("files", file);
+
+    try {
+      console.log("Uploading image...");
+      const response = await fetch(
+        `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Upload failed:", response.status);
+        return null;
+      }
+
+      const result = await response.json();
+      console.log("Image upload response:", result);
+
+      if (result && result.length > 0) {
+        const uploadedImage = result[0];
+        return uploadedImage.id;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const displayPictureId = formData.display_picture
+        ? await uploadImage(formData.display_picture)
+        : null;
+
+      const strapiData = formatFormData(
+        {
+          ...formData,
+          gotraList: Object.keys(gotraAaknaMap),
+          aaknaList: getAaknaOptions(),
+          localPanchayatList: formData.regionalAssembly
+            ? LOCAL_PANCHAYATS[formData.regionalAssembly] || []
+            : [],
+          subLocalPanchayatList: formData.localPanchayat
+            ? SUB_LOCAL_PANCHAYATS[formData.localPanchayat] || []
+            : [],
+        },
+        displayPictureId
+      );
+
+      const response = await fetch(
+        `${API_BASE}/api/registration-pages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: strapiData }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error:", errorData);
+        throw new Error(
+          errorData.error?.message ||
+            errorData.error?.details?.errors?.[0]?.message ||
+            "Failed to submit form"
+        );
+      }
+
+      const result = await response.json();
+      console.log("Form submitted successfully:", result);
+
+      // Extract gahoi code from the response
+      const gahoiCode = result.data?.attributes?.gahoi_code || strapiData.gahoi_code;
+      
+      if (!gahoiCode) {
+        throw new Error("Gahoi code not found in response");
+      }
+  // Clear progress after successful submission
+  clearProgress();
+      
+      showSuccessMessage(gahoiCode);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert(`Failed to submit form: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Separate function for showing success message
+  const showSuccessMessage = (gahoiCode) => {
+    const successPopup = document.createElement("div");
+    successPopup.className =
+      "fixed inset-0 flex items-center justify-center z-50";
+    successPopup.innerHTML = `
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4 relative z-10 border-2 border-[#FD7D01]">
+        <div class="text-center">
+          <div class="flex justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#FD7D01]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Success!</h2>
+          <p class="text-gray-600 mb-2">Registration successful!</p>
+          <p class="text-gray-600 mb-2">Your Gahoi code is:</p>
+          <p class="text-xl font-bold text-[#FD7D01] mb-6">${gahoiCode}</p>
+          <div class="w-full bg-gray-200 h-2 rounded-full mt-4">
+            <div class="bg-[#FD7D01] h-2 rounded-full" style="width: 0%; transition: width 2s ease-in-out;" id="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(successPopup);
+    const progressBar = document.getElementById("progress-bar");
+
+    // Send WhatsApp message
+    const sendWhatsAppMessage = async () => {
+      try {
+        const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
+        const numberWithCountryCode = mobileNumber.startsWith('91') ? mobileNumber : `91${mobileNumber}`;
+        
+        
+        const response = await fetch('https://api.gahoishakti.in/api/send-sms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            number: numberWithCountryCode,
+            message: `Thank you for registering with Gahoi Shakti! Your Gahoi code is: ${gahoiCode}`,
+          }),
+        });
+
+        const data = await response.json();
+        console.log('WhatsApp API Response (via backend):', data);
+
+        if (!data.status) {
+          console.warn('WhatsApp API reported failure:', data.message);
+        }
+      } catch (error) {
+        console.error('Error sending WhatsApp message via backend:', error);
+      }
+    };
+
+    // Send WhatsApp message immediately
+    sendWhatsAppMessage();
+
+    setTimeout(() => {
+      progressBar.style.width = "100%";
+    }, 100);
+
+    setTimeout(() => {
+      document.body.removeChild(successPopup);
+      window.location.href = "/";
+    }, 6500);
+  };
+
+  const hasError = (fieldName) => {
+    return submitted && errors[fieldName];
+  };
+
+  const hasFamilyError = (index, field) => {
+    return submitted && errors[`familyDetails.${index}.${field}`];
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Existing fields */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.name')}
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("name")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  placeholder={t('registration.personalInfo.namePlaceholder')}
+                />
+                {renderError("name")}
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                  </svg>
+                  {t('registration.personalInfo.mobile')}
+                </label>
+                <input
+                  type="tel"
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("mobileNumber")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder= {t('registration.personalInfo.mobilePlaceholder')}
+                  disabled={location.state?.fromLogin}
+                />
+                {hasError("mobileNumber") && (
+                  <p className="text-red-500 text-xs">{errors.mobileNumber}</p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M14.243 5.757a6 6 0 10-9.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.email')}
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("email")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  placeholder={t('registration.personalInfo.emailPlaceholder')}
+                />
+                {hasError("email") && (
+                  <p className="text-red-500 text-xs">{errors.email}</p>
+                )}
+              </div>
+
+              <div className="space-y-3 md:col-span-2">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.gender')}
+                </label>
+                <div className="flex items-center space-x-8 px-4 py-2.5 border border-gray-300 rounded-lg bg-white">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={formData.gender === "male"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.male')}</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={formData.gender === "female"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.female')}</span>
+                  </label>
+                </div>
+
+                {hasError("gender") && (
+                  <p className="text-red-500 text-xs">{errors.gender}</p>
+                )}
+              </div>
+
+              {/* Nationality field */}
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.nationality')}
+                  {hasError("nationality") && (
+                    <span className="ml-2 text-xs text-red-500">*Required</span>
+                  )}
+                </label>
+                <div
+                  className={`flex items-center space-x-8 px-4 py-2.5 border rounded-lg ${
+                    hasError("nationality")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nationality"
+                      value="Indian"
+                      checked={formData.nationality === "Indian"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          nationality: e.target.value,
+                        })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.indian')}</span>
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="nationality"
+                      value="Non-Indian"
+                      checked={formData.nationality === "Non-Indian"}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          nationality: e.target.value,
+                        })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                    {t('registration.personalInfo.nonIndian')}
+                    </span>
+                  </label>
+                </div>
+                {hasError("nationality") && (
+                  <p className="text-red-500 text-xs">{errors.nationality}</p>
+                )}
+              </div>
+
+              {/* Gahoi Community field */}
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.isGahoi')}
+                </label>
+                <div
+                  className={`flex items-center space-x-8 px-4 py-2.5 border rounded-lg ${
+                    hasError("isGahoi")
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isGahoi"
+                      value="Yes"
+                      checked={formData.isGahoi === "Yes"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isGahoi: e.target.value })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.yes')}</span>
+                  </label>
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="isGahoi"
+                      value="No"
+                      checked={formData.isGahoi === "No"}
+                      onChange={(e) =>
+                        setFormData({ ...formData, isGahoi: e.target.value })
+                      }
+                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.no')}</span>
+                  </label>
+                </div>
+                {hasError("isGahoi") && (
+                  <p className="text-red-500 text-xs">{errors.isGahoi}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Blood Group */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium flex text-gray-700">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+import React, { useState, useEffect, useCallback, useMemo } from "react";import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import PhotoUpload from "./PhotoUpload";
+import {
+  STATE_TO_ASSEMBLIES,
+  INDUSTRY_SECTORS,
+  BUSINESS_SIZES,
+  WORK_TYPES,
+  EMPLOYMENT_TYPES,
+  HANDICAP_OPTIONS,
+  BLOOD_GROUPS,
+  INITIAL_FAMILY_MEMBERS,
+  MAX_CHILDREN,
+  MAX_SIBLINGS,
+  MARITAL_STATUS_OPTIONS,
+  EDUCATION_OPTIONS,
+  OCCUPATION_OPTIONS,
+  SIBLING_RELATION_OPTIONS,
+  FORM_STEPS,
+  PROCESS_STEPS,
+  INITIAL_FORM_DATA,
+} from "../../constants/formConstants";
+import {
+  validateStep,
+  formatFormData,
+  hasErrors,
+} from "../../utils/form/formUtils";
+import {
+  STATES,
+  STATE_TO_DISTRICTS,
+  DISTRICT_TO_CITIES,
+  ASHOKNAGAR_GRAM_PANCHAYATS,
+  ASHOKNAGAR_LOCAL_BODIES,
+  ALIRAJPUR_LOCAL_BODIES,
+  ALIRAJPUR_GRAM_PANCHAYATS,
+  ANUPPUR_LOCAL_BODIES,
+  ANUPPUR_GRAM_PANCHAYATS,
+  BALAGHAT_LOCAL_BODIES,
+  BALAGHAT_GRAM_PANCHAYATS,
+  BARWANI_LOCAL_BODIES,
+  BARWANI_GRAM_PANCHAYATS,
+  BETUL_LOCAL_BODIES,
+  BETUL_GRAM_PANCHAYATS,
+  BHIND_LOCAL_BODIES,
+  BHIND_GRAM_PANCHAYATS,
+  BHOPAL_LOCAL_BODIES,
+  BHOPAL_GRAM_PANCHAYATS,
+  BURHANPUR_LOCAL_BODIES,
+  BURHANPUR_GRAM_PANCHAYATS,
+  CHHATARPUR_LOCAL_BODIES,
+  CHHATARPUR_GRAM_PANCHAYATS,
+  CHHINDWARA_LOCAL_BODIES,
+  CHHINDWARA_GRAM_PANCHAYATS,
+  DAMOH_LOCAL_BODIES,
+  DAMOH_GRAM_PANCHAYATS,
+  DATIA_LOCAL_BODIES,
+  DATIA_GRAM_PANCHAYATS,
+  DEWAS_LOCAL_BODIES,
+  DEWAS_GRAM_PANCHAYATS,
+  DHAR_LOCAL_BODIES,
+  DHAR_GRAM_PANCHAYATS,
+  DINDORI_LOCAL_BODIES,
+  DINDORI_GRAM_PANCHAYATS,
+  GUNA_LOCAL_BODIES,
+  GUNA_GRAM_PANCHAYATS,
+  GWALIOR_LOCAL_BODIES,
+  GWALIOR_GRAM_PANCHAYATS,
+  HARDA_LOCAL_BODIES,
+  HARDA_GRAM_PANCHAYATS,
+  INDORE_LOCAL_BODIES,
+  INDORE_GRAM_PANCHAYATS,
+  JABALPUR_LOCAL_BODIES,
+  JABALPUR_GRAM_PANCHAYATS,
+  JHABUA_LOCAL_BODIES,
+  JHABUA_GRAM_PANCHAYATS,
+  KATNI_LOCAL_BODIES,
+  KATNI_GRAM_PANCHAYATS,
+  KHANDWA_LOCAL_BODIES,
+  KHANDWA_GRAM_PANCHAYATS,
+  KHARGONE_LOCAL_BODIES,
+  KHARGONE_GRAM_PANCHAYATS,
+  MANDLA_LOCAL_BODIES,
+  MANDLA_GRAM_PANCHAYATS,
+  MANDSAUR_LOCAL_BODIES,
+  MANDSAUR_GRAM_PANCHAYATS,
+  MORENA_LOCAL_BODIES,
+  MORENA_GRAM_PANCHAYATS,
+  NARSINGHPUR_LOCAL_BODIES,
+  NARSINGHPUR_GRAM_PANCHAYATS,
+  NEEMUCH_LOCAL_BODIES,
+  NEEMUCH_GRAM_PANCHAYATS,
+  PANNA_LOCAL_BODIES,
+  PANNA_GRAM_PANCHAYATS,
+  RAISEN_LOCAL_BODIES,
+  RAISEN_GRAM_PANCHAYATS,
+  RAJGARH_LOCAL_BODIES,
+  RAJGARH_GRAM_PANCHAYATS,
+  RATLAM_LOCAL_BODIES,
+  RATLAM_GRAM_PANCHAYATS,
+  REWA_LOCAL_BODIES,
+  REWA_GRAM_PANCHAYATS,
+  SAGAR_LOCAL_BODIES,
+  SAGAR_GRAM_PANCHAYATS,
+  SATNA_LOCAL_BODIES,
+  SATNA_GRAM_PANCHAYATS,
+  SEHORE_LOCAL_BODIES,
+  SEHORE_GRAM_PANCHAYATS,
+  SEONI_LOCAL_BODIES,
+  SEONI_GRAM_PANCHAYATS,
+  SHAHDOL_LOCAL_BODIES,
+  SHAHDOL_GRAM_PANCHAYATS,
+  SHAJAPUR_LOCAL_BODIES,
+  SHAJAPUR_GRAM_PANCHAYATS,
+  SHEOPUR_LOCAL_BODIES,
+  SHEOPUR_GRAM_PANCHAYATS,
+  SHIVPURI_LOCAL_BODIES,
+  SHIVPURI_GRAM_PANCHAYATS,
+  SIDHI_LOCAL_BODIES,
+  SIDHI_GRAM_PANCHAYATS,
+  SINGRAULI_LOCAL_BODIES,
+  SINGRAULI_GRAM_PANCHAYATS,
+  TIKAMGARH_LOCAL_BODIES,
+  TIKAMGARH_GRAM_PANCHAYATS,
+  UJJAIN_LOCAL_BODIES,
+  UJJAIN_GRAM_PANCHAYATS,
+  UMARIYA_LOCAL_BODIES,
+  UMARIYA_GRAM_PANCHAYATS,
+  VIDISHA_LOCAL_BODIES,
+  VIDISHA_GRAM_PANCHAYATS,
+} from "../../constants/locationData";
+import ReactDOM from "react-dom";
+import PreviousMarriageSection from './PreviousMarriageSection';
+
+const API_BASE = import.meta.env.MODE === 'production' 
+  ? 'https://api.gahoishakti.in'
+  : 'http://localhost:1340';
+
+const API_TOKEN = import.meta.env.VITE_API_TOKEN || '';
+
+export const CHAURASI_PANCHAYAT_NAMES = [
+  "Gahoi Vaishya Panchayat",
+  "Shri Gahoi Vaishya Sabha",
+  "Gahoi Vaishya Samaj",
+];
+
+const LOCAL_PANCHAYATS = {
+  "Chambal Regional Assembly": ["Morena", "Bhind", "Gwalior"],
+  "Central Malwa Regional Assembly": ["Indore", "Dewas", "Ujjain", "Bhopal", "Vidisha", "Raisen"],
+  "Mahakaushal Regional Assembly": ["Jabalpur", "Katni", "Rewa", ""],
+  "Vindhya Regional Assembly": ["Satna", "Shahdol", "Sidhi", "Chhatarpur", "Panna", "Rewa"],
+  "Bundelkhand Regional Assembly": ["Sagar", "Damoh", "Chhatarpur"],
+  "Chaurasi Regional Assembly": ["Bhopal", "Vidisha", "Raisen"],
+  "Southern Regional Assembly": ["Pune", "Mumbai", "Nagpur", "Amravati", "Chalisgaon", "Dhuliya"]
+};
+
+const SUB_LOCAL_PANCHAYATS = {
+  Pune: ["Pune", "Pimpri-Chinchwad", "Khadki", "Hadapsar"],
+  Mumbai: ["South Mumbai", "Andheri", "Borivali", "Thane", "Navi Mumbai"],
+  Nagpur: ["Nagpur", "Kamptee", "Hingna"],
+  Amravati: ["Amravati", "Badnera", "Achalpur"],
+  Chalisgaon: ["Chalisgaon"],
+  Dhuliya: ["Dhuliya"],
+  Morena: ["Morena", "Ambah", "Porsa"],
+  Bhind: ["Bhind", "Ater", "Lahar", "Daboh", "Tharet", "Mihona", "Aswar", "Lahar", "Gohad", "Machhand", "Raun"],
+  Gwalior: ["Gwalior", "Dabra","Madhavganj",
+        "Khasgi Bazaar",
+        "Daulatganj",
+        "Kampoo",
+        "Lohia Bazaar",
+        "Phalka Bazaar",
+        "Lohamandi",
+        "Bahodapur",
+        "Naka Chandravadni",
+        "Harishankarpuram",
+        "Thatipur",
+        "Morar",
+        "Dabra",
+        "Pichhore Dabra",
+        "Behat"],
+  Patna: ["Patna"],
+  Durg: ["Durg"],
+  Rajnandgaon: ["Rajnandgaon"],
+  Dhamtari: ["Dhamtari"],
+  Raipur: ["Raipur"],
+  Bilaspur: ["Bilaspur"],
+  Bastar: ["Bastar"],
+  Koriya: ["Koriya"],
+  Jhansi: [
+    "Garautha", "Barua Sagar", "Simriddha", "Tahrauli", "Gursarai", "Bamor",
+    "Poonchh", "Erich", "Bhel Simrawali", "Babina Cantt", "Bangra Uldan Ranipur",
+    "Mauranipur", "Baragaon", "Ranipur", "Jhansi", "Samthar", "Archara", "Moth"
+  ],
+  Tikamgarh: [
+    "Tikamgarh", "Baldeogarh", "Jatara", "Palera", "Niwari", "Prithvipur",
+    "Orchha", "Badagaon", "Mohangarh", "Digoda", "Lidhora", "Khargapur"
+  ],
+  Datia: [
+    "Sewdha", "Chhoti Badoni", "Datia", "Indergarh", "Badhara Sopan",
+    "Unnao Balaji", "Bhander", "Salon B"
+  ],
+  Jaipur: ["Jaipur"],
+  Indore: ["Indore"],
+  Ujjain: ["Ujjain"],
+  Bhopal: ["Bhopal", "Berasia"],
+  Vidisha: ["Vidisha"],
+  Raisen: ["Begamganj"],
+  Sultanpur: ["Visani"],
+  Ahmedabad: ["Gandhinagar"],
+};
+
+const CHAURASI_LOCAL_PANCHAYAT_MAPPING = {
+  "Gahoi Vaishya Panchayat": ["Shivpuri", "Ashok Nagar", "Guna", "Ahmedabad"],
+  "Shri Gahoi Vaishya Sabha": ["Shivpuri"],
+  "Gahoi Vaishya Samaj": ["Ashok Nagar"],
+};
+
+const CHAURASI_SUB_LOCAL_PANCHAYAT_MAPPING = {
+  "Gahoi Vaishya Panchayat": {
+    Shivpuri: [
+      "Shivpuri",
+      "Malhawani",
+      "Pipara",
+      "Semri",
+      "Bamore Damaroun",
+      "Manpura",
+      "Pichhore",
+    ],
+    "Ashok Nagar": ["Ashok Nagar", "Bamore Kala"],
+    Guna: ["Guna"],
+    Ahmedabad: ["Gandhi Nagar"],
+  },
+  "Shri Gahoi Vaishya Sabha": {
+    Shivpuri: ["Karera", "Bhonti"],
+  },
+  "Gahoi Vaishya Samaj": {
+    "Ashok Nagar": ["Dinara", "Guna"],
+  },
+};
+
+const GUJARAT_CHAURASI_MAPPING = {
+  "Gandhinagar": {
+    assembly: "Chaurasi Regional Assembly",
+    localPanchayatName: "Gahoi Vaishya Panchayat",
+    localPanchayat: "Ahmedabad",
+    subLocalPanchayat: "Gandhi Nagar"
+  }
+};
+
+const RegistrationForm = () => {
+  const location = useLocation();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+  
+  const saveProgress = useCallback((data) => {
+    try {
+      sessionStorage.setItem('registrationProgress', JSON.stringify({
+        formData: data,
+        lastSaved: new Date().toISOString(),
+        currentStep: currentStep
+      }));
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  }, [currentStep]);
+  
+  const loadProgress = useCallback(() => {
+    try {
+      const saved = sessionStorage.getItem('registrationProgress');
+      if (saved) {
+        const { formData, lastSaved, currentStep } = JSON.parse(saved);
+        const savedDate = new Date(lastSaved);
+        const now = new Date();
+        const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24) {
+          return { formData, currentStep };
+        } else {
+          sessionStorage.removeItem('registrationProgress');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading progress:', error);
+      return null;
+    }
+  }, []);
+  const ResumeDialog = () => {
+    if (!showResumeDialog) return null;
+  
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+          <h3 className="text-lg font-semibold mb-4">{t('registration.resumeDialog.title', 'Resume Registration?')}</h3>
+          <p className="mb-6">{t('registration.resumeDialog.message', 'We found your previously saved progress. Would you like to continue where you left off?')}</p>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={() => {
+                setShowResumeDialog(false);
+                clearProgress();
+              }}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              {t('registration.resumeDialog.startNew', 'Start New')}
+            </button>
+            <button
+              onClick={() => {
+                const savedProgress = loadProgress();
+                console.log('Resume clicked, savedProgress:', savedProgress);  // Debug log
+                if (savedProgress) {
+                  console.log('Setting form data to:', savedProgress.formData);  // Debug log
+                  console.log('Setting current step to:', savedProgress.currentStep);  // Debug log
+                  setFormData(savedProgress.formData);
+                  setCurrentStep(savedProgress.currentStep);
+                }
+                setShowResumeDialog(false);
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              {t('registration.resumeDialog.resume', 'Resume')}
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  };
+  
+  const clearProgress = useCallback(() => {
+    try {
+      sessionStorage.removeItem('registrationProgress');
+    } catch (error) {
+      console.error('Error clearing progress:', error);
+    }
+  }, []);
+
+
+
+  const [formData, setFormData] = useState(() => {
+    const initialData = {
+      ...INITIAL_FORM_DATA,
+      workCategory: "professional",
+      workType: "Professional",
+       employmentType: ""
+    };
+    
+    // Only set mobile number if it exists in location state
+    if (location.state?.mobileNumber) {
+      initialData.mobile_number = location.state.mobileNumber;
+      console.log("Initial mobile number set:", location.state.mobileNumber);
+    }
+    
+    return initialData;
+  });
+  
+  const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
+  const [progress, setProgress] = useState(50);
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
+
+  // Handle location state only once 
+  useEffect(() => {
+    if (location.state?.mobileNumber) {
+      console.log("Initializing form with mobile number:", location.state.mobileNumber);
+      setFormData(prevData => ({
+        ...prevData,
+        mobile_number: location.state.mobileNumber
+      }));
+    }
+  }, []); 
+  useEffect(() => {
+    const savedProgress = loadProgress();
+    if (savedProgress) {
+      setShowResumeDialog(true);
+    }
+  }, [loadProgress]);
+  
+  useEffect(() => {
+    // Only save if we have some actual data (not just the initial state)
+    if (Object.keys(formData).some(key => formData[key] !== INITIAL_FORM_DATA[key])) {
+      console.log('Saving progress with data:', formData);  // Debug log
+      saveProgress(formData);
+    }
+  }, [formData, saveProgress]);
+
+  const indianCities = [
+    "Ahmedabad",
+    "Amravati",
+    "Ashok Nagar",
+    "Auraiya",
+    "Baikunthpur",
+    "Banda",
+    "Bhind",
+    "Bilaspur",
+    "Bhopal",
+    "Chalisgaon",
+    "Chhatarpur",
+    "Chhindwara",
+    "Datia",
+    "Delhi",
+    "Dhamtari",
+    "Dhuliya",
+    "Dindori",
+    "Durg",
+    "Ghasan",
+    "Guna",
+    "Gwalior",
+    "Hata",
+    "Hoshangabad",
+    "Indore",
+    "Jabalpur",
+    "Jagdalpur",
+    "Jaipur",
+    "Jalaun",
+    "Jhansi",
+    "Kanpur",
+    "Karvi",
+    "Katni",
+    "Lalitpur",
+    "Lucknow",
+    "Mahoba",
+    "Mandla",
+    "Mathura",
+    "Morena",
+    "Mumbai",
+    "Nagpur",
+    "Narsinghpur",
+    "Other",
+    "Panna",
+    "Patna City",
+    "Pune",
+    "Raisen",
+    "Raipur",
+    "Rajnandgaon",
+    "Rewa",
+    "Sagar",
+    "Satna",
+    "Seoni",
+    "Shahdol",
+    "Shivpuri",
+    "Sultanpur",
+    "Tikamgarh",
+    "Ujjain",
+    "Umariya",
+    "Vidisha",
+  ];
+
+  const handleImageSelect = (file) => {
+    setFormData((prev) => ({
+      ...prev,
+      display_picture: file,
+    }));
+  };
+
+
+  useEffect(() => {
+    const header = document.querySelector("header");
+    const footer = document.querySelector("footer");
+    const nav = document.querySelector("nav");
+
+    if (header) header.style.display = "none";
+    if (footer) footer.style.display = "none";
+    if (nav) nav.style.display = "none";
+
+    document.body.classList.add("fullscreen-form");
+
+    return () => {
+      if (header) header.style.display = "";
+      if (footer) footer.style.display = "";
+      if (nav) nav.style.display = "";
+      document.body.classList.remove("fullscreen-form");
+    };
+  }, []);
+
+  // Optimize form steps by using constants
+  const formSteps = useMemo(() => FORM_STEPS, []);
+
+  useEffect(() => {
+    if (location.state?.fromLogin) {
+      if (location.state?.processSteps) {
+        setProcessSteps(location.state.processSteps);
+      }
+
+      // If mobile number is verified, we can start from the form
+      if (location.state?.mobileNumber) {
+        setFormData((prev) => ({
+          ...prev,
+          mobileNumber: location.state.mobileNumber,
+        }));
+      }
+    }
+  }, [location.state]);
+
+  
+  useEffect(() => {
+    const completedSteps = processSteps.filter((step) => step.completed).length;
+    const totalSteps = processSteps.length;
+    setProgress(Math.round((completedSteps / totalSteps) * 100));
+  }, [processSteps]);
+
+
+  useEffect(() => {
+    const registrationProgress = currentStep / (formSteps.length - 1);
+
+   
+    const updatedSteps = [...processSteps];
+    updatedSteps[2].completed = registrationProgress > 0;
+    setProcessSteps(updatedSteps);
+  }, [currentStep, formSteps.length, processSteps]);
+
+  // map Gotra to Aakna
+  const gotraAaknaMap = {
+    "Vasar/Vastil/Vasal": [
+      "Rusiya",
+      "Arusiya",
+      "Behre",
+      "Bahre",
+      "Pahariya",
+      "Reja",
+      "Mar",
+      "Amar",
+      "Mor",
+      "Sethiya",
+      "Damele",
+      "Kathal",
+      "Kathil",
+      "Marele",
+      "Nahar",
+      "Naar",
+      "KareKhemau",
+      "Raghare",
+      "Bagar",
+      "Tudha",
+      "Sah",
+      "Saav",
+      "Dangan ke",
+      "Seth (Mau ke/Paliya ke/Khakshis ke/Mahuta ke/Bhaghoi ke)",
+      "Kasav",
+      "Khaira",
+      "Sarawgi (Mau ke)",
+      "Sahdele",
+      "Sadele",
+      "Changele",
+      "Chungele",
+      "Mungele",
+      "Dhoosar",
+      "Dadraya",
+      "Patodiya",
+      "Patodi",
+      "Paterha",
+      "Jhanjhar",
+      "Kharaya",
+      "Baraya",
+      "Kunayar",
+      "Purpuriya",
+      "Puranpuriya",
+      "Kajar",
+      "Kshankshar",
+    ],
+
+    Gol: [
+      "Andhi",
+      "Baderiya",
+      "Bamoriya",
+      "Bardiya",
+      "Bed",
+      "Bhagoriya",
+      "Bijpuriya",
+      "Bilaiya",
+      "Chiroliya",
+      "Tarsolliya",
+      "Trisolliya",
+      "Kharaya",
+      "Jakonya",
+      "Jauriya",
+      "Joliya",
+      "Jalaounya",
+      "Kanthariya",
+      "Itoriya",
+      "Itodiya",
+      "Katare",
+      "Kurele",
+      "Vilaiya",
+      "Nigoti",
+      "Nignotiya",
+      "Soni",
+      "Rawat",
+      "Sarawagi",
+      "Brijpuriya",
+      "Sijariya",
+      "Gandhi",
+      "Bamoriya",
+      "Amoriya",
+      "Dohariya Devaraha",
+      "Devadhiya",
+      "Chungele",
+      "Seth (Rora ke)",
+      "Mungele",
+      "Mangole",
+      "Kurothiya",
+      "Khaira",
+      "Bhagorya",
+      "Maunya",
+      "Hadyal",
+      "Digoriya",
+      "Dhingauriya",
+      "Jaar",
+      "Patwari",
+      "Gandhi",
+    ],
+
+    "Gangal / Gagil": [
+      "Geda",
+      "Chapra",
+      "Chupara",
+      "Rawat",
+      "Nogaraiya",
+      "Jhudele/Kshurele",
+      "Nisunge/Nisuri",
+      "Seth (Nolha ke)",
+      "Dangre",
+      "Barele",
+      "Barol",
+      "Nolha/Nilha",
+      "Mihi ke Kunwar",
+      "Saab/Sahu",
+    ],
+
+    "Badal / Waghil / Bandal": [
+      "Chauda",
+      "Chodha",
+      "Chouda",
+      "Soni",
+      "Kharya/Khairya",
+      "Seth (Kathori, Karoli ke)",
+      "Patraiya/Paterha",
+      "Barha/Barehe",
+      "Hathnoria/Hathnotiya",
+      "Damorha",
+      "Lakhatkiya",
+      "Paharu",
+      "Dagarhiha",
+      "Kuretiya/Kuraithiya",
+      "Gugoriya/Ugoriya",
+      "Jugoriya",
+      "Sulganiya/Sulghaniya",
+      "Amroha",
+      "Dadam",
+      "Sawla",
+      "Wageriya",
+    ],
+
+    "Kocchal / Kochil": [
+      "Neekhra",
+      "Indurkhiya",
+      "Kastwar",
+      "Kurele",
+      "Misurha/Masaurya",
+      "Sawla/Saula/Chawla",
+      "Viswari",
+      "Pahariya",
+      "Piparsania",
+      "Dadarya",
+      "Nachhola",
+      "Baronya",
+      "Binaurya",
+      "Kharya/Khara",
+      "Iksade",
+      "Sulganiya/Sulghaniya",
+      "Kanjoulya",
+      "Nigoti (Nigotiya)",
+      "Rawat",
+      "Seth",
+      "Soni",
+    ],
+
+    Jaital: [
+      "Baderia",
+      "Kathal/Kathil",
+      "Nagariya",
+      "Rikholya/Lakhourya",
+      "Seth (Bareth ke)",
+      "Shikoly/Sokorya/Shipoulya",
+      "Lahariya",
+      "Sirojiya",
+    ],
+
+    Vachhil: [
+      "Kuchiya/Kuchha",
+      "Tikraya/Tapakle",
+      "Damele",
+      "Barsainya",
+      "Tapa",
+      "Kanakne",
+      "Matele/Mahtele",
+      "Hunka",
+      "Seth (Nawgaon/Negua ke)",
+      "Badonya",
+      "Gandhi",
+      "Rikholya",
+      "Dhanoriya",
+      "Itoriya/Itodiya",
+      "Sakeray/Sakahere",
+      "Soni",
+      "Khadsariya/Kharsadiya",
+      "Badhiya",
+      "Vinaurya",
+      "Sirsoniya/Risoniya",
+      "Shikoly/Sokorya/Shipoulya",
+      "Khangat",
+      "Katare",
+      "Sarawgi (Mau ke)",
+      "Chungele",
+    ],
+
+    Kachhil: [
+      "Chapra/Chupara",
+      "Tusele",
+      "Piparsaniya",
+      "Seth (Padri ke)",
+      "Dhusar",
+      "Bhondiya (Bhondu)",
+      "Amaulya/Amauriya",
+      "Jhudele/Jhad",
+      "Rawat",
+      "Katare",
+    ],
+
+    Bhaal: [
+      "Kudraya",
+      "Khard",
+      "Suhane/Sohane",
+      "Dengre/Dagre",
+      "Teetbilasi/Teetbirasi",
+      "Ghura",
+      "Khangat",
+      "Bajrang Gadiya",
+      "Naina/Nehna",
+      "Pachnole/Pachraulya",
+      "Sah/Saav",
+      "Seth (Chandaiya ke)",
+      "Chandaiya/Chandraseniya",
+      "Jhudele/Jurele/Jhood",
+    ],
+
+    Kohil: ["Kandele", "Lohiya/Loiya", "Shaav/Shah (Unnao ke)", "Jhuke/Jhunk"],
+
+    Kasiv: [
+      "Asoo",
+      "Asoopi",
+      "Asooti",
+      "Khantal",
+      "Beder",
+      "Badil",
+      "Baidal",
+      "Sudipa",
+      "Asudipa",
+      "Deepa/Teepa",
+    ],
+
+    Kasav: [
+      "Asoo",
+      "Asoopi",
+      "Asooti",
+      "Khantal",
+      "Beder",
+      "Badil",
+      "Baidal",
+      "Sudipa",
+      "Asudipa",
+      "Deepa/Teepa",
+    ],
+    Single: [],
+  };
+
+  //  Aakna options based on selected Gotra
+  const getAaknaOptions = () => {
+    return formData.gotra ? gotraAaknaMap[formData.gotra] || [] : [];
+  };
+
+  const pincodeData = {
+    // Delhi
+    110: {
+      state: "Delhi",
+      city: "Delhi",
+      districts: {
+        "110001-110012": "Central Delhi",
+        "110013-110019": "East Delhi",
+        "110020-110029": "New Delhi",
+        "110030-110039": "North Delhi",
+        "110040-110049": "South Delhi",
+        "110050-110059": "West Delhi",
+        "110060-110069": "North East Delhi",
+        "110070-110079": "South West Delhi",
+        "110080-110089": "North West Delhi",
+        "110090-110099": "Shahdara",
+      },
+    },
+    // Madhya Pradesh - Gwalior
+    474: {
+      state: "Madhya Pradesh",
+      city: "Gwalior",
+      districts: {
+        474015: "Thatipur",
+        474020: "Sithouli",
+      },
+    },
+    475: {
+      state: "Madhya Pradesh",
+      city: "Gwalior",
+      districts: {
+        475001: "Dabra",
+        475110: "Morar",
+        475661: "Datia",
+        475686: "Seondha",
+        475675: "Indergarh",
+      },
+    },
+    477: {
+      state: "Madhya Pradesh",
+      city: "Bhind",
+      districts: {
+        477001: "Bhind",
+        477116: "Ater",
+        477441: "Mehgaon",
+        477333: "Gohad",
+      },
+    },
+    476: {
+      state: "Madhya Pradesh",
+      city: "Morena",
+      districts: {
+        476001: "Morena",
+        476221: "Ambah",
+        476554: "Porsa",
+        476115: "Joura",
+      },
+    },
+    // Rajasthan - Jaipur
+    302: {
+      state: "Rajasthan",
+      city: "Jaipur",
+      districts: {
+        "302001-302039": "Jaipur",
+      },
+    },
+    303: {
+      state: "Rajasthan",
+      city: "Jaipur",
+      districts: {
+        303001: "Chomu",
+        303103: "Jobner",
+        303702: "Dudu",
+      },
+    },
+    // Uttar Pradesh
+    285: {
+      state: "Uttar Pradesh",
+      city: "Jalaun",
+      districts: {
+        285123: "Jalaun",
+        285001: "Orai",
+        285130: "Kalpi",
+      },
+    },
+    226: {
+      state: "Uttar Pradesh",
+      city: "Lucknow",
+      districts: {
+        "226001-226031": "Lucknow",
+        226010: "Gomti Nagar",
+        226012: "Alambagh",
+      },
+    },
+    227: {
+      state: "Uttar Pradesh",
+      city: "Lucknow",
+      districts: {
+        227105: "Malihabad",
+      },
+    },
+    208: {
+      state: "Uttar Pradesh",
+      city: "Kanpur",
+      districts: {
+        "208001-208027": "Kanpur",
+      },
+    },
+    209: {
+      state: "Uttar Pradesh",
+      city: "Kanpur",
+      districts: {
+        209214: "Rural Kanpur Areas",
+      },
+    },
+    210: {
+      state: "Uttar Pradesh",
+      districts: {
+        210205: "Karvi",
+        210001: "Banda",
+        210120: "Naraini",
+      },
+    },
+    206: {
+      state: "Uttar Pradesh",
+      city: "Auraiya",
+      districts: {
+        206122: "Auraiya",
+        206128: "Phaphund",
+      },
+    },
+    284: {
+      state: "Uttar Pradesh",
+      city: "Jhansi",
+      districts: {
+        "284001-284003": "Jhansi",
+      },
+    },
+    // Madhya Pradesh
+    472: {
+      state: "Madhya Pradesh",
+      city: "Tikamgarh",
+      districts: {
+        472001: "Tikamgarh",
+        472339: "Jatara",
+      },
+    },
+    473: {
+      state: "Madhya Pradesh",
+      districts: {
+        473551: "Shivpuri",
+        473331: "Ashok Nagar",
+        473001: "Guna",
+      },
+    },
+    // Gujarat - Ahmedabad
+    380: {
+      state: "Gujarat",
+      city: "Ahmedabad",
+      districts: {
+        "380001-382470": "Ahmedabad",
+      },
+    },
+    // Madhya Pradesh - More Cities
+    452: {
+      state: "Madhya Pradesh",
+      city: "Indore",
+      districts: {
+        "452001-452020": "Indore",
+      },
+    },
+    456: {
+      state: "Madhya Pradesh",
+      city: "Ujjain",
+      districts: {
+        "456001-456668": "Ujjain",
+      },
+    },
+    462: {
+      state: "Madhya Pradesh",
+      city: "Bhopal",
+      districts: {
+        "462001-462047": "Bhopal",
+      },
+    },
+    464: {
+      state: "Madhya Pradesh",
+      districts: {
+        464001: "Vidisha",
+        464551: "Raisen",
+      },
+    },
+    487: {
+      state: "Madhya Pradesh",
+      city: "Narsinghpur",
+      districts: {
+        487001: "Narsinghpur",
+      },
+    },
+    482: {
+      state: "Madhya Pradesh",
+      city: "Jabalpur",
+      districts: {
+        "482001-482008": "Jabalpur",
+      },
+    },
+    484: {
+      state: "Madhya Pradesh",
+      districts: {
+        484661: "Umariya",
+        484001: "Shahdol",
+      },
+    },
+    470: {
+      state: "Madhya Pradesh",
+      districts: {
+        470001: "Sagar",
+        470775: "Hata",
+      },
+    },
+    480: {
+      state: "Madhya Pradesh",
+      districts: {
+        480661: "Seoni",
+        480001: "Chhindwara",
+      },
+    },
+    483: {
+      state: "Madhya Pradesh",
+      city: "Katni",
+      districts: {
+        483501: "Katni",
+      },
+    },
+    488: {
+      state: "Madhya Pradesh",
+      city: "Panna",
+      districts: {
+        488001: "Panna",
+      },
+    },
+    461: {
+      state: "Madhya Pradesh",
+      city: "Hoshangabad",
+      districts: {
+        461001: "Hoshangabad",
+      },
+    },
+    481: {
+      state: "Madhya Pradesh",
+      districts: {
+        481661: "Mandla",
+        481880: "Dindori",
+      },
+    },
+    // Uttar Pradesh
+    228: {
+      state: "Uttar Pradesh",
+      city: "Sultanpur",
+      districts: {
+        228001: "Sultanpur",
+      },
+    },
+    471: {
+      state: "Madhya Pradesh",
+      city: "Chhatarpur",
+      districts: {
+        471001: "Chhatarpur",
+      },
+    },
+    485: {
+      state: "Madhya Pradesh",
+      city: "Satna",
+      districts: {
+        485001: "Satna",
+      },
+    },
+    800: {
+      state: "Bihar",
+      city: "Patna City",
+      districts: {
+        800008: "Patna",
+      },
+    },
+    486: {
+      state: "Madhya Pradesh",
+      city: "Rewa",
+      districts: {
+        486001: "Rewa",
+      },
+    },
+    // Chhattisgarh Cities
+    491: {
+      state: "Chhattisgarh",
+      districts: {
+        491001: "Durg",
+        491441: "Rajnandgaon",
+      },
+    },
+    493: {
+      state: "Chhattisgarh",
+      city: "Dhamtari",
+      districts: {
+        493773: "Dhamtari",
+      },
+    },
+    492: {
+      state: "Chhattisgarh",
+      city: "Raipur",
+      districts: {
+        "492001-492099": "Raipur",
+      },
+    },
+    495: {
+      state: "Chhattisgarh",
+      city: "Bilaspur",
+      districts: {
+        495001: "Bilaspur",
+      },
+    },
+    494: {
+      state: "Chhattisgarh",
+      city: "Jagdalpur",
+      districts: {
+        494001: "Jagdalpur",
+      },
+    },
+    497: {
+      state: "Chhattisgarh",
+      city: "Baikunthpur",
+      districts: {
+        497335: "Baikunthpur",
+      },
+    },
+    // Maharashtra Cities
+    440: {
+      state: "Maharashtra",
+      city: "Nagpur",
+      districts: {
+        "440001-440037": "Nagpur",
+      },
+    },
+    424: {
+      state: "Maharashtra",
+      city: "Chalisgaon",
+      districts: {
+        424101: "Chalisgaon",
+      },
+    },
+    411: {
+      state: "Maharashtra",
+      city: "Pune",
+      districts: {
+        "411001-411062": "Pune",
+      },
+    },
+    444: {
+      state: "Maharashtra",
+      city: "Amravati",
+      districts: {
+        444601: "Amravati",
+        444602: "Amravati",
+        444603: "Amravati",
+      },
+    },
+    400: {
+      state: "Maharashtra",
+      city: "Mumbai",
+      districts: {
+        "400001-400104": "Mumbai",
+      },
+    },
+    281: {
+      state: "Uttar Pradesh",
+      city: "Mathura",
+      districts: {
+        281001: "Mathura",
+      },
+    },
+  };
+  // Memoized helper functions
+  const memoizedGetLocationFromPincode = (pincode) => {
+    if (!pincode || pincode.length !== 6) return null;
+
+    const areaCode = pincode.substring(0, 3);
+    const location = pincodeData[areaCode];
+
+    if (!location) return null;
+
+    const numericPincode = parseInt(pincode);
+    let district = null;
+    let city = location.city;
+
+    // Find matching district based on pincode range
+    for (const [range, districtName] of Object.entries(location.districts)) {
+      const [start, end] = range.split("-").map((p) => parseInt(p));
+      if (!end) {
+        // Single pincode match
+        if (parseInt(range) === numericPincode) {
+          district = districtName;
+          // If city isn't set at the area code level, try to determine from district name
+          if (!city) {
+            city = districtName.replace(" City", "").replace(" Town", "");
+          }
+          break;
+        }
+      } else {
+        // Pincode range match
+        if (numericPincode >= start && numericPincode <= end) {
+          district = districtName;
+          break;
+        }
+      }
+    }
+
+    return {
+      state: location.state,
+      city: city,
+      district: district,
+    };
+  };
+
+  const extractPincodeFromAddress = (address) => {
+    const pincodeMatch = address.match(/\b\d{6}\b/);
+    return pincodeMatch ? pincodeMatch[0] : null;
+  };
+
+  // Optimize handlers with useCallback
+  const handleInputChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+
+      if (name === "mobileNumber" && !/^\d*$/.test(value)) {
+        return;
+      }
+
+      setFormData((prev) => {
+        const newData = { ...prev, [name]: value };
+
+        // Auto-update dependent fields
+        if (name === "localPanchayat") {
+          newData.subLocalPanchayat = "";
+        } else if (name === "regionalAssembly") {
+          newData.localPanchayatName = "";
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        } else if (name === "localPanchayatName") {
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        } else if (name === "gotra") {
+          newData.aakna = "";
+        } else if (name === "isMarried") {
+          // Reset considerSecondMarriage when marital status changes
+          newData.considerSecondMarriage = false;
+          if (value !== "Married") {
+            newData.marriageDate = "";
+          }
+        } else if (name === "state") {
+          // Reset all regional assembly related fields when state changes
+          newData.regionalAssembly = "";
+          newData.localPanchayatName = "";
+          newData.localPanchayat = "";
+          newData.subLocalPanchayat = "";
+        }
+
+        return newData;
+      });
+
+      // Clear field error
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+    },
+    [errors]
+  );
+
+
+
+  const sendWhatsAppInvite = useCallback(async (mobileNumber) => {
+    try {
+      const formData = new URLSearchParams();
+      formData.append('number', mobileNumber);
+      formData.append('message', `Hi! You're invited to join us at Gahoishakti. Click here to log in and get started: https://www.gahoishakti.in/login`);
+  
+       const res = await fetch('https://api.gahoishakti.in/api/whatsapp/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      });
+  
+      const contentType = res.headers.get("content-type");
+  
+      if (!contentType || !contentType.includes("application/json")) {
+        const raw = await res.text();
+        console.error('Unexpected response:', raw);
+        return;
+      }
+  
+      const data = await res.json();
+  
+      if (!data.status) {
+        console.error('Failed to send:', data.message || 'Unknown error');
+      } else {
+        console.log('WhatsApp invite sent successfully');
+      }
+    } catch (err) {
+      console.error('Error sending WhatsApp message:', err);
+    }
+  }, []);
+  
+  
+  const handleFamilyDetailChange = useCallback(
+    (index, field, value) => {
+      // Allow only digits for the mobile number
+      if (field === "mobileNumber" && !/^\d*$/.test(value)) {
+        return;
+      }
+  
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: prev.familyDetails.map((member, i) =>
+          i === index ? { ...member, [field]: value } : member
+        ),
+      }));
+  
+      // Clear any existing error on this field if present
+      if (errors[`familyDetails.${index}.${field}`]) {
+        setErrors((prev) => ({
+          ...prev,
+          [`familyDetails.${index}.${field}`]: "",
+        }));
+      }
+  
+      // Trigger WhatsApp invite only when mobile number reaches 10 digits exactly
+      if (field === "mobileNumber" && value.length === 10) {
+        sendWhatsAppInvite(value);
+      }
+    },
+    [errors, sendWhatsAppInvite]
+  );
+  
+  
+  
+  
+  
+
+  // Optimize add child function
+  const addChild = useCallback(() => {
+    if (
+      formData.familyDetails.filter((member) => member.relation === "Child")
+        .length < MAX_CHILDREN
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: [
+          ...prev.familyDetails,
+          { relation: "Child", name: "", mobileNumber: "", gender: "" },
+        ],
+      }));
+    }
+  }, [formData.familyDetails]);
+
+  // Add a function to add sibling
+  const addSibling = useCallback(() => {
+    if (
+      formData.familyDetails.filter((member) => member.relation === "Sibling")
+        .length < MAX_SIBLINGS
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        familyDetails: [
+          ...prev.familyDetails,
+          {
+            relation: "Sibling",
+            name: "",
+            mobileNumber: "",
+            gender: "",
+            age: "",
+            occupation: "",
+            education: "",
+            maritalStatus: "",
+            isDependent: false,
+          },
+        ],
+      }));
+    }
+  }, [formData.familyDetails]);
+
+  // Add remove functions
+  const removeChild = useCallback((indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyDetails: prev.familyDetails.filter(
+        (_, index) => index !== indexToRemove
+      ),
+    }));
+  }, []);
+
+  const removeSibling = useCallback((indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      familyDetails: prev.familyDetails.filter(
+        (_, index) => index !== indexToRemove
+      ),
+    }));
+  }, []);
+
+  // Update validateCurrentStep function
+  const validateCurrentStep = useCallback(() => {
+    const newErrors = validateStep(currentStep, formData);
+    setErrors(newErrors);
+    return !hasErrors(newErrors);
+  }, [currentStep, formData]);
+
+  // Function to check if email exists in Strapi backend
+  const checkEmailExists = async (email) => {
+    try {
+      const baseUrl = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+      const url = `${baseUrl}/api/registration-pages?filters[personal_information][email_address]=${encodeURIComponent(email)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check email existence');
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length > 0;
+
+    } catch (error) {
+      console.error('Error checking email existence:', error);
+      throw error;
+    }
+  };
+
+  // Function to check if mobile number exists in Strapi backend
+  const checkMobileExists = async (mobileNumber) => {
+    try {
+      const baseUrl = import.meta.env.VITE_PUBLIC_STRAPI_API_URL;
+      const url = `${baseUrl}/api/registration-pages?filters[personal_information][mobile_number]=${encodeURIComponent(mobileNumber)}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check mobile number existence');
+      }
+
+      const data = await response.json();
+      return data.data && data.data.length > 0;
+
+    } catch (error) {
+      console.error('Error checking mobile number existence:', error);
+      throw error;
+    }
+  };
+
+  // Update handleNext to include mobile number check
+  const handleNext = async () => {
+    setSubmitted(true);
+    setLoading(true);
+    
+    try {
+      // Only validate email and mobile on the first step
+      if (currentStep === 0) {
+        // Check email duplication
+        if (formData.email) {
+          const emailExists = await checkEmailExists(formData.email);
+          if (emailExists) {
+            setErrors(prev => ({
+              ...prev,
+              email: "This email address is already registered. Please use a different email."
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Check mobile number duplication only if not coming from login
+        if (!location.state?.fromLogin && formData.mobileNumber) {
+          const mobileExists = await checkMobileExists(formData.mobileNumber);
+          if (mobileExists) {
+            setErrors(prev => ({
+              ...prev,
+              mobileNumber: "This mobile number is already registered. Please use a different number."
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+      }
+      
+      // Rest of the handleNext function stays the same...
+      if (currentStep === formSteps.length - 1) {
+        if (!formData.confirmAccuracy) {
+          setSubmitted(true);
+          setLoading(false);
+          return;
+        }
+        handleSubmit();
+        return;
+      }
+      
+      if (validateCurrentStep()) {
+        setCurrentStep(currentStep + 1);
+        setSubmitted(false);
+        window.scrollTo(0, 0);
+      } else {
+        const firstErrorField = document.querySelector(".error-field");
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    } catch (error) {
+      console.error("Error in handleNext:", error);
+      setErrors(prev => ({
+        ...prev,
+        [currentStep === 0 ? 'mobileNumber' : 'email']: "Unable to verify. Please try again."
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      setSubmitted(false);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const uploadImage = async (file) => {
+    if (!file) return null;
+
+    const formData = new FormData();
+    formData.append("files", file);
+
+    try {
+      console.log("Uploading image...");
+      const response = await fetch(
+        `${import.meta.env.VITE_PUBLIC_STRAPI_API_URL}/api/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Upload failed:", response.status);
+        return null;
+      }
+
+      const result = await response.json();
+      console.log("Image upload response:", result);
+
+      if (result && result.length > 0) {
+        const uploadedImage = result[0];
+        return uploadedImage.id;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const displayPictureId = formData.display_picture
+        ? await uploadImage(formData.display_picture)
+        : null;
+
+      const strapiData = formatFormData(
+        {
+          ...formData,
+          gotraList: Object.keys(gotraAaknaMap),
+          aaknaList: getAaknaOptions(),
+          localPanchayatList: formData.regionalAssembly
+            ? LOCAL_PANCHAYATS[formData.regionalAssembly] || []
+            : [],
+          subLocalPanchayatList: formData.localPanchayat
+            ? SUB_LOCAL_PANCHAYATS[formData.localPanchayat] || []
+            : [],
+        },
+        displayPictureId
+      );
+
+      const response = await fetch(
+        `${API_BASE}/api/registration-pages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ data: strapiData }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error:", errorData);
+        throw new Error(
+          errorData.error?.message ||
+            errorData.error?.details?.errors?.[0]?.message ||
+            "Failed to submit form"
+        );
+      }
+
+      const result = await response.json();
+      console.log("Form submitted successfully:", result);
+
+      // Extract gahoi code from the response
+      const gahoiCode = result.data?.attributes?.gahoi_code || strapiData.gahoi_code;
+      
+      if (!gahoiCode) {
+        throw new Error("Gahoi code not found in response");
+      }
+  // Clear progress after successful submission
+  clearProgress();
+      
+      showSuccessMessage(gahoiCode);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert(`Failed to submit form: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Separate function for showing success message
+  const showSuccessMessage = (gahoiCode) => {
+    const successPopup = document.createElement("div");
+    successPopup.className =
+      "fixed inset-0 flex items-center justify-center z-50";
+    successPopup.innerHTML = `
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4 relative z-10 border-2 border-[#FD7D01]">
+        <div class="text-center">
+          <div class="flex justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#FD7D01]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Success!</h2>
+          <p class="text-gray-600 mb-2">Registration successful!</p>
+          <p class="text-gray-600 mb-2">Your Gahoi code is:</p>
+          <p class="text-xl font-bold text-[#FD7D01] mb-6">${gahoiCode}</p>
+          <div class="w-full bg-gray-200 h-2 rounded-full mt-4">
+            <div class="bg-[#FD7D01] h-2 rounded-full" style="width: 0%; transition: width 2s ease-in-out;" id="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(successPopup);
+    const progressBar = document.getElementById("progress-bar");
+
+    // Send WhatsApp message
+    const sendWhatsAppMessage = async () => {
+      try {
+        const mobileNumber = formData.mobileNumber.toString().replace(/\D/g, '');
+        const numberWithCountryCode = mobileNumber.startsWith('91') ? mobileNumber : `91${mobileNumber}`;
+        
+        
+        const response = await fetch('https://api.gahoishakti.in/api/send-sms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            number: numberWithCountryCode,
+            message: `Thank you for registering with Gahoi Shakti! Your Gahoi code is: ${gahoiCode}`,
+          }),
+        });
+
+        const data = await response.json();
+        console.log('WhatsApp API Response (via backend):', data);
+
+        if (!data.status) {
+          console.warn('WhatsApp API reported failure:', data.message);
+        }
+      } catch (error) {
+        console.error('Error sending WhatsApp message via backend:', error);
+      }
+    };
+
+    // Send WhatsApp message immediately
+    sendWhatsAppMessage();
+
+    setTimeout(() => {
+      progressBar.style.width = "100%";
+    }, 100);
+
+    setTimeout(() => {
+      document.body.removeChild(successPopup);
+      window.location.href = "/";
+    }, 6500);
+  };
+
+  const hasError = (fieldName) => {
+    return submitted && errors[fieldName];
+  };
+
+  const hasFamilyError = (index, field) => {
+    return submitted && errors[`familyDetails.${index}.${field}`];
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Existing fields */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {t('registration.personalInfo.name')}
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("name")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  placeholder={t('registration.personalInfo.namePlaceholder')}
+                />
+                {renderError("name")}
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                  </svg>
+                  {t('registration.personalInfo.mobile')}
+                </label>
+                <input
+                  type="tel"
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 ${
+                    hasError("mobileNumber")
+                      ? "border-red-500 bg-red-50 error-field"
+                      : "border-gray-300"
+                  }`}
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder= {t('registration.personalInfo.mobilePlaceholder')}
+                  disabled={location.state?.fromLogin}
+                />
+                {hasError("mobileNumber") && (
+                  <p className="text-red-500 text-xs">{errors.mobileNumber}</p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <label className=" text-sm font-medium text-gray-700 flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2 text-red-700"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -4561,7 +10796,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
 
     if (formData.district === "Satna") {
       if (formData.regionalAssembly === "Vindhya Regional Assembly" && formData.localPanchayatName === "Gahoi Vaishya Panchayat" && formData.localPanchayat === "Satna") 
-        return ["Satna", "Nayagaon Chitrkoot"];
+        return ["Satna", "Nayagaon Chitrakoot"];
     }
 
 
@@ -4756,7 +10991,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
   // Update the regional information section to use filtered dropdowns
   const renderRegionalInformation = () => (
     <div className="md:col-span-2 mt-6 mb-4">
-      <div className="flex items-center space-x-2 mb-4 pb-2 border-b border-gray-200">
+      <div className="flex items-center space-x-2 mb-4 pb-2 border-gray-200">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5 text-red-700"
@@ -5190,8 +11425,8 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                       {localBody}
                     </option>
                   ))}
-                </>
-                 ) : formData.district === "Seoni" ? (
+                   </>
+                    ) : formData.district === "Seoni" ? (
                 <>
                   {[...SEONI_LOCAL_BODIES.NAGAR_PALIKA, ...SEONI_LOCAL_BODIES.JANPAD_PANCHAYAT].map((localBody, index) => (
                     <option key={index} value={localBody}>
@@ -5483,7 +11718,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                   {panchayat}
                 </option>
               ))
-            ) : formData.city && MORENA_GRAM_PANCHAYATS[formData.city] ? (
+               ) : formData.city && MORENA_GRAM_PANCHAYATS[formData.city] ? (
               MORENA_GRAM_PANCHAYATS[formData.city].map((panchayat, index) => (
                 <option key={index} value={panchayat}>
                   {panchayat}
