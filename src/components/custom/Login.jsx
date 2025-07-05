@@ -154,14 +154,14 @@ const Login = () => {
   });
   const [isCheckingUser, setIsCheckingUser] = useState(false);
 
-  // Add state for saved registration data
-  const [hasSavedRegistration, setHasSavedRegistration] = useState(false);
-  
   // Check for saved registration on mount
   useEffect(() => {
     const savedFormData = localStorage.getItem('registrationFormData');
     const savedStep = localStorage.getItem('registrationCurrentStep');
-    setHasSavedRegistration(!!savedFormData && !!savedStep);
+    if (savedFormData && savedStep) {
+      // We'll handle this in the verifyOTP success callback
+      console.log('Found saved registration data');
+    }
   }, []);
 
   React.useEffect(() => {
@@ -445,89 +445,62 @@ const Login = () => {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // Verify OTP function
-  const verifyOTP = useCallback(async () => {
-    try {
-      const response = await fetch('https://api.gahoishakti.in/api/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          number: formData.mobileNumber,
-          otp: formData.otp,
-        }),
+  // Define verifyOTP inside the component where it's used
+  const verifyOTP = async () => {
+    const response = await fetch(`${API_BASE}/api/verify-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ 
+        mobileNumber: formData.mobileNumber, 
+        otp: formData.otp 
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to verify OTP');
+    }
+
+    const data = await response.json();
+    
+    // Check for saved registration data after successful OTP verification
+    const savedFormData = localStorage.getItem('registrationFormData');
+    const savedStep = localStorage.getItem('registrationCurrentStep');
+    
+    if (savedFormData && savedStep) {
+      // Show resume registration dialog
+      const result = await Swal.fire({
+        title: t('login.otpVerified'),
+        text: t('login.savedRegistrationFound'),
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: t('login.resumeRegistration'),
+        cancelButtonText: t('login.startNew'),
+        confirmButtonColor: '#FD7D01',
+        cancelButtonColor: '#6B7280',
       });
 
-      const data = await response.json();
-      console.log('OTP verification response:', data);
-
-      if (data.success) {
-        // Update process steps
-        const updatedSteps = processSteps.map(step => {
-          if (step.id <= 2) {
-            return { ...step, completed: true };
-          }
-          return step;
-        });
-        setProcessSteps(updatedSteps);
-
-        // Store verified mobile number
-        localStorage.setItem('verifiedMobile', formData.mobileNumber);
-
-        // Check for saved registration data
-        const savedFormData = localStorage.getItem('registrationFormData');
-        const savedStep = localStorage.getItem('registrationCurrentStep');
-
-        if (savedFormData && savedStep) {
-          // Show success message with resume option
-          Swal.fire({
-            title: t('login.otpVerified'),
-            text: t('login.savedRegistrationFound'),
-            icon: 'success',
-            showCancelButton: true,
-            confirmButtonText: t('login.resumeRegistration'),
-            cancelButtonText: t('login.startNew'),
-            confirmButtonColor: '#FD7D01',
-            cancelButtonColor: '#6B7280',
-          }).then((result) => {
-            if (result.isConfirmed) {
-              handleResumeRegistration();
-            } else {
-              // Clear saved data and start new registration
-              localStorage.removeItem('registrationFormData');
-              localStorage.removeItem('registrationCurrentStep');
-              navigate('/registration', { 
-                state: { 
-                  fromLogin: true,
-                  mobileNumber: formData.mobileNumber,
-                  processSteps: updatedSteps
-                }
-              });
-            }
-          });
-        } else {
-          // No saved data, proceed to new registration
-          navigate('/registration', { 
-            state: { 
-              fromLogin: true,
-              mobileNumber: formData.mobileNumber,
-              processSteps: updatedSteps
-            }
-          });
-        }
+      if (result.isConfirmed) {
+        handleResumeRegistration();
       } else {
-        setErrors({
-          otp: t('login.invalidOtp')
+        // Clear saved data and start new registration
+        localStorage.removeItem('registrationFormData');
+        localStorage.removeItem('registrationCurrentStep');
+        navigate('/registration', { 
+          state: { 
+            fromLogin: true,
+            mobileNumber: formData.mobileNumber,
+            processSteps
+          }
         });
       }
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      setErrors({
-        otp: t('login.otpVerificationFailed')
-      });
     }
-  }, [formData.mobileNumber, formData.otp, navigate, processSteps, setProcessSteps, t, handleResumeRegistration]);
+
+    return data;
+  };
 
   // MPIN verification
   const verifyMPIN = async (mobileNumber, mpin) => {
@@ -622,12 +595,10 @@ const Login = () => {
       // Step 2: Verify OTP
       setLoading(true);
       try {
-    
-        await verifyOTP();
-     
+        const verificationResponse = await verifyOTP();
         
-        if (response.jwt) {
-          localStorage.setItem('token', `Bearer ${response.jwt}`);
+        if (verificationResponse.jwt) {
+          localStorage.setItem('token', `Bearer ${verificationResponse.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           
           // If user exists, redirect to home page
