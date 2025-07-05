@@ -251,20 +251,36 @@ const RegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(0);
   // Initialize form data with mobile number from location state
   const [formData, setFormData] = useState(() => {
-    const initialData = {
+    // Try to load saved form data from localStorage
+    const savedFormData = localStorage.getItem('registrationFormData');
+    const savedStep = localStorage.getItem('registrationCurrentStep');
+    
+    if (savedFormData) {
+      const parsedData = JSON.parse(savedFormData);
+      // If we have saved data, set the current step
+      if (savedStep) {
+        setCurrentStep(parseInt(savedStep));
+      }
+      return {
+        ...INITIAL_FORM_DATA,
+        ...parsedData,
+        workCategory: parsedData.workCategory || "professional",
+        workType: parsedData.workType || "Professional",
+        employmentType: parsedData.employmentType || "",
+        // Ensure mobile number from login takes precedence
+        mobile_number: location.state?.mobileNumber || parsedData.mobile_number
+      };
+    }
+
+    // If no saved data, use initial data
+    return {
       ...INITIAL_FORM_DATA,
       workCategory: "professional",
       workType: "Professional",
-       employmentType: ""
+      employmentType: "",
+      // Set mobile number from login if available
+      mobile_number: location.state?.mobileNumber
     };
-    
-    // Only set mobile number if it exists in location state
-    if (location.state?.mobileNumber) {
-      initialData.mobile_number = location.state.mobileNumber;
-      console.log("Initial mobile number set:", location.state.mobileNumber);
-    }
-    
-    return initialData;
   });
   
   const [processSteps, setProcessSteps] = useState(PROCESS_STEPS);
@@ -5941,6 +5957,15 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
       }));
     }
   }, [location.state]);
+
+  // Add effect to save form data when it changes
+  useEffect(() => {
+    // Don't save if we're just starting (empty form)
+    if (Object.keys(formData).length > 3) { // Basic validation that we have more than just the initial fields
+      localStorage.setItem('registrationFormData', JSON.stringify(formData));
+      localStorage.setItem('registrationCurrentStep', currentStep.toString());
+    }
+  }, [formData, currentStep]);
 
   return (
     <div
