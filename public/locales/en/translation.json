@@ -142,13 +142,7 @@
     "namePlaceholder": "Enter your full name",
     "personalInfo": {
       "mama": "Mama"
-    },
-    "otpVerified": "OTP Verified Successfully",
-    "savedRegistrationFound": "We found your incomplete registration. Would you like to continue where you left off?",
-    "resumeRegistration": "Continue Registration",
-    "startNew": "Start New",
-    "otpVerificationFailed": "Failed to verify OTP. Please try again.",
-    "invalidOtp": "Invalid OTP. Please check and try again."
+    }
   },
   "latestNews": {
     "meta": {
@@ -1257,11 +1251,12 @@
       "mobileNumber": "Mobile number (optional)",
       "father": "Father",
       "mother": "Mother",
-      "placeholders": {
-        "name": "Enter {{relation}}'s name",
-        "mobile": "{{relation}}'s mobile number"
-      }
-    },
+  "placeholders": {
+    "name": "Enter {{relation}}'s name",
+    "mobile": "{{relation}}'s mobile number"
+  }
+      
+},
     "workInfo": {
       "title": "Work Information",
       "professionalCategory": "Professional Category",
@@ -1278,7 +1273,7 @@
       "limitedLiabilityPartnership": "Limited Liability Partnership (LLP)",
       "other": "Other",
       "professionalEmployee": "Professional/Employee",
-      "businessSizeOptions": {
+  "businessSizeOptions": {
         "micro": "Micro Enterprise",
         "small": "Small Enterprise",
         "medium": "Medium Enterprise",
@@ -1311,13 +1306,15 @@
       },
       "communityRecords": "These details are important for community records and can be useful for various purposes."
     },
-    "finalsubmission": {
+
+     "finalsubmission": {
       "title": "Final Submission",
       "suggestions": "Your Suggestions:",
       "suggestionsPlaceholder": "Please share any suggestions or feedback you may have",
       "confirmAccuracy": "By submitting this form, I confirm that the information provided is accurate to the best of my knowledge.",
       "thankYou": "Thank you for completing the registration form. Your information will be processed shortly."
-    },
+     },
+
     "regionalInfo": {
       "title": "Regional Information",
       "state": "State",
@@ -1373,12 +1370,6 @@
       "invalidPincode": "Please enter a valid pincode",
       "invalidDate": "Please enter a valid date",
       "fileRequired": "Please upload required document"
-    },
-    "resume": {
-      "title": "Resume Registration",
-      "message": "You have an incomplete registration. Would you like to continue where you left off?",
-      "continue": "Continue",
-      "startNew": "Start New Registration"
     }
   },
   "previousMarriage": {

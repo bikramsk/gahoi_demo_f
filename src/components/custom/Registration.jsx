@@ -249,7 +249,89 @@ const GUJARAT_CHAURASI_MAPPING = {
 const RegistrationForm = () => {
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
-  // Initialize form data with mobile number from location state
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
+  
+  const saveProgress = useCallback((data) => {
+    try {
+      sessionStorage.setItem('registrationProgress', JSON.stringify({
+        formData: data,
+        lastSaved: new Date().toISOString(),
+        currentStep: currentStep
+      }));
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  }, [currentStep]);
+  
+  const loadProgress = useCallback(() => {
+    try {
+      const saved = sessionStorage.getItem('registrationProgress');
+      if (saved) {
+        const { formData, lastSaved, currentStep } = JSON.parse(saved);
+        const savedDate = new Date(lastSaved);
+        const now = new Date();
+        const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
+        
+        if (hoursDiff < 24) {
+          return { formData, currentStep };
+        } else {
+          sessionStorage.removeItem('registrationProgress');
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading progress:', error);
+      return null;
+    }
+  }, []);
+  const ResumeDialog = () => {
+    if (!showResumeDialog) return null;
+  
+    return ReactDOM.createPortal(
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+          <h3 className="text-lg font-semibold mb-4">{t('registration.resumeDialog.title', 'Resume Registration?')}</h3>
+          <p className="mb-6">{t('registration.resumeDialog.message', 'We found your previously saved progress. Would you like to continue where you left off?')}</p>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={() => {
+                setShowResumeDialog(false);
+                clearProgress();
+              }}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              {t('registration.resumeDialog.startNew', 'Start New')}
+            </button>
+            <button
+              onClick={() => {
+                const savedProgress = loadProgress();
+                if (savedProgress) {
+                  setFormData(savedProgress.formData);
+                  setCurrentStep(savedProgress.currentStep);
+                }
+                setShowResumeDialog(false);
+              }}
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+            >
+              {t('registration.resumeDialog.resume', 'Resume')}
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  };
+  
+  const clearProgress = useCallback(() => {
+    try {
+      sessionStorage.removeItem('registrationProgress');
+    } catch (error) {
+      console.error('Error clearing progress:', error);
+    }
+  }, []);
+
+
+
   const [formData, setFormData] = useState(() => {
     const initialData = {
       ...INITIAL_FORM_DATA,
@@ -284,6 +366,18 @@ const RegistrationForm = () => {
       }));
     }
   }, []); 
+  useEffect(() => {
+    const savedProgress = loadProgress();
+    if (savedProgress) {
+      setShowResumeDialog(true);
+    }
+  }, [loadProgress]);
+  
+  useEffect(() => {
+    if (formData !== INITIAL_FORM_DATA) {
+      saveProgress(formData);
+    }
+  }, [formData, saveProgress]);
 
   const indianCities = [
     "Ahmedabad",
@@ -1515,7 +1609,8 @@ const RegistrationForm = () => {
       if (!gahoiCode) {
         throw new Error("Gahoi code not found in response");
       }
-
+  // Clear progress after successful submission
+  clearProgress();
       
       showSuccessMessage(gahoiCode);
     } catch (error) {
@@ -5972,7 +6067,6 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
         </svg>
         Back to Home
       </button>
-
       <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 to-slate-800/70"></div>
       <div className="w-full max-w-4xl mx-auto rounded-xl shadow-lg overflow-hidden relative z-10 mt-8 bg-white border border-[#FD7D01]">
         {/* Header */}
@@ -6043,7 +6137,8 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                     ? "border-red-700 text-red-700"
                     : index < currentStep
                     ? "border-green-500 text-green-700"
-                    : "border-transparent text-gray-500"                } whitespace-nowrap`}
+                    : "border-transparent text-gray-500"
+                } whitespace-nowrap`}
                 onClick={() => index <= currentStep && setCurrentStep(index)}
                 disabled={index > currentStep}
               >
@@ -6069,6 +6164,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           </div>
         </div>
       </div>
+      <ResumeDialog />
     </div>
   );
 };
