@@ -147,7 +147,6 @@ const Login = () => {
   ]);
   const [currentStep, setCurrentStep] = useState(1);
   const [countdown, setCountdown] = useState(0);
-  const [showMpinCreation, setShowMpinCreation] = useState(false);
   const [mpinData, setMpinData] = useState({
     mpin: '',
     confirmMpin: ''
@@ -447,59 +446,96 @@ const Login = () => {
 
   // Define verifyOTP inside the component where it's used
   const verifyOTP = async () => {
-    const response = await fetch(`${API_BASE}/api/verify-otp`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ 
-        mobileNumber: formData.mobileNumber, 
-        otp: formData.otp 
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to verify OTP');
-    }
-
-    const data = await response.json();
-    
-    // Check for saved registration data after successful OTP verification
-    const savedFormData = localStorage.getItem('registrationFormData');
-    const savedStep = localStorage.getItem('registrationCurrentStep');
-    
-    if (savedFormData && savedStep) {
-      // Show resume registration dialog
-      const result = await Swal.fire({
-        title: t('login.otpVerified'),
-        text: t('login.savedRegistrationFound'),
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonText: t('login.resumeRegistration'),
-        cancelButtonText: t('login.startNew'),
-        confirmButtonColor: '#FD7D01',
-        cancelButtonColor: '#6B7280',
+    try {
+      const response = await fetch(`${API_BASE}/api/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          mobileNumber: formData.mobileNumber, 
+          otp: formData.otp 
+        })
       });
 
-      if (result.isConfirmed) {
-        handleResumeRegistration();
-      } else {
-        // Clear saved data and start new registration
-        localStorage.removeItem('registrationFormData');
-        localStorage.removeItem('registrationCurrentStep');
-        navigate('/registration', { 
-          state: { 
-            fromLogin: true,
-            mobileNumber: formData.mobileNumber,
-            processSteps
-          }
-        });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to verify OTP');
       }
-    }
 
-    return data;
+      const data = await response.json();
+      
+      if (data.success) {
+        // Update process steps
+        const updatedSteps = processSteps.map(step => {
+          if (step.id <= 2) {
+            return { ...step, completed: true };
+          }
+          return step;
+        });
+        setProcessSteps(updatedSteps);
+
+        // Store verified mobile number
+        localStorage.setItem('verifiedMobile', formData.mobileNumber);
+        
+        // Check for saved registration data
+        const savedFormData = localStorage.getItem('registrationFormData');
+        const savedStep = localStorage.getItem('registrationCurrentStep');
+        
+        if (savedFormData && savedStep) {
+          // Show resume registration dialog
+          const result = await Swal.fire({
+            title: t('login.otpVerified'),
+            text: t('login.savedRegistrationFound'),
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: t('login.resumeRegistration'),
+            cancelButtonText: t('login.startNew'),
+            confirmButtonColor: '#FD7D01',
+            cancelButtonColor: '#6B7280',
+          });
+
+          if (result.isConfirmed) {
+            navigate('/registration', { 
+              state: { 
+                fromLogin: true,
+                mobileNumber: formData.mobileNumber,
+                processSteps: updatedSteps,
+                resumeRegistration: true
+              }
+            });
+          } else {
+            // Clear saved data and start new registration
+            localStorage.removeItem('registrationFormData');
+            localStorage.removeItem('registrationCurrentStep');
+            navigate('/registration', { 
+              state: { 
+                fromLogin: true,
+                mobileNumber: formData.mobileNumber,
+                processSteps: updatedSteps
+              }
+            });
+          }
+        } else {
+          // No saved data, proceed to new registration
+          navigate('/registration', { 
+            state: { 
+              fromLogin: true,
+              mobileNumber: formData.mobileNumber,
+              processSteps: updatedSteps
+            }
+          });
+        }
+      } else {
+        throw new Error(t('login.invalidOtp'));
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      throw error;
+    }
   };
 
   // MPIN verification
@@ -550,14 +586,9 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
-      
-        
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          
-          // Redirect to homepage 
-        
           navigate('/', { replace: true });
           return;
         }
@@ -572,7 +603,7 @@ const Login = () => {
       return;
     }
 
-    // Send OTP Flow (both new users and existing users choosing OTP)
+    // Send OTP Flow
     if (!showOtpInput) {
       setLoading(true);
       try {
@@ -591,28 +622,11 @@ const Login = () => {
       } finally {
         setLoading(false);
       }
-    } else if (showOtpInput && !showMpinCreation) {
-      // Step 2: Verify OTP
+    } else {
+      // Verify OTP
       setLoading(true);
       try {
-        const verificationResponse = await verifyOTP();
-        
-        if (verificationResponse.jwt) {
-          localStorage.setItem('token', `Bearer ${verificationResponse.jwt}`);
-          localStorage.setItem('verifiedMobile', formData.mobileNumber);
-          
-          // If user exists, redirect to home page
-          if (userExists) {
-            navigate('/', { replace: true });
-            return;
-          }
-          
-          // For new users, show MPIN creation
-          if (!userExists) {
-            setShowMpinCreation(true);
-            setCurrentStep(3);
-          }
-        }
+        await verifyOTP();
       } catch (error) {
         console.error('[DEBUG] OTP verification failed:', error);
         setErrors({
@@ -620,29 +634,6 @@ const Login = () => {
         });
       } finally {
         setLoading(false);
-      }
-    } else if (showMpinCreation) {
-      // MPIN creation for new users - No need to check user existence again
-      if (validateMpin()) {
-        setLoading(true);
-        try {
-          await createMpin(mpinData.mpin);
-          // After MPIN creation, redirect to registration
-          navigate('/registration', { 
-            state: { 
-              mobileNumber: formData.mobileNumber,
-              fromLogin: true,
-              processSteps: processSteps 
-            } 
-          });
-        } catch (error) {
-          console.error('MPIN creation error:', error);
-          setErrors({
-            mpin: error.message || 'Failed to create MPIN'
-          });
-        } finally {
-          setLoading(false);
-        }
       }
     }
   };
