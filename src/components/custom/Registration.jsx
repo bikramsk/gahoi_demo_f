@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";import { useLocation } from "react-router-dom";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import PhotoUpload from "./PhotoUpload";
 import {
