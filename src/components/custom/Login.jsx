@@ -84,7 +84,7 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 
     // Store mobile number for verification
   
-    sessionStorage.setItem('otpMobile', mobileNumber);
+      sessionStorage.setItem('otpMobile', mobileNumber);
 
     return data;
   } catch (error) {
