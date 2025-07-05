@@ -522,14 +522,33 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
-      
         
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           
-          // Redirect to homepage 
-        
+          // Check for incomplete registration
+          const savedProgress = sessionStorage.getItem('registrationProgress');
+          if (savedProgress) {
+            const { lastSaved } = JSON.parse(savedProgress);
+            const savedDate = new Date(lastSaved);
+            const now = new Date();
+            const hoursDiff = (now - savedDate) / (1000 * 60 * 60);
+            
+            if (hoursDiff < 24) {
+              // If there's recent progress, go to registration
+              navigate('/registration', { 
+                state: { 
+                  mobileNumber: formData.mobileNumber,
+                  fromLogin: true,
+                  processSteps: processSteps 
+                } 
+              });
+              return;
+            }
+          }
+          
+          // If no incomplete registration, go to homepage
           navigate('/', { replace: true });
           return;
         }
