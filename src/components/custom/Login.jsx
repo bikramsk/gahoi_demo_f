@@ -50,7 +50,7 @@ www.gahoishakti.in`;
     }
 
     const data = await response.json();
-    console.log('WhatsApp API Response:', data);
+    
 
     if (!data.status) {
       throw new Error(data.message || 'Failed to send reminder message');
@@ -65,7 +65,7 @@ www.gahoishakti.in`;
 
 const sendWhatsAppOTP = async (mobileNumber) => {
   try {
-    console.log('[DEBUG] Sending OTP - Mobile:', mobileNumber);
+    
     const response = await fetch('https://api.gahoishakti.in/api/send-whatsapp-otp', {
       method: 'POST',
       headers: {
@@ -76,14 +76,14 @@ const sendWhatsAppOTP = async (mobileNumber) => {
     });
 
     const data = await response.json();
-    console.log('[DEBUG] Send OTP Response:', data);
+
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to send OTP');
     }
 
     // Store mobile number for verification
-    console.log('[DEBUG] Storing mobile number:', mobileNumber);
+  
     sessionStorage.setItem('otpMobile', mobileNumber);
 
     return data;
@@ -96,14 +96,9 @@ const sendWhatsAppOTP = async (mobileNumber) => {
 const verifyOTP = async (mobileNumber, otp) => {
   try {
     const storedMobile = sessionStorage.getItem('otpMobile');
-    console.log('[DEBUG] Verify OTP - Stored Mobile:', storedMobile);
-    console.log('[DEBUG] Verify OTP - Current Mobile:', mobileNumber);
-    console.log('[DEBUG] Verify OTP - OTP:', otp);
 
     if (storedMobile !== mobileNumber) {
-      console.log('[DEBUG] Mobile number mismatch detected');
-      console.log('[DEBUG] Stored:', storedMobile);
-      console.log('[DEBUG] Current:', mobileNumber);
+    
       throw new Error('Mobile number mismatch. Please request a new OTP.');
     }
 
@@ -120,7 +115,7 @@ const verifyOTP = async (mobileNumber, otp) => {
     });
 
     const data = await response.json();
-    console.log('[DEBUG] Verify OTP Response:', data);
+ 
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to verify OTP');
@@ -274,7 +269,7 @@ const Login = () => {
           });
 
           const result = await response.json();
-          console.log('User status check result:', result);
+         
 
           if (result.exists) {
             // Existing user - must have MPIN
@@ -471,7 +466,7 @@ const Login = () => {
       // Send reminder message 
       const registrationReminderTimeout = setTimeout(async () => {
         try {
-          console.log('Checking registration status...');
+         
           const token = localStorage.getItem('token');
           const registrationResponse = await fetch(
             `${API_BASE}/api/registration-pages?filters[personal_information][mobile_number][$eq]=${mobileNumber}`,
@@ -527,14 +522,14 @@ const Login = () => {
       setLoading(true);
       try {
         const response = await verifyMPIN(formData.mobileNumber, formData.mpin);
-        console.log('MPIN verification response:', response);
+      
         
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);
           localStorage.setItem('verifiedMobile', formData.mobileNumber);
           
           // Redirect to homepage 
-          console.log('MPIN verified, redirecting to homepage');
+        
           navigate('/', { replace: true });
           return;
         }
@@ -572,10 +567,9 @@ const Login = () => {
       // Step 2: Verify OTP
       setLoading(true);
       try {
-        console.log('[DEBUG] Starting OTP verification');
-        console.log('[DEBUG] Form Data:', formData);
+    
         const response = await verifyOTP(formData.mobileNumber, formData.otp);
-        console.log('[DEBUG] Verification successful:', response);
+     
         
         if (response.jwt) {
           localStorage.setItem('token', `Bearer ${response.jwt}`);

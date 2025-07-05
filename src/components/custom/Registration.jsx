@@ -1625,7 +1625,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Full Name
+                  {t('registration.personalInfo.name')}
                 </label>
                 <input
                   type="text"
@@ -1637,7 +1637,7 @@ const RegistrationForm = () => {
                       ? "border-red-500 bg-red-50 error-field"
                       : "border-gray-300"
                   }`}
-                  placeholder="Enter your full name"
+                  placeholder={t('registration.personalInfo.namePlaceholder')}
                 />
                 {renderError("name")}
               </div>
@@ -1652,7 +1652,7 @@ const RegistrationForm = () => {
                   >
                     <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                   </svg>
-                  Mobile Number
+                  {t('registration.personalInfo.mobile')}
                 </label>
                 <input
                   type="tel"
@@ -1667,7 +1667,7 @@ const RegistrationForm = () => {
                   pattern="[0-9]*"
                   inputMode="numeric"
                   maxLength={10}
-                  placeholder="10-digit mobile number"
+                  placeholder= {t('registration.personalInfo.mobilePlaceholder')}
                   disabled={location.state?.fromLogin}
                 />
                 {hasError("mobileNumber") && (
@@ -1689,7 +1689,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Email Address
+                  {t('registration.personalInfo.email')}
                 </label>
                 <input
                   type="email"
@@ -1701,7 +1701,7 @@ const RegistrationForm = () => {
                       ? "border-red-500 bg-red-50 error-field"
                       : "border-gray-300"
                   }`}
-                  placeholder="Enter your email address"
+                  placeholder={t('registration.personalInfo.emailPlaceholder')}
                 />
                 {hasError("email") && (
                   <p className="text-red-500 text-xs">{errors.email}</p>
@@ -1722,34 +1722,30 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Gender
+                  {t('registration.personalInfo.gender')}
                 </label>
                 <div className="flex items-center space-x-8 px-4 py-2.5 border border-gray-300 rounded-lg bg-white">
-                  <label className="inline-flex items-center cursor-pointer">
+                  <label className="inline-flex items-center">
                     <input
                       type="radio"
                       name="gender"
-                      value="Male"
-                      checked={formData.gender === "Male"}
-                      onChange={(e) =>
-                        setFormData({ ...formData, gender: e.target.value })
-                      }
-                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                      value="male"
+                      checked={formData.gender === "male"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Male</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.male')}</span>
                   </label>
-                  <label className="inline-flex items-center cursor-pointer">
+                  <label className="inline-flex items-center">
                     <input
                       type="radio"
                       name="gender"
-                      value="Female"
-                      checked={formData.gender === "Female"}
-                      onChange={(e) =>
-                        setFormData({ ...formData, gender: e.target.value })
-                      }
-                      className="h-4 w-4 text-red-700 focus:ring-red-500"
+                      value="female"
+                      checked={formData.gender === "female"}
+                      onChange={handleInputChange}
+                      className="form-radio text-red-500 focus:ring-red-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Female</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.female')}</span>
                   </label>
                 </div>
 
@@ -1773,7 +1769,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Nationality
+                  {t('registration.personalInfo.nationality')}
                   {hasError("nationality") && (
                     <span className="ml-2 text-xs text-red-500">*Required</span>
                   )}
@@ -1799,7 +1795,7 @@ const RegistrationForm = () => {
                       }
                       className="h-4 w-4 text-red-700 focus:ring-red-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Indian</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.personalInfo.indian')}</span>
                   </label>
                   <label className="inline-flex items-center cursor-pointer">
                     <input
@@ -1816,7 +1812,7 @@ const RegistrationForm = () => {
                       className="h-4 w-4 text-red-700 focus:ring-red-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">
-                      Non-Indian
+                    {t('registration.personalInfo.nonIndian')}
                     </span>
                   </label>
                 </div>
@@ -1840,7 +1836,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Are you from Gahoi Community?
+                  {t('registration.personalInfo.isGahoi')}
                 </label>
                 <div
                   className={`flex items-center space-x-8 px-4 py-2.5 border rounded-lg ${
@@ -1860,7 +1856,7 @@ const RegistrationForm = () => {
                       }
                       className="h-4 w-4 text-red-700 focus:ring-red-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Yes</span>
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.yes')}</span>
                   </label>
                   <label className="inline-flex items-center cursor-pointer">
                     <input
@@ -1873,7 +1869,7 @@ const RegistrationForm = () => {
                       }
                       className="h-4 w-4 text-red-700 focus:ring-red-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">No</span>
+                    <span className="ml-2 text-sm text-gray-700">  {t('registration.personalInfo.no')}</span>
                   </label>
                 </div>
                 {hasError("isGahoi") && (
@@ -1903,7 +1899,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Blood Group
+                  {t('registration.personalInfo.bloodGroup')}
                 </label>
                 <select
                   name="bloodGroup"
@@ -1915,7 +1911,7 @@ const RegistrationForm = () => {
                       : "border-gray-300"
                   }`}
                 >
-                  <option value="">Select Blood Group</option>
+                  <option value="">{t('registration.personalInfo.selectBloodGroup')}</option>
                   {BLOOD_GROUPS.map((group) => (
                     <option key={group} value={group}>
                       {group}
@@ -1944,7 +1940,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Date of Birth
+                  {t('registration.personalInfo.dob')}
                 </label>
                 <input
                   type="date"
@@ -1977,7 +1973,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Date of Marriage
+                  {t('registration.personalInfo.dom')}
                 </label>
                 <input
                   type="date"
@@ -2002,7 +1998,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Highest Education
+                  {t('registration.personalInfo.highestEducation')}
                 </label>
                 <input
                   type="text"
@@ -2014,7 +2010,7 @@ const RegistrationForm = () => {
                       ? "border-red-500 bg-red-50 error-field"
                       : "border-gray-300"
                   }`}
-                  placeholder="Enter your highest education"
+                  placeholder= {t('registration.personalInfo.highestEducationPlaceholder')}
                 />
                 {hasError("education") && (
                   <p className="text-red-500 text-xs">{errors.education}</p>
@@ -2036,7 +2032,7 @@ const RegistrationForm = () => {
                       clipRule="evenodd"
                     />
                   </svg>
-                  Gotra
+                  {t('registration.personalInfo.gotra')}
                 </label>
                 <select
                   name="gotra"
@@ -2048,7 +2044,7 @@ const RegistrationForm = () => {
                       : "border-gray-300"
                   }`}
                 >
-                  <option value="">Select Gotra</option>
+                  <option value=""> {t('registration.personalInfo.selectGotra')}</option>
                   {[
                     "Vasar/Vastil/Vasal",
                     "Gol",
@@ -2087,7 +2083,7 @@ const RegistrationForm = () => {
                   >
                     <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
                   </svg>
-                  Aakna
+                  {t('registration.personalInfo.aakna')}
                 </label>
                 <select
                   name="aakna"
@@ -2100,7 +2096,7 @@ const RegistrationForm = () => {
                   }`}
                   disabled={!formData.gotra}
                 >
-                  <option value="">Select Aakna</option>
+                  <option value="">{t('registration.personalInfo.selectAakna')}</option>
                   {getAaknaOptions().map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -2114,7 +2110,7 @@ const RegistrationForm = () => {
                 )}
                 {!formData.gotra && (
                   <p className="text-gray-500 text-xs mt-2 ml-1 italic">
-                    Select a Gotra first to see available Aakna options
+                    {t('registration.personalInfo.selectGotraFirst')}
                   </p>
                 )}
               </div>
@@ -2140,7 +2136,8 @@ const RegistrationForm = () => {
                   >
                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                   </svg>
-                  Parents Information
+                
+                  {t('registration.familyInfo.parentInfo')}
                 </h3>
               </div>
               <div className="p-6">
@@ -2149,7 +2146,8 @@ const RegistrationForm = () => {
                     <div key={index} className="space-y-4">
                       <div className="flex items-center mb-2">
                         <span className="text-sm font-medium text-gray-700">
-                          {member.relation}
+                          
+                          {t(`registration.familyInfo.${member.relation.toLowerCase()}`)}
                         </span>
                         {hasFamilyError(index, "name") && (
                           <span className="ml-2 text-xs text-red-500">
@@ -2174,7 +2172,7 @@ const RegistrationForm = () => {
                               ? "border-red-300 bg-red-50"
                               : "border-gray-300"
                           } rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent`}
-                          placeholder={`Enter ${member.relation}'s name`}
+                          placeholder={t('registration.familyInfo.placeholders.name', { relation: t(`registration.familyInfo.${member.relation.toLowerCase()}`) })}
                         />
                         <div className="flex gap-2">
                           <input
@@ -2191,7 +2189,7 @@ const RegistrationForm = () => {
                             inputMode="numeric"  
                             maxLength={10}
                             className="block flex-1 px-4 py-2.5 text-gray-700 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"                            
-                            placeholder={`${member.relation}'s mobile number`}
+                            placeholder={t('registration.familyInfo.placeholders.mobile', { relation: t(`registration.familyInfo.${member.relation.toLowerCase()}`) })}
                           />
                           {member.mobileNumber?.length === 10 && (
                             <button
@@ -2216,6 +2214,8 @@ const RegistrationForm = () => {
                   ))}
                 </div>
               </div>
+
+
             </div>
 
             
@@ -2231,7 +2231,7 @@ const RegistrationForm = () => {
                   >
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                   </svg>
-                  Siblings Information
+                  {t('registration.familyInfo.siblingsInfo')}
                 </h3>
                 {formData.familyDetails.filter(
                   (member) => member.relation === "Sibling"
@@ -2253,7 +2253,7 @@ const RegistrationForm = () => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Add Sibling
+                    {t('registration.familyInfo.addSibling')}
                   </button>
                 )}
               </div>
@@ -2303,7 +2303,7 @@ const RegistrationForm = () => {
                                 }
                                 className="block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                               >
-                                <option value="">Select Relation</option>
+                                <option value="">{t('registration.familyInfo.selectRelation')}</option>
                                 {SIBLING_RELATION_OPTIONS.map((rel) => (
                                   <option key={rel} value={rel}>
                                     {rel}
@@ -2321,9 +2321,9 @@ const RegistrationForm = () => {
                                   )
                                 }
                                 className="block w-full px-4 py-2.5 text-gray-700 bg-white rounded-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
-                                placeholder={`Sibling ${
+                                placeholder={`${t('registration.familyInfo.siblingName')} ${
                                   siblingIndex + 1
-                                }'s name`}
+                                }`}
                               />
                             </div>
                             <div className="space-y-4">
@@ -2343,7 +2343,7 @@ const RegistrationForm = () => {
                                   pattern="[0-9]*"
                                   inputMode="numeric"
                                   maxLength={10}
-                                  placeholder="Mobile number"
+                                  placeholder={t('registration.familyInfo.mobilePlaceholder')}
                                 />
                                 {member.mobileNumber?.length === 10 && (
                                   <button
@@ -2378,13 +2378,13 @@ const RegistrationForm = () => {
                                     ? "border-red-500 bg-red-50"
                                     : "border-gray-300"
                                 }`}
-                                placeholder="Age"
+                                placeholder={t('registration.familyInfo.age')}
                                 min="0"
                                 max="120"
                               />
                               {hasFamilyError(index, "age") && (
                                 <p className="text-red-500 text-xs">
-                                  Age is required
+                                  {t('registration.familyInfo.ageRequired')}
                                 </p>
                               )}
                             </div>
@@ -2415,7 +2415,7 @@ const RegistrationForm = () => {
                                     className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
                                   />
                                   <span className="ml-2 text-sm text-gray-700">
-                                    Male
+                                    {t('registration.familyInfo.male')}
                                   </span>
                                 </label>
                                 <label className="inline-flex items-center">
@@ -2434,7 +2434,7 @@ const RegistrationForm = () => {
                                     className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
                                   />
                                   <span className="ml-2 text-sm text-gray-700">
-                                    Female
+                                    {t('registration.familyInfo.female')}
                                   </span>
                                 </label>
                               </div>
@@ -2455,10 +2455,10 @@ const RegistrationForm = () => {
                                   : "border-gray-300"
                               }`}
                             >
-                              <option value="">Marital Status</option>
+                              <option value="">{t('registration.familyInfo.maritalStatus')}</option>
                               {MARITAL_STATUS_OPTIONS.map((status) => (
                                 <option key={status} value={status}>
-                                  {status}
+                                  {t(`registration.familyInfo.${status}`)}
                                 </option>
                               ))}
                             </select>
@@ -2484,7 +2484,7 @@ const RegistrationForm = () => {
                   >
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                   </svg>
-                  Marital Status
+                  {t('registration.familyInfo.maritalStatus')}
                 </h3>
               </div>
               <div className="p-6">
@@ -2511,7 +2511,7 @@ const RegistrationForm = () => {
                       }
                       className="h-4 w-4 text-purple-700 focus:ring-purple-500"
                     />
-                        <span className="ml-2 text-sm text-gray-700">{status}</span>
+                        <span className="ml-2 text-sm text-gray-700">{t(`registration.familyInfo.${status}`)}</span>
                   </label>
                     ))}
                   </div>
@@ -2535,7 +2535,7 @@ const RegistrationForm = () => {
                       }
                       className="h-4 w-4 text-purple-700 focus:ring-purple-500"
                     />
-                          <span className="ml-2 text-sm text-gray-700">Married in same community</span>
+                          <span className="ml-2 text-sm text-gray-700">{t('registration.familyInfo.Marriedinsamecommunity')}</span>
                         </label>
                         <label className="inline-flex items-center">
                           <input
@@ -2553,7 +2553,7 @@ const RegistrationForm = () => {
                             }
                             className="h-4 w-4 text-purple-700 focus:ring-purple-500"
                           />
-                          <span className="ml-2 text-sm text-gray-700">Married in other community</span>
+                          <span className="ml-2 text-sm text-gray-700">{t('registration.familyInfo.Marriedinanothercommunity')}</span>
                   </label>
                 </div>
 
@@ -2561,7 +2561,7 @@ const RegistrationForm = () => {
                         <div className="space-y-3">
                           <input
                             type="text"
-                            placeholder="Spouse's Name"
+                            placeholder={t('registration.familyInfo.spouseplaceholder')} 
                             value={formData.spouseName}
                             onChange={(e) =>
                               setFormData((prev) => ({
@@ -2573,7 +2573,7 @@ const RegistrationForm = () => {
                           />
                           <input
                             type="text"
-                            placeholder="Spouse's Mobile Number"
+                            placeholder={t('registration.familyInfo.spouseMobile')}
                             value={formData.spouseMobile}
                             onChange={(e) => {
                               if (!/^\d*$/.test(e.target.value)) return;
@@ -2600,7 +2600,7 @@ const RegistrationForm = () => {
                             }
                             className="block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
                           >
-                            <option value="">Select Spouse's Gotra</option>
+                            <option value="">{t('registration.familyInfo.spouseGotra')}</option>
                             {Object.keys(gotraAaknaMap).map((gotra) => (
                               <option key={gotra} value={gotra}>
                                 {gotra}
@@ -2619,7 +2619,7 @@ const RegistrationForm = () => {
                               }
                               className="block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
                             >
-                              <option value="">Select Spouse's Aakna</option>
+                              <option value="">{t('registration.familyInfo.spouseAakna')}</option>
                               {gotraAaknaMap[formData.spouseGotra]?.map((aakna) => (
                                 <option key={aakna} value={aakna}>
                                   {aakna}
@@ -2635,7 +2635,7 @@ const RegistrationForm = () => {
                   {(formData.isMarried === "Widow/Widower" || formData.isMarried === "Divorced") && (
                     <div className="mt-4 ml-6">
                       <span className="text-sm text-gray-700 block mb-3">
-                        Are you willing to consider a second marriage?
+                        {t('registration.familyInfo.considerSecondMarriage')}
                       </span>
                       <div className="flex space-x-6">
                         <label className="inline-flex items-center">
@@ -2651,7 +2651,7 @@ const RegistrationForm = () => {
                             }
                             className="h-4 w-4 text-purple-700 focus:ring-purple-500"
                           />
-                          <span className="ml-2 text-sm text-gray-700">Yes</span>
+                          <span className="ml-2 text-sm text-gray-700">{t('registration.familyInfo.yes')}</span>
                         </label>
                         <label className="inline-flex items-center">
                           <input
@@ -2666,7 +2666,7 @@ const RegistrationForm = () => {
                             }
                             className="h-4 w-4 text-purple-700 focus:ring-purple-500"
                           />
-                          <span className="ml-2 text-sm text-gray-700">No</span>
+                          <span className="ml-2 text-sm text-gray-700">{t('registration.familyInfo.no')}</span>
                         </label>
                       </div>
                     </div>
@@ -2688,7 +2688,7 @@ const RegistrationForm = () => {
                   >
                     <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
                   </svg>
-                  Spouse Information
+                  {t('registration.familyInfo.spouseInfo')}
                 </h3>
               </div>
               <div className="p-6">
@@ -2708,7 +2708,7 @@ const RegistrationForm = () => {
                         )
                       }
                       className="block w-full px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
-                      placeholder="Enter spouse's name"
+                      placeholder={t('registration.familyInfo.spouseName')}
                     />
                     <div className="flex gap-2">
                       <input
@@ -2725,7 +2725,7 @@ const RegistrationForm = () => {
                             inputMode="numeric" 
                         className="block flex-1 px-4 py-2.5 text-gray-700 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
                         maxLength={10}
-                        placeholder="Spouse's mobile number"
+                        placeholder={t('registration.familyInfo.spouseMobile')}
                       />
                       {member.mobileNumber?.length === 10 && (
                         <button
@@ -2764,7 +2764,7 @@ const RegistrationForm = () => {
                   >
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                   </svg>
-                  Children Information
+                  {t('registration.familyInfo.childrenInfo')}
                 </h3>
                 {formData.familyDetails.filter(
                   (member) => member.relation === "Child"
@@ -2786,7 +2786,7 @@ const RegistrationForm = () => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Add Child
+                    {t('registration.familyInfo.addChild')}
                   </button>
                 )}
               </div>
@@ -2841,7 +2841,7 @@ const RegistrationForm = () => {
                                     ? "border-red-500 bg-red-50"
                                     : "border-gray-300"
                                 }`}
-                                placeholder={`Child ${childIndex + 1}'s name`}
+                                placeholder={t('registration.familyInfo.childName')}
                               />
                               {hasFamilyError(index, "name") && (
                                 <p className="text-red-500 text-xs">
@@ -2869,7 +2869,7 @@ const RegistrationForm = () => {
                                   pattern="[0-9]*"
                                   inputMode="numeric"
                                   maxLength={10}
-                                  placeholder="Mobile number (optional)"
+                                  placeholder={t('registration.familyInfo.mobileNumber')}
                                 />
                                 {member.mobileNumber?.length === 10 && (
                                   <button
@@ -2920,7 +2920,7 @@ const RegistrationForm = () => {
                                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                                 />
                                 <span className="ml-2 text-sm text-gray-700">
-                                  Male
+                                  {t('registration.familyInfo.male')}
                                 </span>
                               </label>
                               <label className="inline-flex items-center">
@@ -2939,7 +2939,7 @@ const RegistrationForm = () => {
                                   className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
                                 />
                                 <span className="ml-2 text-sm text-gray-700">
-                                  Female
+                                  {t('registration.familyInfo.female')}
                                 </span>
                               </label>
                             </div>
@@ -2988,7 +2988,7 @@ const RegistrationForm = () => {
                 <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
               </svg>
               <h2 className="text-lg font-semibold text-gray-800">
-                Work Information
+                {t('registration.workInfo.title')}
               </h2>
             </div>
 
@@ -2996,7 +2996,7 @@ const RegistrationForm = () => {
               {/* Work Type Selection Radio Buttons */}
               <div className="md:col-span-2 space-y-3">
                 <label className="block text-sm font-medium text-gray-700">
-                  Professional Category
+                  {t('registration.workInfo.professionalCategory')}
                 </label>
                 <div className="flex items-center space-x-8 px-4 py-2.5 border border-gray-300 rounded-lg bg-white">
                   <label className="inline-flex items-center cursor-pointer">
@@ -3016,7 +3016,7 @@ const RegistrationForm = () => {
                       }}
                     className="h-4 w-4 text-red-700 focus:ring-red-500"
                   />
-                    <span className="ml-2 text-sm text-gray-700">Business Owner</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.workInfo.businessOwner')}</span>
                 </label>
                   <label className="inline-flex items-center cursor-pointer">
                     <input
@@ -3036,7 +3036,7 @@ const RegistrationForm = () => {
                       }}
                       className="h-4 w-4 text-red-700 focus:ring-red-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Professional/Employee</span>
+                    <span className="ml-2 text-sm text-gray-700">{t('registration.workInfo.professionalEmployee')}</span>
                   </label>
                 </div>
               </div>
@@ -3046,7 +3046,7 @@ const RegistrationForm = () => {
                 <>
                   <div className="space-y-3">
                     <label className="block text-sm font-medium text-gray-700">
-                      Business Size/Classification
+                      {t('registration.workInfo.businessSize')}
                     </label>
                     <select
                       name="businessSize"
@@ -3058,23 +3058,23 @@ const RegistrationForm = () => {
                           : "border-gray-300"
                       }`}
                     >
-                      <option value="">Select Business Size</option>
+                      <option value="">{t('registration.workInfo.selectBusinessSize')}</option>
                       {BUSINESS_SIZES.map((size) => (
                         <option key={size} value={size}>
-                          {size}
+                          {t(`registration.workInfo.businessSizeOptions.${size}`)}
                         </option>
                       ))}
                     </select>
                     {hasError("businessSize") && (
                       <p className="text-red-500 text-xs">
-                        Please select a business size
+                        {t('registration.workInfo.pleaseSelectBusinessSize')}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-3">
                     <label className="block text-sm font-medium text-gray-700">
-                      Business Type
+                      {t('registration.workInfo.businessType')}
                     </label>
                     <select
                       name="businessType"
@@ -3086,24 +3086,24 @@ const RegistrationForm = () => {
                           : "border-gray-300"
                       }`}
                     >
-                      <option value="">Select Business Type</option>
-                      <option value="sole_proprietorship">Sole Proprietorship</option>
-                      <option value="partnership">Partnership</option>
-                      <option value="private_limited">Private Limited Company</option>
-                      <option value="public_limited">Public Limited Company</option>
-                      <option value="llp">Limited Liability Partnership (LLP)</option>
-                      <option value="other">Other</option>
+                      <option value="">{t('registration.workInfo.selectBusinessType')}</option>
+                      <option value="sole_proprietorship">{t('registration.workInfo.soleProprietorship')}</option>
+                      <option value="partnership">{t('registration.workInfo.partnership')}</option>
+                      <option value="private_limited">{t('registration.workInfo.privateLimitedCompany')}</option>
+                      <option value="public_limited">{t('registration.workInfo.publicLimitedCompany')}</option>
+                      <option value="llp">{t('registration.workInfo.limitedLiabilityPartnership')}</option>
+                      <option value="other">{t('registration.workInfo.other')}</option>
                     </select>
                     {hasError("businessType") && (
                       <p className="text-red-500 text-xs">
-                        Please select a business type
+                        {t('registration.workInfo.pleaseSelectBusinessType')}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-3">
                     <label className="block text-sm font-medium text-gray-700">
-                      Years in Business
+                      {t('registration.workInfo.yearsInBusiness')}
                     </label>
                     <select
                       name="businessYears"
@@ -3115,16 +3115,16 @@ const RegistrationForm = () => {
                           : "border-gray-300"
                       }`}
                     >
-                      <option value="">Select Years in Business</option>
-                      <option value="0-2">0-2 years</option>
-                      <option value="3-5">3-5 years</option>
-                      <option value="6-10">6-10 years</option>
-                      <option value="11-20">11-20 years</option>
-                      <option value="20+">More than 20 years</option>
+                      <option value="">{t('registration.workInfo.selectYearsInBusiness')}</option>
+                      <option value="0-2">{t('registration.workInfo.yearsInBusinessOptions.0-2')}</option>
+                      <option value="3-5">{t('registration.workInfo.yearsInBusinessOptions.3-5')}</option>
+                      <option value="6-10">{t('registration.workInfo.yearsInBusinessOptions.6-10')}</option>
+                      <option value="11-20">{t('registration.workInfo.yearsInBusinessOptions.11-20')}</option>
+                      <option value="20+">{t('registration.workInfo.yearsInBusinessOptions.20+')}</option>
                     </select>
                     {hasError("businessYears") && (
                       <p className="text-red-500 text-xs">
-                        Please select years in business
+                        {t('registration.workInfo.pleaseSelectYearsInBusiness')}
                       </p>
                     )}
                   </div>
@@ -3135,10 +3135,10 @@ const RegistrationForm = () => {
               {formData.workCategory === "professional" && (
                 <div className="md:col-span-2 space-y-3">
                     <label className="block text-sm font-medium text-gray-700">
-                    Employment Type
+                    {t('registration.workInfo.employmentType')}
                     </label>
                   <div className="flex flex-col space-y-2">
-                    {["Central Government Employee", "State Government Employee", "Private Sector Employee"].map((type) => (
+                  {EMPLOYMENT_TYPES.map((type) => (
                       <label key={type} className="inline-flex items-center">
                     <input
                           type="radio"
@@ -3153,13 +3153,15 @@ const RegistrationForm = () => {
                           }
                           className="h-4 w-4 text-red-700 focus:ring-red-500"
                         />
-                        <span className="ml-2 text-sm text-gray-700">{type}</span>
+                       <span className="ml-2 text-sm text-gray-700">
+  {t(`registration.workInfo.employmentTypesOptions.${type}`)}
+</span>
                     </label>
                     ))}
                   </div>
                   {hasError("employmentType") && (
                       <p className="text-red-500 text-xs">
-                      Please select your employment type
+                      {t('registration.workInfo.pleaseSelectEmploymentType')}
                       </p>
                     )}
                   </div>
@@ -3183,8 +3185,7 @@ const RegistrationForm = () => {
                   />
                 </svg>
                 <p className="text-xs sm:text-sm text-gray-600">
-                  These details are important for community records and can be
-                  useful for various purposes.
+                  {t('registration.workInfo.communityRecords')}
                 </p>
               </div>
             </div>
@@ -3208,7 +3209,7 @@ const RegistrationForm = () => {
                 />
               </svg>
               <h2 className="text-lg font-semibold text-gray-800">
-                Final Submission
+                {t('registration.finalsubmission.title')}
               </h2>
             </div>
 
@@ -3216,14 +3217,14 @@ const RegistrationForm = () => {
               <div className="bg-slate-50 p-5 rounded-lg border border-slate-200">
                 <div className="mb-3">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Suggestions:
+                    {t('registration.finalsubmission.suggestions')}
                   </label>
                   <textarea
                     name="suggestions"
                     value={formData.suggestions}
                     onChange={handleInputChange}
                     className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200 min-h-[120px]"
-                    placeholder="Please share any suggestions or feedback you may have"
+                    placeholder={t('registration.finalsubmission.suggestionsPlaceholder')}
                   />
                 </div>
               </div>
@@ -3243,7 +3244,7 @@ const RegistrationForm = () => {
                     className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                   />
                   <div className="ml-3 text-sm font-medium text-gray-700">
-                    By submitting this form, I confirm that the information provided is accurate to the best of my knowledge.
+                    {t('registration.finalsubmission.confirmAccuracy')}
                   </div>
                 </div>
                 {submitted && !formData.confirmAccuracy && (
@@ -3252,8 +3253,7 @@ const RegistrationForm = () => {
               </div>
 
               <div className="text-center text-gray-500 text-sm">
-                Thank you for completing the registration form. Your information
-                will be processed shortly.
+                {t('registration.finalsubmission.thankYou')}
               </div>
             </div>
           </div>
@@ -4678,7 +4678,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
           />
         </svg>
         <h3 className="text-lg font-semibold text-gray-800">
-          Regional Information
+        {t('registration.regionalInfo.title')}
         </h3>
       </div>
 
@@ -4700,7 +4700,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                   clipRule="evenodd"
                 />
               </svg>
-              State
+              {t('registration.regionalInfo.state')}
             </label>
             <select
               name="state"
@@ -4712,7 +4712,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                   : "border-gray-300"
               }`}
             >
-              <option value="">Select State</option>
+              <option value=""> {t('registration.regionalInfo.selectState')}</option>
               {indianStates.map((state, index) => (
                 <option key={index} value={state}>
                   {state}
@@ -4739,7 +4739,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                   clipRule="evenodd"
                 />
               </svg>
-              District
+              {t('registration.regionalInfo.district')}
             </label>
             <select
               name="district"
@@ -4751,7 +4751,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                   : "border-gray-300"
               }`}
             >
-              <option value="">Select District</option>
+              <option value="">{t('registration.regionalInfo.selectDistrict')}</option>
               {formData.state &&
                 STATE_TO_DISTRICTS[formData.state]?.map((district, index) => (
                   <option key={index} value={district}>
@@ -4781,7 +4781,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                   clipRule="evenodd"
                 />
               </svg>
-              Local Body
+              {t('registration.regionalInfo.localBody')}
             </label>
             <select
               name="city"
@@ -4794,7 +4794,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               }`}
               disabled={!formData.district}
             >
-              <option value="">Select Local Body</option>
+              <option value="">   {t('registration.regionalInfo.selectLocalBody')}</option>
               {formData.district === "Ashoknagar" ? (
                 <>
                   {[...ASHOKNAGAR_LOCAL_BODIES.NAGAR_PALIKA, ...ASHOKNAGAR_LOCAL_BODIES.JANPAD_PANCHAYAT].map((localBody, index) => (
@@ -5215,7 +5215,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                 clipRule="evenodd"
               />
             </svg>
-            Gram Panchayat
+            {t('registration.regionalInfo.gramPanchayat')}
           </label>
           <select
             name="gramPanchayat"
@@ -5228,7 +5228,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
             }`}
             disabled={!formData.city}
           >
-            <option value="">Select Gram Panchayat</option>
+            <option value="">{t('registration.regionalInfo.selectGramPanchayat')}</option>
             {formData.city && ASHOKNAGAR_GRAM_PANCHAYATS[formData.city] ? (
               ASHOKNAGAR_GRAM_PANCHAYATS[formData.city].map((panchayat, index) => (
                 <option key={index} value={panchayat}>
@@ -5552,7 +5552,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                 clipRule="evenodd"
               />
             </svg>
-            Current Address
+            {t('registration.regionalInfo.currentAddress')}
           </label>
           <textarea
             name="currentAddress"
@@ -5564,7 +5564,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                 : "border-gray-300"
             }`}
             rows="3"
-            placeholder="Enter your current address"
+            placeholder= {t('registration.regionalInfo.currentAddressPlaceholder')}
           />
           {hasError("currentAddress") && (
             <p className="text-red-500 text-xs">{errors.currentAddress}</p>
@@ -5579,7 +5579,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               htmlFor="regionalAssembly"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Regional Assembly 
+             {t('registration.regionalInfo.regionalAssembly')}
             </label>
             <select
               id="regionalAssembly"
@@ -5591,10 +5591,10 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
             >
               <option value="">
                 {!formData.state 
-                  ? "Select State First"
+                  ? t('registration.regionalInfo.selectStateFirst')
                   : !STATE_TO_ASSEMBLIES[formData.state]
-                  ? "No Regional Assembly for Selected State"
-                  : "Select Regional Assembly"
+                  ? t('registration.regionalInfo.noRegionalAssemblyForSelectedState')
+                  : t('registration.regionalInfo.selectRegionalAssembly')
                 }
               </option>
               {getFilteredRegionalAssemblies().map((assembly, index) => (
@@ -5616,7 +5616,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               htmlFor="localPanchayatName"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Local Panchayat Trust 
+              {t('registration.regionalInfo.localPanchayatTrust')}
             </label>
             <select
               id="localPanchayatName"
@@ -5626,14 +5626,14 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white transition-all duration-200 text-sm"
               disabled={!formData.regionalAssembly || !STATE_TO_ASSEMBLIES[formData.state]}
             >
-              <option value="">
+               <option value="">
                 {!formData.state 
-                  ? "Select State First"
+                  ? t('registration.regionalInfo.selectStateFirst')
                   : !STATE_TO_ASSEMBLIES[formData.state]
-                  ? "No Local Panchayat for Selected State"
+                  ? t('registration.regionalInfo.noLocalPanchayatForSelectedState')
                   : !formData.regionalAssembly
-                  ? "Select Regional Assembly First"
-                  : "Select Local Panchayat Name"
+                  ? t('registration.regionalInfo.selectRegionalAssemblyFirst')
+                  : t('registration.regionalInfo.selectLocalPanchayatName')
                 }
               </option>
               {getFilteredLocalPanchayatNames().map((name, index) => (
@@ -5658,7 +5658,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               htmlFor="localPanchayat"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Local Panchayat
+             {t('registration.regionalInfo.localPanchayat')}
             </label>
             <select
               id="localPanchayat"
@@ -5670,12 +5670,12 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
             >
               <option value="">
                 {!formData.state 
-                  ? "Select State First"
+                  ? t('registration.regionalInfo.selectStateFirst')
                   : !STATE_TO_ASSEMBLIES[formData.state]
-                  ? "No Local Panchayat for Selected State"
+                  ? t('registration.regionalInfo.noLocalPanchayatForSelectedState')
                   : !formData.localPanchayatName
-                  ? "Select Local Panchayat Name First"
-                  : "Select Local Panchayat"
+                  ? t('registration.regionalInfo.selectLocalPanchayatFirst')
+                  : t('registration.regionalInfo.selectLocalPanchayat')
                 }
               </option>
               {getFilteredLocalPanchayats().map((panchayat, index) => (
@@ -5697,7 +5697,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               htmlFor="subLocalPanchayat"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Sub Local Panchayat
+             {t('registration.regionalInfo.subLocalPanchayat')}
             </label>
             <select
               id="subLocalPanchayat"
@@ -5709,12 +5709,12 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
             >
               <option value="">
                 {!formData.state 
-                  ? "Select State First"
+                  ? t('registration.regionalInfo.selectStateFirst')
                   : !STATE_TO_ASSEMBLIES[formData.state]
-                  ? "No Sub Local Panchayat for Selected State"
+                  ? t('registration.regionalInfo.noSubLocalPanchayatForSelectedState')
                   : !formData.localPanchayat
-                  ? "Select Local Panchayat First"
-                  : "Select Sub Local Panchayat"
+                  ? t('registration.regionalInfo.selectLocalPanchayatFirst')
+                  : t('registration.regionalInfo.selectSubLocalPanchayat')
                 }
               </option>
               {getFilteredSubLocalPanchayats().map((panchayat, index) => (
@@ -5851,7 +5851,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               onClick={handlePrevious}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
-              Previous
+              {t('registration.previous')}
             </button>
           )}
         </div>
@@ -5863,7 +5863,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
               onClick={handleSkip}
               className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
-              Skip this section
+              {t('registration.skip')}
             </button>
           )}
 
@@ -5895,12 +5895,12 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Processing...
+                {t('registration.processing')}
               </span>
             ) : currentStep === formSteps.length - 1 ? (
-              "Submit"
+              t('registration.submit')
             ) : (
-              "Next"
+              t('registration.next')
             )}
           </button>
         </div>
@@ -5979,7 +5979,7 @@ if (formData.regionalAssembly === "Vindhya Regional Assembly") {
         <div className="bg-red-800 text-white p-3">
           <div className="container mx-auto">
             <h1 className="text-xl font-bold mb-2 text-center">
-              Registration Form
+              {t('registration.title')}
             </h1>
 
             {/* Progress Tracker */}

@@ -1067,85 +1067,38 @@
       },
       "previousMarriage": {
         "title": "Previous Marriage Information",
-        "spouseName": {
-          "label": "Previous Spouse Name",
-          "placeholder": "Enter previous spouse name"
-        },
-        "gotra": {
-          "label": "Previous Spouse Gotra",
-          "placeholder": "Select previous spouse gotra"
-        },
-        "aakna": {
-          "label": "Previous Spouse Aakna",
-          "placeholder": "Select previous spouse aakna"
-        },
-        "dob": {
-          "label": "Previous Spouse Date of Birth",
-          "placeholder": "Select previous spouse date of birth"
-        },
-        "children": {
-          "title": "Children Information",
-          "addButton": "Add Child",
-          "removeButton": "Remove Child",
-          "name": {
-            "label": "Child Name",
-            "placeholder": "Enter child name"
-          },
-          "gender": {
-            "label": "Child Gender",
-            "placeholder": "Select child gender",
-            "options": {
-              "male": "Male",
-              "female": "Female",
-              "other": "Other"
-            }
-          },
-          "age": {
-            "label": "Child Age",
-            "placeholder": "Enter child age"
-          },
-          "livingWith": {
-            "label": "Child Living With",
-            "placeholder": "Select who the child lives with",
-            "options": {
-              "self": "Self",
-              "spouse": "Previous Spouse",
-              "other": "Other"
-            }
-          }
-        },
-        "preferences": {
-          "kundliMatch": {
-            "label": "Kundli Match Required",
-            "description": "Do you want kundli matching for your next marriage?"
-          },
-          "acceptChildren": {
-            "label": "Accept Children",
-            "description": "Are you willing to accept a partner with children?"
-          }
-        },
-        "documents": {
-          "title": "Required Documents",
-          "deathCertificate": {
-            "label": "Death Certificate",
-            "description": "Upload death certificate if spouse is deceased"
-          },
-          "divorcePapers": {
-            "label": "Divorce Papers",
-            "description": "Upload divorce papers if divorced"
-          }
-        },
-        "validation": {
-          "spouseNameRequired": "Previous spouse name is required",
-          "gotraRequired": "Previous spouse gotra is required",
-          "aaknaRequired": "Previous spouse aakna is required",
-          "dobRequired": "Previous spouse date of birth is required",
-          "childNameRequired": "Child name is required",
-          "childGenderRequired": "Child gender is required",
-          "childAgeRequired": "Child age is required",
-          "childLivingWithRequired": "Please specify who the child lives with",
-          "documentsRequired": "Please upload required documents"
-        }
+        "marriageDate": "Marriage Date",
+        "children": "Number of Children",
+        "childrenDetails": "Children Details"
+      },
+      "partnerPreferences": {
+        "title": "Partner Preferences",
+        "ageRange": "Preferred Age Range",
+        "education": "Education Preference",
+        "occupation": "Occupation Preference",
+        "business": "Business",
+        "service": "Service",
+        "housewife": "Housewife",
+        "any": "Any",
+        "location": "Preferred Location",
+        "acceptChildren": "Would you accept a partner with children?"
+      },
+      "familyInfo": {
+        "title": "Family Information",
+        "fatherName": "Father's Name",
+        "motherName": "Mother's Name",
+        "siblingsInfo": "Siblings Information",
+        "siblingsPlaceholder": "Brother - Sister / Sister - Brother Information"
+      },
+      "documents": {
+        "title": "Required Documents",
+        "fullSizePhoto": "Full Size Photo",
+        "aadharCard": "Aadhar Card Copy",
+        "divorceOrDeath": "Divorce Decree / Death Certificate",
+        "kundali": "Kundali",
+        "dragDrop": "Drag files here or click to select",
+        "maxSize": "Maximum file size: 10MB",
+        "selectDocFirst": "Please select document type first"
       },
       "consent": {
         "title": "Consent Form",
@@ -1191,6 +1144,269 @@
           "neelam": "Smt. Neelam Reja"
         }
       }
+    }
+  },
+  "registration": {
+    "title": "Registration Form",
+    "skip": "Skip this section",
+    "previous": "Previous",
+    "next": "Next",
+    "submit": "Submit",
+    "processing": "Processing...",
+    "steps": {
+      "personalInfo": "Personal Information",
+      "familyInfo": "Family Information",
+      "workInfo": "Work Information",
+      "finalSubmission": "Final Submission"
+    },  
+    "personalInfo": {
+      "title": "Personal Information",
+      "name": "Full Name",
+      "namePlaceholder": "Enter your full name",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "dob": "Date of Birth",
+      "dom": "Date of Marriage",
+      "maritalStatus": "Marital Status",
+      "height": "Height",
+      "weight": "Weight",
+      "bloodGroup": "Blood Group",
+      "highestEducation": "Highest Education",
+      "highestEducationPlaceholder": "Enter your highest education",
+      "gotra": "Gotra",
+      "selectGotra": "Select Gotra",
+      "aakna": "Aakna",
+      "selectAakna": "Select Aakna",
+      "selectGotraFirst": "Select a Gotra first to see available Aakna options",
+      "occupation": "Occupation",
+      "income": "Annual Income",
+      "email": "Email Address",
+      "emailPlaceholder": "Enter your email address",
+      "mobile": "Mobile Number",
+      "mobilePlaceholder": "10-digit mobile number",
+      "nationality": "Nationality",
+      "indian": "Indian",
+      "nonIndian": "Non-Indian",
+      "alternativeMobile": "Alternative Mobile Number",
+      "address": "Address",
+      "pincode": "Pincode",
+      "state": "State",
+      "district": "District",
+      "city": "City/Village",
+      "isGahoi": "Are you from Gahoi Community?",
+      "selectBloodGroup": "Select Blood Group",
+      "manglikStatus": "Manglik Status",
+      "handicap": "Handicap",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "familyInfo": {
+      "title": "Family Information",
+      "parentInfo": "Parent Information",
+      "fatherName": "Father's Name",
+      "motherName": "Mother's Name",
+      "familyType": "Family Type",
+      "familyValues": "Family Values",
+      "familyStatus": "Family Status",
+      "familyIncome": "Family Income",
+      "gotra": "Gotra",
+      "nativePlace": "Native Place",
+      "aakna": "Aakna",
+      "siblingsInfo": "Siblings Information",
+      "addSibling": "Add Sibling",
+      "siblingName": "Sibling Name",
+      "selectRelation": "Select Relation",
+      "mobilePlaceholder": "Mobile number",
+      "age": "Age",
+      "male": "Male",
+      "female": "Female",
+      "maritalStatus": "Marital Status",
+      "single": "Single",
+      "Married": "Married",
+      "Unmarried": "Unmarried",
+      "Widow/Widower": "Widow/Widower",
+      "Divorced": "Divorced",
+      "ageRequired": "Age is required",
+      "gender": "Gender",
+      "genderRequired": "Gender is required",
+      "mobile": "Mobile Number",
+      "mobileRequired": "Mobile number is required",
+      "Marriedinsamecommunity": "Married in same community",
+      "Marriedinanothercommunity": "Married in another community",
+      "spouseplaceholder": "Spouse's Name",
+      "spouseMobile": "Spouse's Mobile Number",
+      "spouseGotra": "Spouse's Gotra",
+      "spouseAakna": "Spouse's Aakna",
+      "considerSecondMarriage": "Are you willing to consider a second marriage?",
+      "yes": "Yes",
+      "no": "No",
+      "considerSecondMarriageYes": "Yes",
+      "considerSecondMarriageNo": "No",
+      "spouseInfo": "Spouse Information",
+      "spouseName": "Spouse's Name",
+      "childrenInfo": "Children Information",
+      "childName": "Child Name",
+      "addChild": "Add Child",
+      "mobileNumber": "Mobile number (optional)",
+      "father": "Father",
+      "mother": "Mother",
+  "placeholders": {
+    "name": "Enter {{relation}}'s name",
+    "mobile": "{{relation}}'s mobile number"
+  }
+      
+},
+    "workInfo": {
+      "title": "Work Information",
+      "professionalCategory": "Professional Category",
+      "businessOwner": "Business Owner",
+      "professional": "Professional",
+      "businessSize": "Business Size",
+      "selectBusinessSize": "Select Business Size",
+      "businessType": "Business Type",
+      "selectBusinessType": "Select Business Type",
+      "soleProprietorship": "Sole Proprietorship",
+      "partnership": "Partnership",
+      "privateLimitedCompany": "Private Limited Company",
+      "publicLimitedCompany": "Public Limited Company",
+      "limitedLiabilityPartnership": "Limited Liability Partnership (LLP)",
+      "other": "Other",
+      "professionalEmployee": "Professional/Employee",
+  "businessSizeOptions": {
+        "micro": "Micro Enterprise",
+        "small": "Small Enterprise",
+        "medium": "Medium Enterprise",
+        "large": "Large Enterprise",
+        "selfEmployed": "Self Employed/Freelancer",
+        "notApplicable": "Not Applicable"
+      },
+      "workType": "Work Type",
+      "employmentType": "Employment Type",
+      "centralGovt": "Central Government Employee",
+      "stateGovt": "State Government Employee",
+      "privateSector": "Private Sector Employee",
+      "employmentTypesOptions": {
+        "centralGovt": "Central Government Employee",
+        "stateGovt": "State Government Employee",
+        "privateSector": "Private Sector Employee"
+      },
+      "pleaseSelectEmploymentType": "Please select your employment type",
+      "industrySector": "Industry Sector",
+      "companyName": "Company Name",
+      "workArea": "Work Area",
+      "yearsInBusiness": "Years in Business",
+      "selectYearsInBusiness": "Select Years in Business",
+      "yearsInBusinessOptions": {
+        "0-2": "0-2 years",
+        "3-5": "3-5 years",
+        "6-10": "6-10 years",
+        "11-20": "11-20 years",
+        "20+": "More than 20 years"
+      },
+      "communityRecords": "These details are important for community records and can be useful for various purposes."
+    },
+
+     "finalsubmission": {
+      "title": "Final Submission",
+      "suggestions": "Your Suggestions:",
+      "suggestionsPlaceholder": "Please share any suggestions or feedback you may have",
+      "confirmAccuracy": "By submitting this form, I confirm that the information provided is accurate to the best of my knowledge.",
+      "thankYou": "Thank you for completing the registration form. Your information will be processed shortly."
+     },
+
+    "regionalInfo": {
+      "title": "Regional Information",
+      "state": "State",
+      "selectState": "Select State",
+      "district": "District",
+      "selectDistrict": "Select District",
+      "city": "City/Village",
+      "selectCity": "Select City/Village",
+      "localBody": "Local Body",
+      "selectLocalBody": "Select Local Body",
+      "gramPanchayat": "Gram Panchayat",
+      "selectGramPanchayat": "Select Gram Panchayat",
+      "currentAddress": "Current Address",
+      "currentAddressPlaceholder": "Enter your current address",
+      "regionalAssembly": "Regional Assembly",
+      "selectRegionalAssembly": "Select Regional Assembly",
+      "selectStateFirst": "Select State First",
+      "selectDistrictFirst": "Select District First",
+      "selectCityFirst": "Select City/Village First",
+      "selectLocalBodyFirst": "Select Local Body First",
+      "selectGramPanchayatFirst": "Select Gram Panchayat First",
+      "selectLocalPanchayatFirst": "Select Local Panchayat First",
+      "selectRegionalAssemblyFirst": "Select Regional Assembly First",
+      "noRegionalAssemblyForSelectedState": "No Regional Assembly for Selected State",
+      "noLocalPanchayatForSelectedState": "No Local Panchayat for Selected State",
+      "noSubLocalPanchayatForSelectedState": "No Sub Local Panchayat for Selected State",
+      "localPanchayatTrust": "Local Panchayat Trust",
+      "localPanchayat": "Local Panchayat",
+      "selectLocalPanchayat": "Select Local Panchayat",
+      "selectLocalPanchayatName": "Select Local Panchayat Name",
+      "subLocalPanchayat": "Sub Local Panchayat",
+      "selectSubLocalPanchayat": "Select Sub Local Panchayat"
+    },
+    "preferences": {
+      "title": "Partner Preferences",
+      "ageRange": "Age Range",
+      "heightRange": "Height Range",
+      "education": "Education Preference",
+      "occupation": "Occupation Preference",
+      "income": "Income Preference",
+      "location": "Location Preference"
+    },
+    "buttons": {
+      "next": "Next",
+      "previous": "Previous",
+      "submit": "Submit",
+      "skip": "Skip this section"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email address",
+      "invalidMobile": "Please enter a valid mobile number",
+      "invalidPincode": "Please enter a valid pincode",
+      "invalidDate": "Please enter a valid date",
+      "fileRequired": "Please upload required document"
+    }
+  },
+  "previousMarriage": {
+    "title": "Previous Marriage Information",
+    "marriageDate": "Marriage Date",
+    "marriageEndDate": "Marriage End Date",
+    "marriageEndReason": "Reason for Marriage End",
+    "marriageCommunity": "Marriage Community",
+    "marriageType": "Marriage Type",
+    "children": {
+      "title": "Children Information",
+      "haveChildren": "Do you have children?",
+      "numberOfChildren": "Number of Children",
+      "childDetails": "Child Details",
+      "addChild": "Add Child",
+      "removeChild": "Remove Child",
+      "childName": "Child Name",
+      "childAge": "Child Age",
+      "childGender": "Child Gender",
+      "livingWith": "Children Living With"
+    },
+    "preferences": {
+      "wantKundliMatch": "Want Kundli Match",
+      "acceptPartnerWithChildren": "Accept Partner with Children",
+      "marriageToCaste": "Marriage to Another Caste"
+    },
+    "documents": {
+      "title": "Documents",
+      "deathCertificate": "Death Certificate (for widowed)",
+      "divorceCertificate": "Divorce Certificate",
+      "upload": "Upload",
+      "remove": "Remove"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidDate": "Please enter a valid date",
+      "fileRequired": "Please upload required document"
     }
   }
 } 

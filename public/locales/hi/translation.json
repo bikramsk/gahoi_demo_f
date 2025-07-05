@@ -1214,87 +1214,23 @@
         "title": "पता की जानकारी",
         "currentAddress": "वर्तमान पता"
       },
-      "previousMarriage": {
-        "title": "पिछली शादी की जानकारी",
-        "spouseName": {
-          "label": "पूर्व पति/पत्नी का नाम",
-          "placeholder": "पूर्व पति/पत्नी का नाम दर्ज करें"
-        },
-        "gotra": {
-          "label": "पूर्व पति/पत्नी का गोत्र",
-          "placeholder": "पूर्व पति/पत्नी का गोत्र चुनें"
-        },
-        "aakna": {
-          "label": "पूर्व पति/पत्नी का आंकना",
-          "placeholder": "पूर्व पति/पत्नी का आंकना चुनें"
-        },
-        "dob": {
-          "label": "पूर्व पति/पत्नी की जन्म तिथि",
-          "placeholder": "पूर्व पति/पत्नी की जन्म तिथि चुनें"
-        },
-        "children": {
-          "title": "बच्चों की जानकारी",
-          "addButton": "बच्चा जोड़ें",
-          "removeButton": "बच्चा हटाएं",
-          "name": {
-            "label": "बच्चे का नाम",
-            "placeholder": "बच्चे का नाम दर्ज करें"
-          },
-          "gender": {
-            "label": "बच्चे का लिंग",
-            "placeholder": "बच्चे का लिंग चुनें",
-            "options": {
-              "male": "पुरुष",
-              "female": "महिला",
-              "other": "अन्य"
-            }
-          },
-          "age": {
-            "label": "बच्चे की उम्र",
-            "placeholder": "बच्चे की उम्र दर्ज करें"
-          },
-          "livingWith": {
-            "label": "बच्चा किसके साथ रहता है",
-            "placeholder": "बच्चा किसके साथ रहता है चुनें",
-            "options": {
-              "self": "स्वयं",
-              "spouse": "पूर्व पति/पत्नी",
-              "other": "अन्य"
-            }
-          }
-        },
-        "preferences": {
-          "kundliMatch": {
-            "label": "कुंडली मिलान आवश्यक",
-            "description": "क्या आप अगली शादी के लिए कुंडली मिलान चाहते हैं?"
-          },
-          "acceptChildren": {
-            "label": "बच्चों को स्वीकार करें",
-            "description": "क्या आप बच्चों वाले जीवनसाथी को स्वीकार करेंगे?"
-          }
-        },
-        "documents": {
-          "title": "आवश्यक दस्तावेज",
-          "deathCertificate": {
-            "label": "मृत्यु प्रमाण पत्र",
-            "description": "यदि पति/पत्नी की मृत्यु हो गई है तो मृत्यु प्रमाण पत्र अपलोड करें"
-          },
-          "divorcePapers": {
-            "label": "तलाक के कागजात",
-            "description": "यदि तलाक हुआ है तो तलाक के कागजात अपलोड करें"
-          }
-        },
-        "validation": {
-          "spouseNameRequired": "पूर्व पति/पत्नी का नाम आवश्यक है",
-          "gotraRequired": "पूर्व पति/पत्नी का गोत्र आवश्यक है",
-          "aaknaRequired": "पूर्व पति/पत्नी का आंकना आवश्यक है",
-          "dobRequired": "पूर्व पति/पत्नी की जन्म तिथि आवश्यक है",
-          "childNameRequired": "बच्चे का नाम आवश्यक है",
-          "childGenderRequired": "बच्चे का लिंग आवश्यक है",
-          "childAgeRequired": "बच्चे की उम्र आवश्यक है",
-          "childLivingWithRequired": "कृपया बताएं कि बच्चा किसके साथ रहता है",
-          "documentsRequired": "कृपया आवश्यक दस्तावेज अपलोड करें"
-        }
+"previousMarriage": {
+        "title": "पूर्व विवाह की जानकारी",
+        "marriageDate": "विवाह की तिथि",
+        "children": "बच्चों की संख्या",
+        "childrenDetails": "बच्चों का विवरण"
+      },
+      "partnerPreferences": {
+        "title": "जीवनसाथी की प्राथमिकताएं",
+        "ageRange": "आयु सीमा",
+        "education": "शैक्षणिक योग्यता",
+        "occupation": "व्यवसाय",
+        "location": "पसंदीदा स्थान",
+        "business": "व्यवसाय",
+        "service": "नौकरी",
+        "housewife": "गृहिणी",
+        "any": "कोई भी",
+        "acceptChildren": "क्या आप बच्चों वाले जीवनसाथी को स्वीकार करेंगे?"
       },
       "familyInfo": {
         "title": "परिवार की जानकारी",
@@ -1357,6 +1293,266 @@
           "neelam": "श्रीमती नीलम रेजा"
         }
       }
+    }
+  },
+  "registration": {
+    "title": "पंजीकरण फॉर्म",
+    "skip": "इस खंड को छोड़ें",
+    "previous": "पिछला",
+    "next": "अगाड़ा",
+    "submit": "जमा करें",
+    "processing": "प्रस्तुत हो रहा है...",
+    "steps": {
+      "personalInfo": "व्यक्तिगत जानकारी",
+      "familyInfo": "परिवार की जानकारी",
+      "workInfo": "कार्य जानकारी",
+      "finalSubmission": "अंतिम प्रस्तुति"
+    },
+    "personalInfo": {
+      "title": "व्यक्तिगत जानकारी",
+      "name": "पूरा नाम",
+      "namePlaceholder": "अपना पूरा नाम दर्ज करें",
+      "gender": "लिंग",
+      "male": "पुरुष",
+      "female": "महिला",
+      "dob": "जन्म तिथि",
+      "dom": "विवाह की तिथि",
+      "maritalStatus": "वैवाहिक स्थिति",
+      "height": "ऊंचाई",
+      "weight": "वजन",
+      "bloodGroup": "रक्त समूह",
+      "selectBloodGroup": "रक्त समूह चुनें",
+      "highestEducation": "उच्चतम शिक्षा",
+      "highestEducationPlaceholder": "आपकी उच्चतम शिक्षा दर्ज करें",
+      "gotra": "गोत्र",
+      "selectGotra": "गोत्र चुनें",
+      "aakna": "आंकना",
+      "selectAakna": "आंकना चुनें",
+      "selectGotraFirst": "गोत्र चुनें फिर आंकना देखें",
+      "occupation": "व्यवसाय",
+      "income": "वार्षिक आय",
+      "email": "ईमेल पता",
+      "emailPlaceholder": "आपका ईमेल पता दर्ज करें",
+      "mobile": "मोबाइल नंबर",
+      "mobilePlaceholder": "१० अंकों का मोबाइल नंबर दर्ज करें",
+      "alternativeMobile": "वैकल्पिक मोबाइल नंबर",
+      "nationality": "राष्ट्रीयता",
+      "indian": "भारतीय",
+      "nonIndian": "अभारतीय",
+      "address": "पता",
+      "pincode": "पिन कोड",
+      "state": "राज्य",
+      "district": "जिला",
+      "city": "शहर/गाँव",
+      "isGahoi": "क्या आप गहोई समुदाय से हैं?",
+      "manglikStatus": "मांगलिक स्थिति",
+      "handicap": "विकलांगता",
+      "yes": "हाँ",
+      "no": "नहीं"
+    },
+    "familyInfo": {
+      "title": "पारिवारिक जानकारी",
+      "parentInfo": "माता-पिता की जानकारी",
+      "fatherName": "पिता का नाम",
+      "motherName": "माता का नाम",
+      "familyType": "परिवार का प्रकार",
+      "familyValues": "पारिवारिक मूल्य",
+      "familyStatus": "पारिवारिक स्थिति",
+      "familyIncome": "पारिवारिक आय",
+      "gotra": "गोत्र",
+      "nativePlace": "मूल निवास स्थान",
+      "aakna": "आंकना",
+      "siblingsInfo": "भाई-बहन की जानकारी",
+      "addSibling": "भाई-बहन जोड़ें",
+      "siblingName": "भाई-बहन का नाम",
+      "mobilePlaceholder": "मोबाइल नंबर",
+      "selectRelation": "संबंध चुनें",
+      "age": "उम्र",
+      "male": "पुरुष",
+      "female": "महिला",
+      "maritalStatus": "वैवाहिक स्थिति",
+      "single": "अविवाहित",
+      "Married": "विवाहित",
+      "Unmarried": "अविवाहित",
+      "Widow/Widower": "विधुर/विधवा",
+      "Divorced": "तलाकित",
+      "ageRequired": "उम्र आवश्यक है",
+      "gender": "लिंग",
+      "genderRequired": "लिंग आवश्यक है",
+      "mobile": "मोबाइल नंबर",
+      "mobileRequired": "मोबाइल नंबर आवश्यक है",
+      "Marriedinsamecommunity": "विवाहित हुए हैं उसी समुदाय में",
+      "Marriedinanothercommunity": "विवाहित हुए हैं दूसरे समुदाय में",
+      "spouseplaceholder": "जीवनसाथी का नाम",
+      "spouseMobile": "जीवनसाथी का मोबाइल नंबर",
+      "spouseGotra": "जीवनसाथी का गोत्र",
+      "spouseAakna": "जीवनसाथी का आंकना",
+      "considerSecondMarriage": "क्या आप दूसरी शादी को ध्यान में रखना चाहते हैं?",
+      "yes": "हाँ",
+      "no": "नहीं",
+      "considerSecondMarriageYes": "हाँ",
+      "considerSecondMarriageNo": "नहीं",
+      "spouseInfo": "जीवनसाथी की जानकारी",
+      "spouseName": "जीवनसाथी का नाम",
+      "childrenInfo": "बच्चों की जानकारी",
+      "childName": "बच्चे का नाम",
+      "addChild": "बच्चा जोड़ें",
+      "mobileNumber": "मोबाइल नंबर (वैकल्पिक)",
+      "father": "पिता",
+      "mother": "माँ",
+  "placeholders": {
+    "name": "{{relation}} का नाम दर्ज करें",
+    "mobile": "{{relation}} का मोबाइल नंबर दर्ज करें"
+    }
+      },
+    "workInfo": {
+      "title": "कार्य जानकारी",
+      "professionalCategory": "पेशेवर श्रेणी",
+      "businessOwner": "व्यवसायी",
+      "professional": "पेशेवर",
+      "businessSize": "व्यवसाय का आकार",
+      "selectBusinessSize": "व्यवसाय का आकार चुनें",
+      "businessType": "व्यवसाय का प्रकार",
+      "selectBusinessType": "व्यवसाय का प्रकार चुनें",
+        "soleProprietorship": "व्यवसायी",
+        "partnership": "पार्टनरशिप",
+        "privateLimitedCompany": "प्राइवेट लिमिटेड कंपनी",
+        "publicLimitedCompany": "पब्लिक लिमिटेड कंपनी",
+        "limitedLiabilityPartnership": "लिमिटेड लिबिलिटी पार्टनरशिप",
+        "other": "अन्य",
+        "professionalEmployee": "पेशेवर/कर्मचारी",
+    "businessSizeOptions": {
+      "micro": "माइक्रो व्यवसाय",
+      "small": "स्मॉल व्यवसाय",
+      "medium": "मीडियम व्यवसाय",
+      "large": "लार्ज व्यवसाय",
+      "selfEmployed": "सेल्फ एम्प्लोयेड/फ्रीलैंसर",
+      "notApplicable": "अनावश्यक"
+      },
+      "workType": "कार्य का प्रकार",
+      "employmentType": "रोजगार का प्रकार",
+      "employmentTypesOptions": {
+        "centralGovt": "केंद्रीय सरकार कर्मचारी",
+        "stateGovt": "राज्य सरकार कर्मचारी",
+        "privateSector": "निजी क्षेत्र कर्मचारी"
+      },
+      "industrySector": "उद्योग क्षेत्र",
+      "companyName": "कंपनी का नाम",
+      "workArea": "कार्य क्षेत्र",
+      "pleaseSelectBusinessSize": "कृपया व्यवसाय का आकार चुनें",
+      "pleaseSelectBusinessType": "कृपया व्यवसाय का प्रकार चुनें",
+      "yearsInBusiness": "व्यवसाय में वर्ष",
+      "selectYearsInBusiness": "व्यवसाय में वर्ष चुनें",
+      "yearsInBusinessOptions": {
+        "0-2": "0-2 वर्ष",
+        "3-5": "3-5 वर्ष",
+        "6-10": "6-10 वर्ष",
+        "11-20": "11-20 वर्ष",
+        "20+": "20+ वर्ष"
+      },
+      "pleaseSelectEmploymentType": "कृपया आपका रोजगार का प्रकार चुनें",
+      "communityRecords": "ये जानकारी समुदाय के लिए महत्वपूर्ण है और विभिन्न उद्देश्यों के लिए उपयोगी हो सकती है।"
+    },
+
+    "finalsubmission": {
+      "title": "अंतिम प्रस्तुति",
+      "suggestions": "आपके सुझाव:",
+      "suggestionsPlaceholder": "कृपया आपके सुझाव या प्रतिक्रिया दर्ज करें",
+      "confirmAccuracy": "इस फ़ॉर्म द्वारा जमा करने के लिए, मैं सुनिश्चित हूं कि दी गई जानकारी मेरी जानकारी के अनुसार सटीक है।",
+      "thankYou": "आपका धन्यवाद जैसे ही आपका प्रस्तुति पूरी हो जाएगी आपके जानकारी को संसाधित किया जाएगा।"
+    },
+
+    "regionalInfo": {
+      "title": "क्षेत्रीय जानकारी",
+      "state": "राज्य",
+      "district": "जिला",
+      "city": "शहर/गाँव",
+      "localBody": "स्थानीय प्रशासन",
+      "selectState": "राज्य चुनें",
+      "selectDistrict": "जिला चुनें",
+      "selectCity": "शहर/गाँव चुनें",
+      "selectLocalBody": "स्थानीय प्रशासन चुनें",
+      "gramPanchayat": "गाँव पंचायत",
+      "selectGramPanchayat": "गाँव पंचायत चुनें",
+      "currentAddress": "वर्तमान पता",
+      "currentAddressPlaceholder": "आपका वर्तमान पता दर्ज करें",
+      "regionalAssembly": "क्षेत्रीय सभा",
+      "selectRegionalAssembly": "क्षेत्रीय सभा चुनें",
+      "selectStateFirst": "राज्य चुनें पहले",
+      "noRegionalAssemblyForSelectedState": "चुने गए राज्य के लिए क्षेत्रीय सभा नहीं है",
+      "noLocalPanchayatForSelectedState": "चुने गए राज्य के लिए स्थानीय पंचायत नहीं है",
+      "noSubLocalPanchayatForSelectedState": "चुने गए राज्य के लिए उप स्थानीय पंचायत नहीं है",
+      "localPanchayatTrust": "स्थानीय पंचायत ट्रस्ट",
+      "selectDistrictFirst": "जिला चुनें पहले",
+      "selectCityFirst": "शहर/गाँव चुनें पहले",
+      "selectLocalBodyFirst": "स्थानीय प्रशासन चुनें पहले",
+      "selectGramPanchayatFirst": "गाँव पंचायत चुनें पहले",
+      "selectRegionalAssemblyFirst": "क्षेत्रीय सभा चुनें पहले",
+      "selectLocalPanchayatFirst": "स्थानीय पंचायत चुनें पहले",
+      "selectLocalPanchayatName": "स्थानीय पंचायत नाम चुनें",
+      "selectLocalPanchayat": "स्थानीय पंचायत चुनें",
+      "localPanchayat": "स्थानीय पंचायत",     
+      "subLocalPanchayat": "उप स्थानीय पंचायत"
+    },
+    "preferences": {
+      "title": "जीवनसाथी की पसंद",
+      "ageRange": "आयु सीमा",
+      "heightRange": "ऊंचाई सीमा",
+      "education": "शैक्षिक योग्यता पसंद",
+      "occupation": "व्यवसाय पसंद",
+      "income": "आय पसंद",
+      "location": "स्थान पसंद"
+    },
+    "buttons": {
+      "next": "अगला",
+      "previous": "पिछला",
+      "submit": "जमा करें",
+      "skip": "इस खंड को छोड़ें"
+    },
+    "validation": {
+      "required": "यह फ़ील्ड आवश्यक है",
+      "invalidEmail": "कृपया एक वैध ईमेल पता दर्ज करें",
+      "invalidMobile": "कृपया एक वैध मोबाइल नंबर दर्ज करें",
+      "invalidPincode": "कृपया एक वैध पिन कोड दर्ज करें",
+      "invalidDate": "कृपया एक वैध तिथि दर्ज करें",
+      "fileRequired": "कृपया आवश्यक दस्तावेज़ अपलोड करें"
+    }
+  },
+  "previousMarriage": {
+    "title": "पिछली शादी की जानकारी",
+    "marriageDate": "विवाह की तिथि",
+    "marriageEndDate": "विवाह समाप्ति की तिथि",
+    "marriageEndReason": "विवाह समाप्ति का कारण",
+    "marriageCommunity": "विवाह समुदाय",
+    "marriageType": "विवाह का प्रकार",
+    "children": {
+      "title": "बच्चों की जानकारी",
+      "haveChildren": "क्या आपके बच्चे हैं?",
+      "numberOfChildren": "बच्चों की संख्या",
+      "childDetails": "बच्चे का विवरण",
+      "addChild": "बच्चा जोड़ें",
+      "removeChild": "बच्चा हटाएं",
+      "childName": "बच्चे का नाम",
+      "childAge": "बच्चे की उम्र",
+      "childGender": "बच्चे का लिंग",
+      "livingWith": "बच्चे किसके साथ रह रहे हैं"
+    },
+    "preferences": {
+      "wantKundliMatch": "कुंडली मिलान चाहिए",
+      "acceptPartnerWithChildren": "बच्चों वाले जीवनसाथी को स्वीकार करें",
+      "marriageToCaste": "दूसरी जाति में विवाह"
+    },
+    "documents": {
+      "title": "दस्तावेज़",
+      "deathCertificate": "मृत्यु प्रमाण पत्र (विधवा/विधुर के लिए)",
+      "divorceCertificate": "तलाक प्रमाण पत्र",
+      "upload": "अपलोड करें",
+      "remove": "हटाएं"
+    },
+    "validation": {
+      "required": "यह फ़ील्ड आवश्यक है",
+      "invalidDate": "कृपया एक वैध तिथि दर्ज करें",
+      "fileRequired": "कृपया आवश्यक दस्तावेज़ अपलोड करें"
     }
   }
 } 
